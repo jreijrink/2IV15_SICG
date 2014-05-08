@@ -28,9 +28,8 @@ namespace Project1
 		private int omx, omy, mx, my;
 		private int hmx, hmy;
 
-		private SpringForce delete_this_dummy_spring = null;
-		private RodConstraint delete_this_dummy_rod = null;
-		private CircularWireConstraint delete_this_dummy_wire = null;
+        private List<Force> forces;
+        private List<Constraint> contrains;
 
 
 		/*
@@ -56,9 +55,13 @@ namespace Project1
 			particles.Add(new Particle(center + offset * 2));
 			particles.Add(new Particle(center + offset * 3));
 
-			delete_this_dummy_spring = new SpringForce(particles[0], particles[1], dist, 1.0f, 1.0f);
-			delete_this_dummy_rod = new RodConstraint(particles[1], particles[2], dist);
-			delete_this_dummy_wire = new CircularWireConstraint(particles[0], center, dist);
+            forces = new List<Force>();
+            forces.Add(new SpringForce(particles[0], particles[1], dist, 1.0f, 1.0f));
+            forces.Add(new GravityForce(particles[1]));
+
+            contrains = new List<Constraint>();
+            contrains.Add(new RodConstraint(particles[1], particles[2], dist));
+            contrains.Add(new CircularWireConstraint(particles[0], center, dist));
 		}
 
 		/*
@@ -115,19 +118,13 @@ namespace Project1
 		}
 
 		private void DrawForces()
-		{
-			// change this to iteration over full set
-			if (delete_this_dummy_spring != null)
-				delete_this_dummy_spring.Draw();
+        {
+            forces.ForEach(f => f.Draw());
 		}
 
 		private void DrawConstraints()
-		{
-			// change this to iteration over full set
-			if (delete_this_dummy_rod != null)
-				delete_this_dummy_rod.Draw();
-			if (delete_this_dummy_wire != null)
-				delete_this_dummy_wire.Draw();
+        {
+            contrains.ForEach(c => c.Draw());
 		}
 		
 		/*
@@ -196,7 +193,7 @@ namespace Project1
 		{
 			if(dsim)
 			{
-				Solver.SimulationStep(particles, dt);
+				Solver.SimulationStep(particles, forces, contrains, dt);
 			}
 			else
 			{
@@ -235,8 +232,7 @@ namespace Project1
 					break;
 			}
 		}
-
-
+        
 		public Game(int n, float dt, float d)
 		{
 			this.N = n;

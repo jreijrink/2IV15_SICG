@@ -16,12 +16,22 @@ namespace Project1
 			return result;
 		}
 
-		public static void SimulationStep(List<Particle> particles, float dt)
-		{
-			for (int i = 0; i < particles.Count; i++)
+		public static void SimulationStep(List<Particle> particles, List<Force> forces, List<Constraint> constraints, float dt)
+        {
+            foreach (Particle particle in particles)
+            {
+                particle.Force = new HyperPoint<float>(0, 0);
+            }
+
+            forces.ForEach(f => f.Calculate());
+
+            constraints.ForEach(f => f.Calculate());
+
+            foreach(Particle particle in particles)
 			{
-				particles[i].Position += particles[i].Velocity*dt;
-				particles[i].Velocity = particles[i].Velocity*Damp + new HyperPoint<float>(GetRandom(), GetRandom())*0.005f;
+                HyperPoint<float> acceleration = particle.Force * particle.Mass;
+                particle.Velocity += acceleration * dt;
+                particle.Position += particle.Velocity * dt;
 			}
 		}
 	}

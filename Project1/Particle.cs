@@ -11,8 +11,11 @@ namespace Project1
 	class Particle
 	{
 		private HyperPoint<float> _constructPos;
-		private HyperPoint<float> _position;
-		private HyperPoint<float> _velocity;
+        private HyperPoint<float> _position;
+        private HyperPoint<float> _velocity;
+        private HyperPoint<float> _force;
+        private HyperPoint<float> _acceleration;
+        private float _mass;
 
 		public HyperPoint<float> ConstructPos
 		{
@@ -26,18 +29,50 @@ namespace Project1
 			set { _position = value; }
 		}
 
-		public HyperPoint<float> Velocity
-		{
-			get { return _velocity; }
-			set { _velocity = value; }
-		}
+        public HyperPoint<float> Velocity
+        {
+            get { return _velocity; }
+            set { _velocity = value; }
+        }
 
-		public Particle(HyperPoint<float> constructPos)
-		{
-			_constructPos = constructPos;
-			_position = new HyperPoint<float>(0, 0);
-			_velocity = new HyperPoint<float>(0, 0);
-		}
+        public HyperPoint<float> Force
+        {
+            get { return _force; }
+            set { _force = value; }
+        }
+
+        public HyperPoint<float> Acceleration
+        {
+            get { return _acceleration; }
+            set { _acceleration = value; }
+        }
+
+        public float Mass
+        {
+            get { return _mass; }
+            set { _mass = value; }
+        }
+
+        public Particle(HyperPoint<float> constructPos)
+        {
+            _constructPos = constructPos;
+            _mass = 0.01f;
+            _position = new HyperPoint<float>(0, 0);
+            _velocity = new HyperPoint<float>(0, 0);
+            _force = new HyperPoint<float>(0, 0);
+            _acceleration = new HyperPoint<float>(0, 0);
+        }
+
+        public Particle(HyperPoint<float> constructPos, float mass)
+        {
+            _constructPos = constructPos;
+            _mass = mass;
+            _position = new HyperPoint<float>(0, 0);
+            _velocity = new HyperPoint<float>(0, 0);
+            _force = new HyperPoint<float>(0, 0);
+            _acceleration = new HyperPoint<float>(0, 0);
+            _mass = mass;
+        }
 
 		public void reset()
 		{

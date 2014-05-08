@@ -7,7 +7,7 @@ using OpenTK.Graphics.OpenGL;
 
 namespace Project1
 {
-	class CircularWireConstraint
+    class CircularWireConstraint : Constraint
 	{
 		private readonly Particle _p;
 		private readonly HyperPoint<float> _center;
@@ -20,7 +20,7 @@ namespace Project1
 			_radius = radius;
 		}
 
-		public void Draw()
+        public override void Draw()
 		{
 			GL.Begin(BeginMode.LineLoop);
 			GL.Color3(0f, 1f, 0f);
@@ -31,5 +31,9 @@ namespace Project1
 			}
 			GL.End();
 		}
+
+        public override void Calculate()
+        {
+        }
 	}
 }

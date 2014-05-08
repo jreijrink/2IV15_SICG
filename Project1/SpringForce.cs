@@ -1,20 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
+using micfort.GHL.Math2;
 using OpenTK.Graphics.OpenGL;
 
 namespace Project1
 {
-	class SpringForce
+	class SpringForce : Force
 	{
 		private readonly Particle _p1;
 		private readonly Particle _p2;
-		private readonly double _dist;
-		private readonly double _ks;
-		private readonly double _kd;
+        private readonly float _dist;
+        private readonly float _ks;
+        private readonly float _kd;
 
-		public SpringForce(Particle p1, Particle p2, double dist, double ks, double kd)
+        public SpringForce(Particle p1, Particle p2, float dist, float ks, float kd)
 		{
 			_p1 = p1;
 			_p2 = p2;
@@ -23,14 +25,34 @@ namespace Project1
 			_kd = kd;
 		}
 
-		public void Draw()
-		{
-			GL.Begin(BeginMode.Lines);
-			GL.Color3(0.8f, 0.7f, 0.6f);
-			GL.Vertex2(_p1.Position[0], _p1.Position[1]);
-			GL.Color3(0.8f, 0.7f, 0.6f);
-			GL.Vertex2(_p2.Position[0], _p2.Position[1]);
-			GL.End();
-		}
+        public override void Draw()
+        {
+            GL.Begin(BeginMode.Lines);
+            GL.Color3(0.8f, 0.7f, 0.6f);
+            GL.Vertex2(_p1.Position[0], _p1.Position[1]);
+            GL.Color3(0.8f, 0.7f, 0.6f);
+            GL.Vertex2(_p2.Position[0], _p2.Position[1]);
+            GL.End();
+        }
+
+        public override void Calculate()
+        {
+            HyperPoint<float> pos_diff = _p1.Position - _p2.Position;
+            HyperPoint<float> vel_diff = _p1.Velocity - _p2.Velocity;
+            float pos_diff_length = pos_diff.GetLength();
+
+            float x = _ks * (pos_diff_length - _dist);
+            float y = _kd * (vel_diff.DotProduct(pos_diff) / pos_diff_length);
+
+            //( + ) * (pos_diff / pos_diff_length);
+            Matrix<float> result = new Matrix<float>(1, 2, new float [] {x, y});
+            Matrix<float> forcematrix = result * (pos_diff / pos_diff_length);
+            HyperPoint<float> force = new HyperPoint<float>(forcematrix[0, 0], forcematrix[0, 1]);
+
+            //HyperPoint<float> force = _ks * (pos_diff - _dist) + _kd * ((pos_diff * vol_diff) / pos_diff);
+
+            _p1.Force += force;
+            _p2.Force -= force;
+        }
 	}
 }

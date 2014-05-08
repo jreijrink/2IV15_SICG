@@ -7,7 +7,7 @@ using OpenTK.Graphics.OpenGL;
 
 namespace Project1
 {
-	class RodConstraint
+    class RodConstraint : Constraint
 	{
 		private readonly Particle _p1;
 		private readonly Particle _p2;
@@ -20,7 +20,7 @@ namespace Project1
 			_dist = dist;
 		}
 
-		public void Draw()
+		public  override void Draw()
 		{
 			GL.Begin(BeginMode.Lines);
 			GL.Color3(0.8f, 0.7f, 0.6f);
@@ -29,5 +29,9 @@ namespace Project1
 			GL.Vertex2(_p2.Position[0], _p2.Position[1]); 
 			GL.End();
 		}
+
+        public override void Calculate()
+        {
+        }
 	}
 }
