@@ -51,14 +51,16 @@ namespace Project1
 
 			particles = new List<Particle>();
 
-			particles.Add(new Particle(center + offset * 1));
-			particles.Add(new Particle(center + offset * 2));
-			particles.Add(new Particle(center + offset * 3));
+			particles.Add(new Particle(center + offset * 1, 1.0f));
+            particles.Add(new Particle(center + offset * 2, 1.0f));
+            particles.Add(new Particle(center + offset * 3, 1.0f));
 
             forces = new List<Force>();
-            forces.Add(new SpringForce(particles[0], particles[1], dist * 2, 2.0f, 4.0f));
-            forces.Add(new SpringForce(particles[1], particles[2], dist * 2, 2.0f, 4.0f));
+            forces.Add(new SpringForce(particles[0], particles[1], dist * 2, 1.0f, 1.0f));
+            forces.Add(new SpringForce(particles[1], particles[2], dist * 2, 1.0f, 1.0f));
+            forces.Add(new GravityForce(particles[0]));
             forces.Add(new GravityForce(particles[1]));
+            forces.Add(new GravityForce(particles[2]));
 
             contrains = new List<Constraint>();
             contrains.Add(new RodConstraint(particles[1], particles[2], dist));

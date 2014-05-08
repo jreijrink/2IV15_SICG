@@ -34,6 +34,7 @@ namespace Project1
 
         public override void Calculate()
         {
+
         }
 	}
 }

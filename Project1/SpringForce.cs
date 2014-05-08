@@ -45,10 +45,10 @@ namespace Project1
             float y = _kd * (vel_diff.DotProduct(pos_diff) / pos_diff_length);
             float result = x + y;
 
-            HyperPoint<float> force = (pos_diff / pos_diff_length) * result;
+            HyperPoint<float> force = (pos_diff / pos_diff_length) * -result;
 
-            _p1.Force -= force;
-            _p2.Force += force;
+            _p1.Force += force;
+            _p2.Force -= force;
         }
 	}
 }

@@ -49,8 +49,9 @@ namespace Project1
 
         public Particle(HyperPoint<float> constructPos)
         {
-            _mass = 0.01f;
+            _constructPos = constructPos;
             _position = constructPos;
+            _mass = 1.0f;
             _velocity = new HyperPoint<float>(0, 0);
             _force = new HyperPoint<float>(0, 0);
             _acceleration = new HyperPoint<float>(0, 0);
@@ -59,8 +60,8 @@ namespace Project1
         public Particle(HyperPoint<float> constructPos, float mass)
         {
             _constructPos = constructPos;
+            _position = constructPos;
             _mass = mass;
-            _position = new HyperPoint<float>(0, 0);
             _velocity = new HyperPoint<float>(0, 0);
             _force = new HyperPoint<float>(0, 0);
             _acceleration = new HyperPoint<float>(0, 0);

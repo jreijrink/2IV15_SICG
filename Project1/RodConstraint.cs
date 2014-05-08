@@ -32,6 +32,8 @@ namespace Project1
 
         public override void Calculate()
         {
+            float distance = (float)Math.Pow((_p1.Position.X - _p2.Position.X), 2) + (float)Math.Pow((_p1.Position.Y - _p2.Position.Y), 2) - (float)Math.Pow(_dist, 2);
+            
         }
 	}
 }
