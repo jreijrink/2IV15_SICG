@@ -29,7 +29,7 @@ namespace Project1
 
             foreach(Particle particle in particles)
 			{
-                HyperPoint<float> acceleration = particle.Force * particle.Mass;
+                HyperPoint<float> acceleration = particle.Force / particle.Mass;
                 particle.Velocity += acceleration * dt;
                 particle.Position += particle.Velocity * dt;
 			}

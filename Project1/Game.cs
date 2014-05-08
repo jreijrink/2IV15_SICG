@@ -56,7 +56,8 @@ namespace Project1
 			particles.Add(new Particle(center + offset * 3));
 
             forces = new List<Force>();
-            forces.Add(new SpringForce(particles[0], particles[1], dist, 1.0f, 1.0f));
+            forces.Add(new SpringForce(particles[0], particles[1], dist * 2, 2.0f, 4.0f));
+            forces.Add(new SpringForce(particles[1], particles[2], dist * 2, 2.0f, 4.0f));
             forces.Add(new GravityForce(particles[1]));
 
             contrains = new List<Constraint>();
@@ -132,16 +133,13 @@ namespace Project1
 		relates mouse movements to tinker toy construction
 		----------------------------------------------------------------------
 		*/
-
-
-
+        
 		/*
 		----------------------------------------------------------------------
 		callback routines
 		----------------------------------------------------------------------
 		*/
-
-
+        
 		private void OnLoad(object sender, EventArgs eventArgs)
 		{
 			// setup settings, load textures, sounds

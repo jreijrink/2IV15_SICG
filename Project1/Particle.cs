@@ -16,13 +16,7 @@ namespace Project1
         private HyperPoint<float> _force;
         private HyperPoint<float> _acceleration;
         private float _mass;
-
-		public HyperPoint<float> ConstructPos
-		{
-			get { return _constructPos; }
-			set { _constructPos = value; }
-		}
-
+        
 		public HyperPoint<float> Position
 		{
 			get { return _position; }
@@ -55,9 +49,8 @@ namespace Project1
 
         public Particle(HyperPoint<float> constructPos)
         {
-            _constructPos = constructPos;
             _mass = 0.01f;
-            _position = new HyperPoint<float>(0, 0);
+            _position = constructPos;
             _velocity = new HyperPoint<float>(0, 0);
             _force = new HyperPoint<float>(0, 0);
             _acceleration = new HyperPoint<float>(0, 0);

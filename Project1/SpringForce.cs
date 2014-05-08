@@ -43,16 +43,12 @@ namespace Project1
 
             float x = _ks * (pos_diff_length - _dist);
             float y = _kd * (vel_diff.DotProduct(pos_diff) / pos_diff_length);
+            float result = x + y;
 
-            //( + ) * (pos_diff / pos_diff_length);
-            Matrix<float> result = new Matrix<float>(1, 2, new float [] {x, y});
-            Matrix<float> forcematrix = result * (pos_diff / pos_diff_length);
-            HyperPoint<float> force = new HyperPoint<float>(forcematrix[0, 0], forcematrix[0, 1]);
+            HyperPoint<float> force = (pos_diff / pos_diff_length) * result;
 
-            //HyperPoint<float> force = _ks * (pos_diff - _dist) + _kd * ((pos_diff * vol_diff) / pos_diff);
-
-            _p1.Force += force;
-            _p2.Force -= force;
+            _p1.Force -= force;
+            _p2.Force += force;
         }
 	}
 }
