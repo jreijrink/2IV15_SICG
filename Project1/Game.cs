@@ -46,8 +46,8 @@ namespace Project1
 		private void InitSystem()
 		{
 			float dist = 0.2f;
-			HyperPoint<float> center = new HyperPoint<float>(0.0f, 0.0f);
-			HyperPoint<float> offset = new HyperPoint<float>(dist, 0.0f);
+            HyperPoint<float> center = new HyperPoint<float>(0.0f, 0.0f);
+            HyperPoint<float> offset = new HyperPoint<float>(dist, 0.0f);
 
 			particles = new List<Particle>();
 
@@ -56,14 +56,14 @@ namespace Project1
             particles.Add(new Particle(center + offset * 3, 1.0f));
 
             forces = new List<Force>();
-            forces.Add(new SpringForce(particles[0], particles[1], dist * 2, 1.0f, 1.0f));
+            //forces.Add(new SpringForce(particles[0], particles[1], dist * 2, 1.0f, 1.0f));
             forces.Add(new SpringForce(particles[1], particles[2], dist * 2, 1.0f, 1.0f));
             forces.Add(new GravityForce(particles[0]));
             forces.Add(new GravityForce(particles[1]));
             forces.Add(new GravityForce(particles[2]));
 
             contrains = new List<Constraint>();
-            contrains.Add(new RodConstraint(particles[1], particles[2], dist));
+            contrains.Add(new RodConstraint(particles[0], particles[1], dist));
             contrains.Add(new CircularWireConstraint(particles[0], center, dist));
 		}
 

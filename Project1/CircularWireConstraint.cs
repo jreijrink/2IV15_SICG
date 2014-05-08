@@ -34,6 +34,10 @@ namespace Project1
 
         public override void Calculate()
         {
+            HyperPoint<float> normal = _p.Position - _center;
+            float labda = (-_p.Force.DotProduct(normal) - _p.Mass * _p.Velocity.DotProduct(_p.Velocity)) / (normal.DotProduct(normal));
+            HyperPoint<float> force_c = normal * labda;
+            _p.Force += force_c;
 
         }
 	}
