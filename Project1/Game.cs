@@ -65,7 +65,8 @@ namespace Project1
 
             contrains = new List<Constraint>();
             contrains.Add(new RodConstraint(particles[0], particles[1], dist));
-            contrains.Add(new CircularWireConstraint(particles[0], center, dist * 1));
+            contrains.Add(new RodConstraint(particles[1], particles[2], dist));
+            //contrains.Add(new CircularWireConstraint(particles[0], center, dist * 1));
             //contrains.Add(new CircularWireConstraint(particles[1], center, dist * 2));
             //contrains.Add(new CircularWireConstraint(particles[2], center, dist * 3));
 		}
