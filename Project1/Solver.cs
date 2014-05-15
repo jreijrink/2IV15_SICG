@@ -40,7 +40,7 @@ namespace Project1
         {
 	        int nConstraint = constraints.Count;
 
-	        Matrix<double> J = new Matrix<double>(nConstraint, particles.Count * 2);
+	        Matrix<float> J = new Matrix<float>(nConstraint, particles.Count * 2);
 
 	        for(int i = 0; i < nConstraint; i++)
             {
@@ -51,24 +51,24 @@ namespace Project1
                     J[i, c[j].Index * 2 + 1] = c[j].Velocity.X;
                 }
 	        }
-	        Matrix<double> JT = J.Transpose();
+	        Matrix<float> JT = J.Transpose();
 
-	        Matrix<double> M = new Matrix<double>(particles.Count * 2, particles.Count * 2);
+	        Matrix<float> M = new Matrix<float>(particles.Count * 2, particles.Count * 2);
 
             for (int i = 0; i < M.Rows;  i++)
             {
                 for (int j = 0; j < M.Columns; j++)
-                    M[i, j] = 0.0;
+                    M[i, j] = 0.0f;
             }
 
             for (int i = 0; i < M.Rows; i++)
             {
-                int index = (int)Math.Floor((double)i / 3);
+                int index = (int)Math.Floor((float)i / 3);
 		        M[i, i] = particles[index].Mass;
 	        }
-            Matrix<double> W = M.Inverse();
+            Matrix<float> W = M.Inverse();
             
-	        Matrix<double> Jdot = new Matrix<double>(nConstraint, particles.Count * 2);
+	        Matrix<float> Jdot = new Matrix<float>(nConstraint, particles.Count * 2);
 	        for (int i = 0; i < nConstraint; i++)
             {
 	          List<Particle> c = constraints[i].GetTimeDerivative();
@@ -80,81 +80,50 @@ namespace Project1
 	          }
 	        }
 
-	        Matrix<double> qdot = new Matrix<double>(1, particles.Count * 2);
+	        Matrix<float> qdot = new Matrix<float>(1, particles.Count * 2);
 	        for (int i = 0; i < particles.Count; i++)
             {
 			        qdot[0, 2*i] = particles[i].Velocity.X;
 			        qdot[0, 2*i+1] = particles[i].Velocity.Y;
 	        }
 
-	        Matrix<double> Q = new Matrix<double>(1, particles.Count * 2);
+	        Matrix<float> Q = new Matrix<float>(1, particles.Count * 2);
 	        for (int i = 0; i < particles.Count; i++)
             {
 			        Q[0, 2*i] = particles[i].Force.X;
 			        Q[0, 2*i+1] = particles[i].Force.Y;
 	        }
 
-            Matrix<double> step1 = J * W;
-            Matrix<double> step2 = J.Transpose();
-            Matrix<double> step3 = Jdot * -1;
-            Matrix<double> step4 = qdot.Transpose();
-            Matrix<double> step5 = Q.Transpose();
-            Matrix<double> step6 = step1 * step5;
-            Matrix<double> step7 = step1 * step2;
-            Matrix<double> step8 = step3 * step4;
-            Matrix<double> step9 = step6 * -1;
-            Matrix<double> step10 = step8.Add(step9).Transpose();
-            Matrix<double> step11 = step7.Inverse();
-
-            Matrix<double> labda = step11 * step10;
-            Matrix<double> force = labda * J;
-            
             /*
-	        //--------------------JW.Q-------------------------------------------
-	        Matrix<double> JWQ;
-	        JWQ = Matrix::multiply(JW, Q);
+            Matrix<float> step1 = J * W;
+            Matrix<float> step2 = J.Transpose();
+            Matrix<float> step3 = Jdot * -1;
+            Matrix<float> step4 = qdot.Transpose();
+            Matrix<float> step5 = Q.Transpose();
+            Matrix<float> step6 = step1 * step5;
+            Matrix<float> step7 = step1 * step2;
+            Matrix<float> step8 = step3 * step4;
+            Matrix<float> step9 = step6 * -1;
+            Matrix<float> step11 = step7.Inverse();
 
-	        //--------------------Correction damping: -------------------------------------------
-	        Matrix<double> C(nConstraint, vector<double>(1));
-	        for(int i=0; i<nConstraint; i++) {
-	          C[i][0] = allConstraints[i]->getC();
-	        }
-
-	        Matrix<double> Cdot(nConstraint, vector<double>(1));
-	        for(int i=0; i<nConstraint; i++) {
-	          Cdot[i][0] = allConstraints[i]->getCdot();
-	        };
-
-	        //--------------------b=(-Jdotqdot-JWQ-ksC-kdCdot)-------------------------------------------
-	        Matrix<double> b = Matrix::subtract(Matrix::mulconst(Jdotqdot,-1), JWQ);
-	        b = Matrix::subtract(b, Matrix::mulconst(C, ks));
-	        b = Matrix::subtract(b, Matrix::mulconst(Cdot, kd));
-
-	        //--------------------Solve: Ax=b -------------------------------------------
-	        implicitMatrix *M = new implicitMatrix(A);
-	        double t1[nConstraint], t2[nConstraint];
-
-	        //There should be an elegant way to convert vector to array? :)
-	        for (unsigned int i=0; i<b.size(); i++) t2[i] = b[i][0];
-
-	        int steps = 100;
-	        ConjGrad(nConstraint, M, t1, t2, 1.0e-5, &steps);
-	        delete M;
-
-	        //-------------------- JT.lamda -------------------------------------------
-	        //Compute correction matrix:
-	        Matrix<double> lambda(nConstraint, vector<double>(1));
-	        for (int i=0; i<nConstraint; i++) lambda[i][0] = t1[i];
-
-	        Matrix<double> corrc = Matrix::multiply(JT,lambda);
-
-
-	        //--------------------------------------------------------------------------
-	        //Apply correction forces to the force accumulator:
-	        for (unsigned int i=0; i<pVector.size(); i++) {
-		        pVector[i]->setForce(pVector[i]->getForce()+Vec2f(corrc[2*i][0], corrc[2*i+1][0]));
-	        }
+            Matrix<float> labda = step11 * step10;
+            Matrix<float> force = labda.Transpose() * J;
             */
+            
+            //Solve Ax = b
+            Matrix<float> A = J * W * J.Transpose();
+            HyperPoint<float> labda = new HyperPoint<float>(0, 0);
+            Matrix<float> B = ((Jdot * -1) * (qdot.Transpose())).Add((J * W * Q.Transpose()) * -1);
+            HyperPoint<float> Bvec = new HyperPoint<float>(B.m);
+            int steps = 100;
+            double test = LinearSolver.ConjGrad(nConstraint, A, Bvec, 1.0f / 10000.0f, ref steps, out labda);
+            Matrix<float> labdaM = new Matrix<float>(labda.p.Count(), 1, labda.p);
+            Matrix<float> force = labdaM.Transpose() * J;
+
+            for (int i = 0; i < particles.Count; i++)
+            {
+                particles[i].Force += new HyperPoint<float>(force[0, i * 2], force[0, i * 2 + 1]);
+            }
         }
     }
 }

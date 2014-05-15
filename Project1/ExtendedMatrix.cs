@@ -9,24 +9,24 @@ namespace Project1
 {
     public static class MatrixExtensions
     {
-        public static Matrix<double> Inverse(this Matrix<double> matrix)
+        public static Matrix<float> Inverse(this Matrix<float> matrix)
         {
             int n = matrix.Rows;
             //e will represent each column in the identity matrix
-            double[] e;
+            float[] e;
             //x will hold the inverse matrix to be returned
-            Matrix<double> x = new Matrix<double>(matrix.Rows, matrix.Columns);
+            Matrix<float> x = new Matrix<float>(matrix.Rows, matrix.Columns);
 
             /*
             * solve will contain the vector solution for the LUP decomposition as we solve
-            * for each vector of x.  We will combine the solutions into the double[][] array x.
+            * for each vector of x.  We will combine the solutions into the float[][] array x.
             * */
-            double[] solve;
+            float[] solve;
 
             //Get the LU matrix and P matrix (as an array)
-            Tuple<Matrix<double>, int[]> results = LUPDecomposition(matrix);
+            Tuple<Matrix<float>, int[]> results = LUPDecomposition(matrix);
 
-            Matrix<double> LU = results.Item1;
+            Matrix<float> LU = results.Item1;
             int[] P = results.Item2;
 
             /*
@@ -34,7 +34,7 @@ namespace Project1
             * */
             for (int i = 0; i < n; i++)
             {
-                e = new double[matrix.Columns];
+                e = new float[matrix.Columns];
                 e[i] = 1;
                 solve = LUPSolve(LU, P, e);
                 for (int j = 0; j < solve.Length; j++)
@@ -45,9 +45,9 @@ namespace Project1
             return x;
         }
 
-        public static Matrix<double> Transpose(this Matrix<double> matrix)
+        public static Matrix<float> Transpose(this Matrix<float> matrix)
         {
-            Matrix<double> result = new Matrix<double>(matrix.Columns, matrix.Rows);
+            Matrix<float> result = new Matrix<float>(matrix.Columns, matrix.Rows);
 
             for (int n = 0; n < matrix.Columns; n++)
             {
@@ -60,9 +60,9 @@ namespace Project1
             return result;
         }
 
-        public static Matrix<double> Add( this Matrix<double> m1, Matrix<double> m2)
+        public static Matrix<float> Add( this Matrix<float> m1, Matrix<float> m2)
         {
-            Matrix<double> result = new Matrix<double>(m1.Rows, m1.Columns);
+            Matrix<float> result = new Matrix<float>(m1.Rows, m1.Columns);
 
             for (int i = 0; i < m1.Rows; i++)
             {
@@ -75,7 +75,7 @@ namespace Project1
             return result;
         }
 
-        private static Tuple<Matrix<double>, int[]> LUPDecomposition(Matrix<double> A)
+        private static Tuple<Matrix<float>, int[]> LUPDecomposition(Matrix<float> A)
         {
             int n = A.Rows - 1;
             /*
@@ -84,12 +84,12 @@ namespace Project1
             * dividing by zero or small numbers.
             * */
             int[] pi = new int[n + 1];
-            double p = 0;
+            float p = 0;
             int kp = 0;
             int pik = 0;
             int pikp = 0;
-            double aki = 0;
-            double akpi = 0;
+            float aki = 0;
+            float akpi = 0;
 
             //Initialize the permutation matrix, will be the identity matrix
             for (int j = 0; j <= n; j++)
@@ -155,14 +155,14 @@ namespace Project1
             return Tuple.Create(A, pi);
         }
 
-        private static double[] LUPSolve(Matrix<double> LU, int[] pi, double[] b)
+        private static float[] LUPSolve(Matrix<float> LU, int[] pi, float[] b)
         {
             int n = LU.Rows - 1;
-            double[] x = new double[n + 1];
-            double[] y = new double[n + 1];
-            double suml = 0;
-            double sumu = 0;
-            double lij = 0;
+            float[] x = new float[n + 1];
+            float[] y = new float[n + 1];
+            float suml = 0;
+            float sumu = 0;
+            float lij = 0;
 
             /*
             * Solve for y using formward substitution

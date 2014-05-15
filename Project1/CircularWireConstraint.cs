@@ -44,24 +44,53 @@ namespace Project1
         }
         */
 
+
         public override float GetC()
         {
-            return 0;
+            return (_p.Position.X - _center.X) * (_p.Position.X - _center.X) +
+                    (_p.Position.Y - _center.Y) * (_p.Position.Y - _center.Y) -
+                    _radius * _radius;
         }
 
         public override float GetCdot()
         {
-            return 0;
+            List<Particle> derivatives = GetDerivative();
+
+            Matrix<float> velocity1Transpose = new Matrix<float>(1, 2);
+            velocity1Transpose[0, 0] = _p.Velocity.X;
+            velocity1Transpose[0, 1] = _p.Velocity.Y;
+            Matrix<float> cdot1 = velocity1Transpose * derivatives[0].Velocity;
+
+            return cdot1[0, 0];
         }
 
         public override List<Particle> GetDerivative()
         {
-            return null;
+            List<Particle> derivatives = new List<Particle>();
+
+            HyperPoint<float> derivativeX1 = new HyperPoint<float>(
+                2 * (_p.Position.X - _center.X),
+                2 * (_p.Position.Y - _center.Y)
+            );
+            Particle p1 = new Particle(_p.Index);
+            p1.Velocity = derivativeX1;
+            derivatives.Add(p1);
+            
+            return derivatives;
         }
 
         public override List<Particle> GetTimeDerivative()
         {
-            return null;
+            List<Particle> timeDerivatives = new List<Particle>();
+            HyperPoint<float> timeDerivativeX1 = new HyperPoint<float>(
+                2 * (_p.Velocity.X),
+                2 * (_p.Velocity.Y)
+            );
+            Particle p1 = new Particle(_p.Index);
+            p1.Velocity = timeDerivativeX1;
+            timeDerivatives.Add(p1);
+            
+            return timeDerivatives;
         }
 	}
 }
