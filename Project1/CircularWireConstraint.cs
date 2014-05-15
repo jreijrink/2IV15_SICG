@@ -8,12 +8,12 @@ using OpenTK.Graphics.OpenGL;
 namespace Project1
 {
     class CircularWireConstraint : Constraint
-	{
-		private readonly Particle _p;
+    {
+        private readonly Particle _p;
 		private readonly HyperPoint<float> _center;
-		private readonly double _radius;
+		private readonly float _radius;
 
-		public CircularWireConstraint(Particle p, HyperPoint<float> center, double radius)
+		public CircularWireConstraint(Particle p, HyperPoint<float> center, float radius)
 		{
 			_p = p;
 			_center = center;
@@ -31,7 +31,8 @@ namespace Project1
 			}
 			GL.End();
 		}
-
+       
+        /*
         public override void Calculate()
         {
             HyperPoint<float> normal = _p.Position - _center;
@@ -40,6 +41,27 @@ namespace Project1
             _p.Force += force_c;
 
 
+        }
+        */
+
+        public override float GetC()
+        {
+            return 0;
+        }
+
+        public override float GetCdot()
+        {
+            return 0;
+        }
+
+        public override List<Particle> GetDerivative()
+        {
+            return null;
+        }
+
+        public override List<Particle> GetTimeDerivative()
+        {
+            return null;
         }
 	}
 }
