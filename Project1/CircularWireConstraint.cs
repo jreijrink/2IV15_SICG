@@ -39,6 +39,7 @@ namespace Project1
             HyperPoint<float> force_c = normal * labda;
             _p.Force += force_c;
 
+
         }
 	}
 }

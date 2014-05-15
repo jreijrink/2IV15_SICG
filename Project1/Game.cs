@@ -56,15 +56,18 @@ namespace Project1
             particles.Add(new Particle(center + offset * 3, 1.0f));
 
             forces = new List<Force>();
-            //forces.Add(new SpringForce(particles[0], particles[1], dist * 2, 1.0f, 1.0f));
+            forces.Add(new SpringForce(particles[0], particles[1], dist * 2, 1.0f, 1.0f));
             forces.Add(new SpringForce(particles[1], particles[2], dist * 2, 1.0f, 1.0f));
+            //forces.Add(new SpringForce(particles[2], particles[0], dist * 3, 1.0f, 1.0f));
             forces.Add(new GravityForce(particles[0]));
             forces.Add(new GravityForce(particles[1]));
             forces.Add(new GravityForce(particles[2]));
 
             contrains = new List<Constraint>();
             contrains.Add(new RodConstraint(particles[0], particles[1], dist));
-            contrains.Add(new CircularWireConstraint(particles[0], center, dist));
+            contrains.Add(new CircularWireConstraint(particles[0], center, dist * 1));
+            //contrains.Add(new CircularWireConstraint(particles[1], center, dist * 2));
+            //contrains.Add(new CircularWireConstraint(particles[2], center, dist * 3));
 		}
 
 		/*

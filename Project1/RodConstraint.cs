@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using micfort.GHL.Math2;
@@ -33,7 +34,13 @@ namespace Project1
         public override void Calculate()
         {
             float distance = (float)Math.Pow((_p1.Position.X - _p2.Position.X), 2) + (float)Math.Pow((_p1.Position.Y - _p2.Position.Y), 2) - (float)Math.Pow(_dist, 2);
-            
+
+            float force = -10 * (_p1.Position.X - _p2.Position.X) - 1 * (_p1.Velocity.Y - _p2.Velocity.Y);
+            _p1.Force += new HyperPoint<float>(force, 0);
+            _p2.Force -= new HyperPoint<float>(force, 0);
+            //LinearSolver.ConjGrad(
+
+
         }
 	}
 }
