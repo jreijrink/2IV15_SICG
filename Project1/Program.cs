@@ -6,36 +6,22 @@ using System.Text;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
+using Project1.Interface;
 
 namespace Project1
 {
 	class Program
 	{
-		[STAThread]
 		public static void Main(string[] args)
 		{
-			int N;
-			float dt;
-			float d;
-			if (args.Length == 0)
-			{
-				N = 64;
-				dt = 0.1f;
-				d = 5.0f;
-				
-			}
-			else
-			{
-				N = int.Parse(args[0]);
-				dt = int.Parse(args[1]);
-				d = int.Parse(args[2]);
-			}
-			Console.Out.WriteLine("Using parameters : N={0} dt={1} d={2}\n", N, dt, d);
-			using (var game = new Game(N, dt, d))
-			{
-				// Run the game at 60 updates per second
-				game.Run(60.0);
-			}
+            micfort.GHL.GHLWindowsInit.Init();
+            startWindow(args);
 		}
+
+        public static void startWindow(string[] args)
+        {
+            MainWindow window = new MainWindow(args);
+            window.ShowDialog();
+        }
 	}
 }

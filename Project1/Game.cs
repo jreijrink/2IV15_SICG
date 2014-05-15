@@ -2,14 +2,16 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Windows.Forms;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
 using micfort.GHL.Math2;
+using MouseEventArgs = System.Windows.Forms.MouseEventArgs;
 
 namespace Project1
 {
-	class Game: GameWindow
+    public class Game
 	{
 		private int N;
 		private float dt, d;
@@ -21,7 +23,6 @@ namespace Project1
 		private List<Particle> particles;
 
 		private int win_id;
-		private int win_x, win_y;
 		private int[] mouse_down;
 		private int[] mouse_release;
 		private int[] mouse_shiftclick;
@@ -31,8 +32,10 @@ namespace Project1
         private List<Force> forces;
         private List<Constraint> contrains;
 
+        private Rectangle drawWindow = new Rectangle(0,0,400,400);
 
-		/*
+
+        /*
 		----------------------------------------------------------------------
 		free/clear/allocate simulation data
 		----------------------------------------------------------------------
@@ -43,8 +46,10 @@ namespace Project1
 			particles.ForEach(x => x.reset());
 		}
 
-		private void InitSystem()
-		{
+        public void InitSystem(Rectangle drawWindow)
+        {
+
+            this.drawWindow = drawWindow;
 			float dist = 0.2f;
             HyperPoint<float> center = new HyperPoint<float>(0.0f, 0.0f);
             HyperPoint<float> offset = new HyperPoint<float>(dist, 0.0f);
@@ -78,10 +83,10 @@ namespace Project1
 
 		private void PreDisplay()
 		{
-			GL.Viewport(0, 0, win_x, win_y);
+			GL.Viewport(0, 0, drawWindow.Width, drawWindow.Height);
 			GL.MatrixMode(MatrixMode.Projection);
 			GL.LoadIdentity();
-			GL.Ortho(-1.0, 1.0, -1.0, 1.0, -1, 1);
+			GL.Ortho(-2.0, 2.0, -2.0, 2.0, -2, 2);
 			GL.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 			GL.Clear(ClearBufferMask.ColorBufferBit);
 		}
@@ -94,12 +99,12 @@ namespace Project1
 				const int FrameInterval = 4;
 				if((frame_number % FrameInterval) == 0)
 				{
-					using(Bitmap bmp = new Bitmap(Width, Height))
+					using(Bitmap bmp = new Bitmap(drawWindow.Width, drawWindow.Height))
 					{
 						System.Drawing.Imaging.BitmapData data =
-							bmp.LockBits(this.ClientRectangle, System.Drawing.Imaging.ImageLockMode.WriteOnly,
+							bmp.LockBits(this.drawWindow, System.Drawing.Imaging.ImageLockMode.WriteOnly,
 										 System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-						GL.ReadPixels(0, 0, Width, Height, PixelFormat.Bgr, PixelType.UnsignedByte, data.Scan0);
+                        GL.ReadPixels(0, 0, drawWindow.Width, drawWindow.Height, PixelFormat.Bgr, PixelType.UnsignedByte, data.Scan0);
 						bmp.UnlockBits(data);
 
 						bmp.RotateFlip(RotateFlipType.RotateNoneFlipY);
@@ -114,8 +119,6 @@ namespace Project1
 				}
 			}
 			frame_number++;
-
-			SwapBuffers();
 		}
 
 		private void DrawParticles()
@@ -144,24 +147,25 @@ namespace Project1
 		callback routines
 		----------------------------------------------------------------------
 		*/
-        
-		private void OnLoad(object sender, EventArgs eventArgs)
+
+        public void OnLoad(object sender, EventArgs eventArgs)
 		{
 			// setup settings, load textures, sounds
-			VSync = VSyncMode.On;
+			//VSync = VSyncMode.On;
 
 			GL.Enable(EnableCap.LineSmooth); 
 			GL.Enable(EnableCap.PolygonSmooth);
 		}
 
-		private void OnResize(object sender, EventArgs eventArgs)
+		public void OnResize(object sender, EventArgs eventArgs)
 		{
-			GL.Viewport(0, 0, Width, Height);
-			win_x = Width;
-			win_y = Height;
+            GLControl control = (GLControl)sender;
+		    drawWindow = control.ClientRectangle;
+
+            GL.Viewport(0, 0, drawWindow.Width, drawWindow.Height);
 		}
 
-		private void OnRenderFrame(object sender, FrameEventArgs frameEventArgs)
+        public void OnRenderFrame()
 		{
 			PreDisplay();
 
@@ -192,7 +196,7 @@ namespace Project1
 			//SwapBuffers();
 		}
 
-		private void OnUpdateFrame(object sender, FrameEventArgs frameEventArgs)
+        public void OnUpdateFrame()
 		{
 			if(dsim)
 			{
@@ -202,35 +206,28 @@ namespace Project1
 			{
 				//todo reset
 			}
-
-			// add game logic, input handling
-			if (Keyboard[Key.Escape])
-			{
-				Exit();
-			}
 		}
 
-		private void OnKeyUp(object sender, KeyboardKeyEventArgs keyboardKeyEventArgs)
+        public void OnKeyUp(object sender, KeyEventArgs keyEventArgs)
 		{
 		}
 
-		private void OnKeyDown(object sender, KeyboardKeyEventArgs keyboardKeyEventArgs)
+        public void OnKeyDown(object sender, KeyEventArgs keyEventArgs)
 		{
-			switch (keyboardKeyEventArgs.Key)
+            switch (keyEventArgs.KeyCode)
 			{
-				case Key.C:
+				case Keys.C:
 					ClearData();
 					break;
 
-				case Key.D:
+				case Keys.D:
 					dump_frames = !dump_frames;
 					break;
 
-				case Key.Q:
-					Exit();
+				case Keys.Q:
 					break;
 
-				case Key.Space:
+				case Keys.Space:
 					dsim = !dsim;
 					break;
 			}
@@ -244,16 +241,24 @@ namespace Project1
 
 			dsim = false;
 			dump_frames = false;
-			frame_number = 0;
+		    frame_number = 0;
 
-			InitSystem();
-
-			this.Load += OnLoad;
-			this.Resize += OnResize;
-			this.UpdateFrame += OnUpdateFrame;
-			this.RenderFrame += OnRenderFrame;
-			this.KeyDown += OnKeyDown;
-			this.KeyUp += OnKeyUp;
+//			this.Load += OnLoad;
+//			this.Resize += OnResize;
+//			this.UpdateFrame += OnUpdateFrame;
+//			this.RenderFrame += OnRenderFrame;
+//			this.KeyDown += OnKeyDown;
+//			this.KeyUp += OnKeyUp;
 		}
+
+        public void OnMouseDown(object sender, MouseEventArgs e)
+        {
+            
+        }
+
+        public void OnMouseMove(object sender, MouseEventArgs e)
+        {
+            
+        }
 	}
 }
