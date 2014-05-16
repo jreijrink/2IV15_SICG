@@ -43,9 +43,12 @@ namespace Project1
 
         public override float GetC()
         {
-            return (_p1.Position.X - _p2.Position.X) * (_p1.Position.X - _p2.Position.X) +
-                    (_p1.Position.Y - _p2.Position.Y) * (_p1.Position.Y - _p2.Position.Y) -
-                    _dist * _dist;
+            float C = ((_p1.Position.X - _p2.Position.X) * (_p1.Position.X - _p2.Position.X)) +
+                    ((_p1.Position.Y - _p2.Position.Y) * (_p1.Position.Y - _p2.Position.Y)) -
+                    (_dist * _dist);
+
+            Console.Out.WriteLine(String.Format("C: {0}", C));
+            return C;
         }
 
         public override float GetCdot()
@@ -53,7 +56,6 @@ namespace Project1
             List<Particle> derivatives = GetDerivative();
 
             Matrix<float> velocity1Transpose = new Matrix<float>(1, 2);
-
             velocity1Transpose[0, 0] = _p1.Velocity.X;
             velocity1Transpose[0, 1] = _p1.Velocity.Y;
             Matrix<float> cdot1 = velocity1Transpose * derivatives[0].Velocity;
@@ -62,7 +64,7 @@ namespace Project1
             velocity2Transpose[0, 0] = _p2.Velocity.X;
             velocity2Transpose[0, 1] = _p2.Velocity.Y;
             Matrix<float> cdot2 = velocity2Transpose * derivatives[1].Velocity;
-
+            
             return cdot1[0, 0] + cdot2[0, 0];
         }
 
