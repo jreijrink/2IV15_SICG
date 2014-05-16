@@ -89,7 +89,11 @@ namespace Project1
 
         public void InitClothSystem(Rectangle drawWindow)
         {
+            this.viewWidth = 4.0;
+            this.viewHeight = 4.0;
+
             this.drawWindow = drawWindow;
+
             int size = 8;
             float dist = 0.4f;
             HyperPoint<float> start = new HyperPoint<float>(-1.2f, -1.2f);
@@ -379,7 +383,7 @@ namespace Project1
                     this.mouseParticle = new Particle(0, mouseLoc, 1f);
                     this.currentSelectedParticle = selectedParticle;
                     this.currentSelectedParticle.isSelected = true;
-                    this.mouseSpringForce = new SpringForce(selectedParticle, mouseParticle, 0.01f, 1f, 1f);
+                    this.mouseSpringForce = new SpringForce(selectedParticle, mouseParticle, 0.01f, 3.0f, 1f);
                     forces.Add(mouseSpringForce);
                 }
             }
