@@ -68,16 +68,21 @@ namespace Project1
             particles.Add(new Particle(1, center + offset * 2, 5.0f));
             particles.Add(new Particle(2, center + offset * 4, 5.0f));
             particles.Add(new Particle(3, center + offset * 5, 10.0f));
+            particles.Add(new Particle(4, center + new HyperPoint<float>(0, 1), 1));
+            particles.Add(new Particle(5, center + new HyperPoint<float>(0, 1), 1));
 
             forces = new List<Force>();
             forces.Add(new SpringForce(particles[0], particles[1], dist * 1, 1.0f, 1.0f));
             forces.Add(new SpringForce(particles[1], particles[2], dist * 5, 3.0f, 1.0f));
             forces.Add(new SpringForce(particles[2], particles[0], dist * 8, 1.0f, 1.0f));
+            forces.Add(new SpringForce(particles[4], particles[5], dist * 2, 1.0f, 1.0f));
 
             forces.Add(new GravityForce(particles[0]));
             forces.Add(new GravityForce(particles[1]));
             forces.Add(new GravityForce(particles[2]));
             forces.Add(new GravityForce(particles[3]));
+            forces.Add(new GravityForce(particles[4]));
+            forces.Add(new GravityForce(particles[5]));
 
             contrains = new List<Constraint>();
             contrains.Add(new CircularWireConstraint(particles[0], center + offset * 0, dist * 1));
@@ -85,6 +90,7 @@ namespace Project1
             contrains.Add(new CircularWireConstraint(particles[2], center - offset * 2, dist * 6));
 
             contrains.Add(new RodConstraint(particles[1], particles[3], dist * 3));
+            //contrains.Add(new LineConstraint(particles[4], particles[5].Position + new HyperPoint<float>(-2, 0), particles[4].Position + new HyperPoint<float>(2, 0)));
         }
 
         public void InitClothSystem(Rectangle drawWindow)

@@ -26,7 +26,7 @@ namespace Project1.Interface
             if (args.Length == 0)
             {
                 N = 64;
-                dt = 0.001f;
+                dt = 0.0001f;
                 d = 5.0f;
 
             }
