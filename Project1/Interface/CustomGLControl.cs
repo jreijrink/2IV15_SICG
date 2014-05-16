@@ -23,7 +23,6 @@ namespace Project1.Interface
         {
             this.game = game;
             //this.settings = settings;
-            game.InitSystem(this.ClientRectangle);
 
             Application.Idle += GameControl_Idle;
             this.Resize += game.OnResize;

@@ -376,7 +376,7 @@ namespace Project1
 
                 if (selectedParticle != null)
                 {
-                    this.mouseParticle = new Particle(mouseLoc, 1f);
+                    this.mouseParticle = new Particle(0, mouseLoc, 1f);
                     this.currentSelectedParticle = selectedParticle;
                     this.currentSelectedParticle.isSelected = true;
                     this.mouseSpringForce = new SpringForce(selectedParticle, mouseParticle, 0.01f, 1f, 1f);
