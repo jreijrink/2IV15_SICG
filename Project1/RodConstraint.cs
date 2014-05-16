@@ -43,12 +43,9 @@ namespace Project1
 
         public override float GetC()
         {
-            float C = ((_p1.Position.X - _p2.Position.X) * (_p1.Position.X - _p2.Position.X)) +
+            return ((_p1.Position.X - _p2.Position.X) * (_p1.Position.X - _p2.Position.X)) +
                     ((_p1.Position.Y - _p2.Position.Y) * (_p1.Position.Y - _p2.Position.Y)) -
                     (_dist * _dist);
-
-            Console.Out.WriteLine(String.Format("C: {0}", C));
-            return C;
         }
 
         public override float GetCdot()
