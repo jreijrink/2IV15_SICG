@@ -12,7 +12,8 @@ namespace Project1.Interface
 {
     public partial class MainWindow : Form
     {
-        private Game game;
+        private Game gameParticle;
+        private Game gameCloth;
 
         int N;
         float dt;
@@ -25,7 +26,7 @@ namespace Project1.Interface
             if (args.Length == 0)
             {
                 N = 64;
-                dt = 0.0006f;
+                dt = 0.001f;
                 d = 5.0f;
 
             }
@@ -44,15 +45,29 @@ namespace Project1.Interface
                 ErrorReporting.Instance.ReportInfo(this, "starting game");
                 if (Site == null || !Site.DesignMode)
                 {
-                    Game game = new Game(N, dt, d);
-                    customGLControl1.init(game);
-                    settingsControl1.init(game);
+                    gameParticle = new Game(N, dt, d);
+                    customGLControl1.init(gameParticle, GameType.Particle);
+                    settingsControl1.init(gameParticle);
+
+                    gameCloth = new Game(N, dt, d);
+                    customGLControl2.init(gameCloth, GameType.Cloth);
+                    settingsControl2.init(gameCloth);
                 }
             }
             catch (Exception exception)
             {
                 ErrorReporting.Instance.ReportFatalT(this, "Erro", exception);
             }
+        }
+
+        private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            TabControl control = (TabControl)sender;
+
+            if (control.SelectedIndex == 0)
+                gameCloth.Pause();
+            else if (control.SelectedIndex == 1)
+                gameParticle.Pause();
         }
     }
 }

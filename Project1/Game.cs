@@ -11,6 +11,8 @@ using MouseEventArgs = System.Windows.Forms.MouseEventArgs;
 
 namespace Project1
 {
+    public enum GameType { Particle, Cloth }
+
     public class Game
 	{
 		private int N;
@@ -46,34 +48,120 @@ namespace Project1
 			particles.ForEach(x => x.reset());
 		}
 
-        public void InitSystem(Rectangle drawWindow)
+        public void InitParticleSystem(Rectangle drawWindow)
         {
 
             this.drawWindow = drawWindow;
-			float dist = 0.2f;
+            float dist = 0.2f;
             HyperPoint<float> center = new HyperPoint<float>(0.0f, 0.0f);
             HyperPoint<float> offset = new HyperPoint<float>(dist, 0.0f);
 
-			particles = new List<Particle>();
+            particles = new List<Particle>();
 
-			particles.Add(new Particle(center + offset * 1, 1.0f));
-            particles.Add(new Particle(center + offset * 2, 1.0f));
-            particles.Add(new Particle(center + offset * 3, 1.0f));
+            particles.Add(new Particle(0, center + offset * 1, 5.0f));
+            particles.Add(new Particle(1, center + offset * 2, 5.0f));
+            particles.Add(new Particle(2, center + offset * 4, 5.0f));
+            particles.Add(new Particle(3, center + offset * 5, 10.0f));
 
             forces = new List<Force>();
-            forces.Add(new SpringForce(particles[0], particles[1], dist * 2, 1.0f, 1.0f));
-            forces.Add(new SpringForce(particles[1], particles[2], dist * 2, 1.0f, 1.0f));
-            forces.Add(new SpringForce(particles[2], particles[0], dist * 3, 1.0f, 1.0f));
+            forces.Add(new SpringForce(particles[0], particles[1], dist * 1, 1.0f, 1.0f));
+            forces.Add(new SpringForce(particles[1], particles[2], dist * 5, 3.0f, 1.0f));
+            forces.Add(new SpringForce(particles[2], particles[0], dist * 8, 1.0f, 1.0f));
+
             forces.Add(new GravityForce(particles[0]));
             forces.Add(new GravityForce(particles[1]));
             forces.Add(new GravityForce(particles[2]));
+            forces.Add(new GravityForce(particles[3]));
 
             contrains = new List<Constraint>();
-            contrains.Add(new RodConstraint(particles[0], particles[1], dist));
-            contrains.Add(new CircularWireConstraint(particles[0], center, dist));
-            contrains.Add(new CircularWireConstraint(particles[1], center, dist * 2));
-            contrains.Add(new CircularWireConstraint(particles[2], center, dist * 3));
-		}
+            contrains.Add(new CircularWireConstraint(particles[0], center + offset * 0, dist * 1));
+            contrains.Add(new CircularWireConstraint(particles[1], center - offset * 1, dist * 3));
+            contrains.Add(new CircularWireConstraint(particles[2], center - offset * 2, dist * 6));
+
+            contrains.Add(new RodConstraint(particles[1], particles[3], dist * 3));
+        }
+
+        public void InitClothSystem(Rectangle drawWindow)
+        {
+            this.drawWindow = drawWindow;
+            int size = 8;
+            float dist = 0.4f;
+            HyperPoint<float> start = new HyperPoint<float>(-1.2f, -1.2f);
+            HyperPoint<float> offset = new HyperPoint<float>(0.0f, 0.0f);
+
+            particles = new List<Particle>();
+            forces = new List<Force>();
+            contrains = new List<Constraint>();
+
+            int index = 0;
+            offset = new HyperPoint<float>(0.0f, dist * (size - 1));
+            Particle fixedparticle1 = new Particle(0, start + offset, 5.0f);
+            offset = new HyperPoint<float>(dist * (size - 1), dist * (size - 1));
+            Particle fixedparticle2 = new Particle(0, start + offset, 5.0f);
+
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    offset = new HyperPoint<float>(dist * x, dist * y);
+                    Particle particle = new Particle(index, start + offset, 5.0f);
+                    particles.Add(particle);
+                    forces.Add(new GravityForce(particle));
+
+                    if (x != 0)
+                    {
+                        //Stiff spring to left particle
+                        forces.Add(createStiffSpringForce(particle, particles[index - 1], dist));
+                    }
+                    if (x > 1)
+                    {
+                        //Long spring to particle 2 to left
+                        forces.Add(createSpringForce(particle, particles[index - 2], dist * 2));
+                    }
+
+                    if (y != 0)
+                    {
+                        //Stiff spring to above particle
+                        forces.Add(createStiffSpringForce(particle, particles[index - size], dist));
+
+                        //Stiff spring to cross particles
+                        if (x != 0)
+                        {
+                            forces.Add(createStiffSpringForce(particle, particles[index - size - 1], (float)Math.Sqrt(2 * dist * dist)));
+                        }
+                        if (x < (size - 1))
+                        {
+                            forces.Add(createStiffSpringForce(particle, particles[index - size + 1], (float)Math.Sqrt(2 * dist * dist)));
+                        }
+                    }
+                    if(y > 1)
+                    {
+                        //Long spring to particle 2 to above
+                        forces.Add(createSpringForce(particle, particles[index - (size * 2)], dist * 2));
+                    }
+
+                    if (y == (size - 1))
+                    {
+                        //Fixd point in left and right top
+                        if (x == 0 || x == (size - 1))
+                        {
+                            contrains.Add(new FixedConstraint(particle, particle.Position));
+                        }
+                    }
+                    index++;
+                }
+            }
+        }
+
+        private SpringForce createSpringForce(Particle p1, Particle p2, float dist)
+        {
+            return new SpringForce(p1, p2, dist, 1.0f, 1.0f);
+        }
+
+        private SpringForce createStiffSpringForce(Particle p1, Particle p2, float dist)
+        {
+            return new SpringForce(p1, p2, dist, 25.0f, 1.0f);
+        }
 
 		/*
 		----------------------------------------------------------------------
@@ -250,6 +338,11 @@ namespace Project1
 //			this.KeyDown += OnKeyDown;
 //			this.KeyUp += OnKeyUp;
 		}
+
+        public void Pause()
+        {
+            dsim = false;
+        }
 
         public void OnMouseDown(object sender, MouseEventArgs e)
         {
