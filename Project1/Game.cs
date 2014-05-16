@@ -33,7 +33,7 @@ namespace Project1
         private double viewWidth;
         private double viewHeight;
         private List<Force> forces;
-        private List<Constraint> contrains;
+        private List<Constraint> constrains;
 
         private Rectangle drawWindow = new Rectangle(0,0,400,400);
         private double minParticleDistance = 0.02;
@@ -59,7 +59,8 @@ namespace Project1
             this.viewHeight = 4.0;
 
             this.drawWindow = drawWindow;
-			float dist = 0.2f;            HyperPoint<float> center = new HyperPoint<float>(0.0f, 0.0f);
+			float dist = 0.2f;
+            HyperPoint<float> center = new HyperPoint<float>(0.0f, 0.0f);
             HyperPoint<float> offset = new HyperPoint<float>(dist, 0.0f);
 
             particles = new List<Particle>();
@@ -84,18 +85,22 @@ namespace Project1
             forces.Add(new GravityForce(particles[4]));
             forces.Add(new GravityForce(particles[5]));
 
-            contrains = new List<Constraint>();
-            contrains.Add(new CircularWireConstraint(particles[0], center + offset * 0, dist * 1));
-            contrains.Add(new CircularWireConstraint(particles[1], center - offset * 1, dist * 3));
-            contrains.Add(new CircularWireConstraint(particles[2], center - offset * 2, dist * 6));
+            constrains = new List<Constraint>();
+            constrains.Add(new CircularWireConstraint(particles[0], center + offset * 0, dist * 1));
+            constrains.Add(new CircularWireConstraint(particles[1], center - offset * 1, dist * 3));
+            constrains.Add(new CircularWireConstraint(particles[2], center - offset * 2, dist * 6));
 
-            contrains.Add(new RodConstraint(particles[1], particles[3], dist * 3));
+            constrains.Add(new RodConstraint(particles[1], particles[3], dist * 3));
             //contrains.Add(new LineConstraint(particles[4], particles[5].Position + new HyperPoint<float>(-2, 0), particles[4].Position + new HyperPoint<float>(2, 0)));
         }
 
         public void InitClothSystem(Rectangle drawWindow)
         {
+            this.viewWidth = 4.0;
+            this.viewHeight = 4.0;
+
             this.drawWindow = drawWindow;
+
             int size = 8;
             float dist = 0.4f;
             HyperPoint<float> start = new HyperPoint<float>(-1.2f, -1.2f);
@@ -103,7 +108,7 @@ namespace Project1
 
             particles = new List<Particle>();
             forces = new List<Force>();
-            contrains = new List<Constraint>();
+            constrains = new List<Constraint>();
 
             int index = 0;
             offset = new HyperPoint<float>(0.0f, dist * (size - 1));
@@ -124,6 +129,7 @@ namespace Project1
                     {
                         //Stiff spring to left particle
                         forces.Add(createStiffSpringForce(particle, particles[index - 1], dist));
+                        constrains.Add(new RodConstraint(particle, particles[index - 1], dist));
                     }
                     if (x > 1)
                     {
@@ -135,15 +141,18 @@ namespace Project1
                     {
                         //Stiff spring to above particle
                         forces.Add(createStiffSpringForce(particle, particles[index - size], dist));
+                        constrains.Add(new RodConstraint(particle, particles[index - size], dist));
 
                         //Stiff spring to cross particles
                         if (x != 0)
                         {
                             forces.Add(createStiffSpringForce(particle, particles[index - size - 1], (float)Math.Sqrt(2 * dist * dist)));
+                            constrains.Add(new RodConstraint(particle, particles[index - size - 1], (float)Math.Sqrt(2 * dist * dist)));
                         }
                         if (x < (size - 1))
                         {
                             forces.Add(createStiffSpringForce(particle, particles[index - size + 1], (float)Math.Sqrt(2 * dist * dist)));
+                            constrains.Add(new RodConstraint(particle, particles[index - size + 1], (float)Math.Sqrt(2 * dist * dist)));
                         }
                     }
                     if(y > 1)
@@ -157,7 +166,7 @@ namespace Project1
                         //Fixd point in left and right top
                         if (x == 0 || x == (size - 1))
                         {
-                            contrains.Add(new FixedConstraint(particle, particle.Position));
+                            constrains.Add(new FixedConstraint(particle, particle.Position));
                         }
                     }
                     index++;
@@ -233,7 +242,7 @@ namespace Project1
 
 		private void DrawConstraints()
         {
-            contrains.ForEach(c => c.Draw());
+            constrains.ForEach(c => c.Draw());
 		}
 		
 		/*
@@ -300,7 +309,7 @@ namespace Project1
 		{
 			if(dsim)
 			{
-				Solver.SimulationStep(particles, forces, contrains, dt);
+				Solver.SimulationStep(particles, forces, constrains, dt);
 			}
 			else
 			{
@@ -385,7 +394,7 @@ namespace Project1
                     this.mouseParticle = new Particle(0, mouseLoc, 1f);
                     this.currentSelectedParticle = selectedParticle;
                     this.currentSelectedParticle.isSelected = true;
-                    this.mouseSpringForce = new SpringForce(selectedParticle, mouseParticle, 0.01f, 1f, 1f);
+                    this.mouseSpringForce = new SpringForce(selectedParticle, mouseParticle, 0.01f, 3.0f, 1f);
                     forces.Add(mouseSpringForce);
                 }
             }
