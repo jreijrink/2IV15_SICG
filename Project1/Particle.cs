@@ -19,7 +19,9 @@ namespace Project1
         private float _mass;
         private static int nextId = 0;
 
-        public int Index
+	    public bool isSelected = false;
+
+	    public int Index
         {
             get { return _index; }
         }
@@ -88,7 +90,11 @@ namespace Project1
 		public void draw()
 		{
 			const double h = 0.03;
-			GL.Color3(1f, 1f, 1f);
+            if(isSelected)
+                GL.Color3(1f, 0f, 0f);
+            else
+			    GL.Color3(1f, 1f, 1f);
+
 			GL.Begin(BeginMode.Quads);
 			GL.Vertex2(_position[0] - h / 2.0, _position[1] - h / 2.0);
 			GL.Vertex2(_position[0] + h / 2.0, _position[1] - h / 2.0);

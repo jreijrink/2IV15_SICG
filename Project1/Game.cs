@@ -28,11 +28,16 @@ namespace Project1
 		private int[] mouse_shiftclick;
 		private int omx, omy, mx, my;
 		private int hmx, hmy;
-
+        private double viewWidth;
+        private double viewHeight;
         private List<Force> forces;
         private List<Constraint> contrains;
 
         private Rectangle drawWindow = new Rectangle(0,0,400,400);
+        private double minParticleDistance = 0.02;
+        private Particle currentSelectedParticle;
+        private Particle mouseParticle;
+        private SpringForce mouseSpringForce;
 
 
         /*
@@ -48,9 +53,11 @@ namespace Project1
 
         public void InitSystem(Rectangle drawWindow)
         {
+            this.viewWidth = 4.0;
+            this.viewHeight = 4.0;
 
             this.drawWindow = drawWindow;
-			float dist = 0.2f;
+			float dist = 0.5f;
             HyperPoint<float> center = new HyperPoint<float>(0.0f, 0.0f);
             HyperPoint<float> offset = new HyperPoint<float>(dist, 0.0f);
 
@@ -86,7 +93,7 @@ namespace Project1
 			GL.Viewport(0, 0, drawWindow.Width, drawWindow.Height);
 			GL.MatrixMode(MatrixMode.Projection);
 			GL.LoadIdentity();
-			GL.Ortho(-2.0, 2.0, -2.0, 2.0, -2, 2);
+            GL.Ortho(-viewWidth / 2, viewWidth / 2, -viewHeight / 2, viewHeight / 2, -1, 1);
 			GL.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 			GL.Clear(ClearBufferMask.ColorBufferBit);
 		}
@@ -253,12 +260,67 @@ namespace Project1
 
         public void OnMouseDown(object sender, MouseEventArgs e)
         {
-            
+            if (!dsim || this.currentSelectedParticle != null || mouseSpringForce != null)
+                return;
+
+            if(e.Button == MouseButtons.Left)
+            {
+                float mouseX = (float) (((e.Location.X / (float)drawWindow.Width) -  0.5) * viewWidth);
+                float mouseY = (float) (((e.Location.Y / (float)drawWindow.Height) - 0.5) * -viewHeight);
+
+                HyperPoint<float> mouseLoc = new HyperPoint<float>(mouseX, mouseY);
+
+                double minDistance = double.PositiveInfinity;
+                Particle selectedParticle = null;
+                foreach (Particle particle in particles)
+                {
+                    double distance = (particle.Position - mouseLoc).GetLengthSquared();
+                    if (distance < minDistance && distance < minParticleDistance)
+                    {
+                        minDistance = distance;
+                        selectedParticle = particle;
+                    }
+                }
+
+                if (selectedParticle != null)
+                {
+                    this.mouseParticle = new Particle(mouseLoc, 1f);
+                    this.currentSelectedParticle = selectedParticle;
+                    this.currentSelectedParticle.isSelected = true;
+                    this.mouseSpringForce = new SpringForce(selectedParticle, mouseParticle, 0.01f, 1f, 1f);
+                    forces.Add(mouseSpringForce);
+                }
+            }
+        }
+
+        public void OnMouseUp(object sender, MouseEventArgs e)
+        {
+            if(!dsim)
+                return;
+
+            if (e.Button == MouseButtons.Left)
+            {
+                if (currentSelectedParticle != null)
+                {
+                    forces.Remove(mouseSpringForce);
+                    this.currentSelectedParticle.isSelected = false;
+                    this.mouseParticle = null;
+                    this.currentSelectedParticle = null;
+                    this.mouseSpringForce = null;
+                }
+            }
         }
 
         public void OnMouseMove(object sender, MouseEventArgs e)
         {
-            
+            float mouseX = (float)(((e.Location.X / (float)drawWindow.Width) - 0.5) * viewWidth);
+            float mouseY = (float)(((e.Location.Y / (float)drawWindow.Height) - 0.5) * -viewHeight);
+            HyperPoint<float> mouseLoc = new HyperPoint<float>(mouseX, mouseY);
+
+            if(this.mouseParticle != null)
+            {
+                mouseParticle.Position = mouseLoc;
+            }
         }
 	}
 }

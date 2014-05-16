@@ -50,6 +50,7 @@ namespace Project1
                     J[i, c[j].Index * 2 + 1] = c[j].Velocity.Y;
                 }
 	        }
+
 	        Matrix<float> JT = J.Transpose();
 
             Matrix<float> W = new Matrix<float>(particles.Count * 2, particles.Count * 2);
