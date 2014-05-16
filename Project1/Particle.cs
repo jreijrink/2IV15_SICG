@@ -17,7 +17,6 @@ namespace Project1
         private HyperPoint<float> _force;
         private HyperPoint<float> _acceleration;
         private float _mass;
-        private static int nextId = 0;
 
 	    public bool isSelected = false;
 
@@ -56,22 +55,15 @@ namespace Project1
             set { _mass = value; }
         }
 
-        public Particle()
-            : this(new HyperPoint<float>(0, 0), 1.0f) { }
-
         public Particle(int index)
+            : this(index, new HyperPoint<float>(0, 0), 1.0f) { }
+        
+        public Particle(int index, HyperPoint<float> constructPos)
+            : this(index, constructPos, 1.0f) { }
+
+        public Particle(int index, HyperPoint<float> constructPos, float mass)
         {
             _index = index;
-        }
-
-        public Particle(HyperPoint<float> constructPos)
-            : this(constructPos, 1.0f) { }
-
-        public Particle(HyperPoint<float> constructPos, float mass)
-        {
-            _index = Particle.nextId;
-            Particle.nextId++;
-
             _constructPos = constructPos;
             _position = constructPos;
             _mass = mass;
@@ -88,7 +80,7 @@ namespace Project1
 		}
 
 		public void draw()
-		{
+        {
 			const double h = 0.03;
             if(isSelected)
                 GL.Color3(1f, 0f, 0f);

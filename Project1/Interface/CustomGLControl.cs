@@ -19,7 +19,7 @@ namespace Project1.Interface
             InitializeComponent();
         }
 
-        public void init(Game game)
+        public void init(Game game, GameType type)
         {
             this.game = game;
             //this.settings = settings;
@@ -35,8 +35,10 @@ namespace Project1.Interface
             this.MouseUp += game.OnMouseUp;
             this.MouseMove += game.OnMouseMove;
 
-            
-            //game.InitSystem();
+            if(type == GameType.Particle)
+                game.InitParticleSystem(this.ClientRectangle);
+            else if (type == GameType.Cloth)
+                game.InitClothSystem(this.ClientRectangle);
         }
 
         private void GameControl_render(object sender, PaintEventArgs e)

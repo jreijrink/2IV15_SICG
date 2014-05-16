@@ -8,6 +8,9 @@ namespace Project1
 {
     static class Solver
     {
+        private static float constraint_ks = 1000;
+        private static float constraint_kd = 1;
+
         public const float Damp = 0.98f;
         private static Random rand = new Random();
         public static float GetRandom()
@@ -24,8 +27,9 @@ namespace Project1
             }
 
             forces.ForEach(f => f.Calculate());
-            
-            constraintForce(particles, constraints);
+
+
+            constraintForce(particles, constraints, constraint_ks, constraint_kd);
 
             foreach (Particle particle in particles)
             {
@@ -35,7 +39,7 @@ namespace Project1
             }
         }
         
-        static void constraintForce(List<Particle> particles, List<Constraint> constraints)
+        static void constraintForce(List<Particle> particles, List<Constraint> constraints, float ks, float kd)
         {
 	        int nConstraint = constraints.Count;
 
@@ -108,8 +112,6 @@ namespace Project1
             HyperPoint<float> lambda = new HyperPoint<float>(0, 0);
             Matrix<float> B = ((Jdot * -1) * (qdot.Transpose())).Add((J * W * Q.Transpose()) * -1);
             
-            float ks = 100;
-            float kd = 100;
 	        B = B.Add(C * ks * -1);
 	        B = B.Add(Cdot * kd * -1);
             
