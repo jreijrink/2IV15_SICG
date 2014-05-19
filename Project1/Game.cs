@@ -14,31 +14,35 @@ namespace Project1
     public enum GameType { Particle, Cloth }
 
     public class Game
-	{
-		private int N;
-		private float dt, d;
-		private bool dsim;
-		private bool dump_frames;
-		private int frame_number;
+    {
+        private int N;
+        private float dt, d;
+        private bool dsim;
+        private bool dump_frames;
+        private int frame_number;
 
-		// static Particle *pList;
-		private List<Particle> particles;
+        private GameType _type;
 
-		private int win_id;
-		private int[] mouse_down;
-		private int[] mouse_release;
-		private int[] mouse_shiftclick;
-		private int omx, omy, mx, my;
-		private int hmx, hmy;
+        // static Particle *pList;
+        private List<Particle> particles;
+
+        private int win_id;
+        private int[] mouse_down;
+        private int[] mouse_release;
+        private int[] mouse_shiftclick;
+        private int omx, omy, mx, my;
+        private int hmx, hmy;
         private double viewWidth;
         private double viewHeight;
         private List<Force> forces;
         private List<Constraint> constrains;
 
-        private Rectangle drawWindow = new Rectangle(0,0,400,400);
+        private Rectangle drawWindow = new Rectangle(0, 0, 400, 400);
         private double minParticleDistance = 0.02;
+        private double minHorDistance = 0.2;
         private Particle currentSelectedParticle;
         private Particle mouseParticle;
+        private bool hor_force_applied;
         private SpringForce mouseSpringForce;
 
 
@@ -48,18 +52,20 @@ namespace Project1
 		----------------------------------------------------------------------
 		*/
 
-		private void ClearData()
-		{
-			particles.ForEach(x => x.reset());
-		}
+        private void ClearData()
+        {
+            particles.ForEach(x => x.reset());
+        }
 
         public void InitParticleSystem(Rectangle drawWindow)
         {
+            _type = GameType.Particle;
+
             this.viewWidth = 4.0;
             this.viewHeight = 4.0;
 
             this.drawWindow = drawWindow;
-			float dist = 0.2f;
+            float dist = 0.2f;
             HyperPoint<float> center = new HyperPoint<float>(0.0f, 0.0f);
             HyperPoint<float> offset = new HyperPoint<float>(dist, 0.0f);
 
@@ -90,6 +96,7 @@ namespace Project1
 
         public void InitClothSystem(Rectangle drawWindow)
         {
+            _type = GameType.Cloth;
             this.viewWidth = 4.0;
             this.viewHeight = 4.0;
 
@@ -123,7 +130,7 @@ namespace Project1
                     {
                         //Stiff spring to left particle
                         forces.Add(createStiffSpringForce(particle, particles[index - 1], dist));
-                        constrains.Add(new RodConstraint(particle, particles[index - 1], dist));
+                        //constrains.Add(new RodConstraint(particle, particles[index - 1], dist));
                     }
                     if (x > 1)
                     {
@@ -135,21 +142,21 @@ namespace Project1
                     {
                         //Stiff spring to above particle
                         forces.Add(createStiffSpringForce(particle, particles[index - size], dist));
-                        constrains.Add(new RodConstraint(particle, particles[index - size], dist));
+                        //constrains.Add(new RodConstraint(particle, particles[index - size], dist));
 
                         //Stiff spring to cross particles
                         if (x != 0)
                         {
                             forces.Add(createStiffSpringForce(particle, particles[index - size - 1], (float)Math.Sqrt(2 * dist * dist)));
-                            constrains.Add(new RodConstraint(particle, particles[index - size - 1], (float)Math.Sqrt(2 * dist * dist)));
+                            //constrains.Add(new RodConstraint(particle, particles[index - size - 1], (float)Math.Sqrt(2 * dist * dist)));
                         }
                         if (x < (size - 1))
                         {
                             forces.Add(createStiffSpringForce(particle, particles[index - size + 1], (float)Math.Sqrt(2 * dist * dist)));
-                            constrains.Add(new RodConstraint(particle, particles[index - size + 1], (float)Math.Sqrt(2 * dist * dist)));
+                            //constrains.Add(new RodConstraint(particle, particles[index - size + 1], (float)Math.Sqrt(2 * dist * dist)));
                         }
                     }
-                    if(y > 1)
+                    if (y > 1)
                     {
                         //Long spring to particle 2 to above
                         forces.Add(createSpringForce(particle, particles[index - (size * 2)], dist * 2));
@@ -178,181 +185,181 @@ namespace Project1
             return new SpringForce(p1, p2, dist, 25.0f, 1.0f);
         }
 
-		/*
-		----------------------------------------------------------------------
-		OpenGL specific drawing routines
-		----------------------------------------------------------------------
-		*/
+        /*
+        ----------------------------------------------------------------------
+        OpenGL specific drawing routines
+        ----------------------------------------------------------------------
+        */
 
-		private void PreDisplay()
-		{
-			GL.Viewport(0, 0, drawWindow.Width, drawWindow.Height);
-			GL.MatrixMode(MatrixMode.Projection);
-			GL.LoadIdentity();
+        private void PreDisplay()
+        {
+            GL.Viewport(0, 0, drawWindow.Width, drawWindow.Height);
+            GL.MatrixMode(MatrixMode.Projection);
+            GL.LoadIdentity();
             GL.Ortho(-viewWidth / 2, viewWidth / 2, -viewHeight / 2, viewHeight / 2, -1, 1);
-			GL.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-			GL.Clear(ClearBufferMask.ColorBufferBit);
-		}
+            GL.ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            GL.Clear(ClearBufferMask.ColorBufferBit);
+        }
 
-		private void PostDisplay()
-		{
-			// Write frames if necessary.
-			if (dump_frames)
-			{
-				const int FrameInterval = 4;
-				if((frame_number % FrameInterval) == 0)
-				{
-					using(Bitmap bmp = new Bitmap(drawWindow.Width, drawWindow.Height))
-					{
-						System.Drawing.Imaging.BitmapData data =
-							bmp.LockBits(this.drawWindow, System.Drawing.Imaging.ImageLockMode.WriteOnly,
-										 System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+        private void PostDisplay()
+        {
+            // Write frames if necessary.
+            if (dump_frames)
+            {
+                const int FrameInterval = 4;
+                if ((frame_number % FrameInterval) == 0)
+                {
+                    using (Bitmap bmp = new Bitmap(drawWindow.Width, drawWindow.Height))
+                    {
+                        System.Drawing.Imaging.BitmapData data =
+                            bmp.LockBits(this.drawWindow, System.Drawing.Imaging.ImageLockMode.WriteOnly,
+                                         System.Drawing.Imaging.PixelFormat.Format24bppRgb);
                         GL.ReadPixels(0, 0, drawWindow.Width, drawWindow.Height, PixelFormat.Bgr, PixelType.UnsignedByte, data.Scan0);
-						bmp.UnlockBits(data);
+                        bmp.UnlockBits(data);
 
-						bmp.RotateFlip(RotateFlipType.RotateNoneFlipY);
+                        bmp.RotateFlip(RotateFlipType.RotateNoneFlipY);
 
-						if (!Directory.Exists("snapshots"))
-							Directory.CreateDirectory("snapshots");
+                        if (!Directory.Exists("snapshots"))
+                            Directory.CreateDirectory("snapshots");
 
-						string filename = string.Format("snapshots/img{0}.png", Convert.ToSingle(frame_number)/FrameInterval);
-						bmp.Save(filename);
-						Console.Out.WriteLine("Output snapshot: {0}", Convert.ToSingle(frame_number) / FrameInterval);
-					}
-				}
-			}
-			frame_number++;
-		}
+                        string filename = string.Format("snapshots/img{0}.png", Convert.ToSingle(frame_number) / FrameInterval);
+                        bmp.Save(filename);
+                        Console.Out.WriteLine("Output snapshot: {0}", Convert.ToSingle(frame_number) / FrameInterval);
+                    }
+                }
+            }
+            frame_number++;
+        }
 
-		private void DrawParticles()
-		{
-			particles.ForEach(x => x.draw());
-		}
+        private void DrawParticles()
+        {
+            particles.ForEach(x => x.draw());
+        }
 
-		private void DrawForces()
+        private void DrawForces()
         {
             forces.ForEach(f => f.Draw());
-		}
+        }
 
-		private void DrawConstraints()
+        private void DrawConstraints()
         {
             constrains.ForEach(c => c.Draw());
-		}
-		
-		/*
-		----------------------------------------------------------------------
-		relates mouse movements to tinker toy construction
-		----------------------------------------------------------------------
-		*/
-        
-		/*
-		----------------------------------------------------------------------
-		callback routines
-		----------------------------------------------------------------------
-		*/
+        }
+
+        /*
+        ----------------------------------------------------------------------
+        relates mouse movements to tinker toy construction
+        ----------------------------------------------------------------------
+        */
+
+        /*
+        ----------------------------------------------------------------------
+        callback routines
+        ----------------------------------------------------------------------
+        */
 
         public void OnLoad(object sender, EventArgs eventArgs)
-		{
-			// setup settings, load textures, sounds
-			//VSync = VSyncMode.On;
+        {
+            // setup settings, load textures, sounds
+            //VSync = VSyncMode.On;
 
-			GL.Enable(EnableCap.LineSmooth); 
-			GL.Enable(EnableCap.PolygonSmooth);
-		}
+            GL.Enable(EnableCap.LineSmooth);
+            GL.Enable(EnableCap.PolygonSmooth);
+        }
 
-		public void OnResize(object sender, EventArgs eventArgs)
-		{
+        public void OnResize(object sender, EventArgs eventArgs)
+        {
             GLControl control = (GLControl)sender;
-		    drawWindow = control.ClientRectangle;
+            drawWindow = control.ClientRectangle;
 
             GL.Viewport(0, 0, drawWindow.Width, drawWindow.Height);
-		}
+        }
 
         public void OnRenderFrame()
-		{
-			PreDisplay();
+        {
+            PreDisplay();
 
-			DrawForces();
-			DrawConstraints();
-			DrawParticles();
-			
-			PostDisplay();
+            DrawForces();
+            DrawConstraints();
+            DrawParticles();
 
-			// render graphics
-			//GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            PostDisplay();
 
-			//GL.MatrixMode(MatrixMode.Projection);
-			//GL.LoadIdentity();
-			//GL.Ortho(-1.0, 1.0, -1.0, 1.0, 0.0, 4.0);
+            // render graphics
+            //GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-			//GL.Begin(PrimitiveType.Triangles);
+            //GL.MatrixMode(MatrixMode.Projection);
+            //GL.LoadIdentity();
+            //GL.Ortho(-1.0, 1.0, -1.0, 1.0, 0.0, 4.0);
 
-			//GL.Color3(Color.MidnightBlue);
-			//GL.Vertex2(-1.0f, 1.0f);
-			//GL.Color3(Color.SpringGreen);
-			//GL.Vertex2(0.0f, -1.0f);
-			//GL.Color3(Color.Ivory);
-			//GL.Vertex2(1.0f, 1.0f);
+            //GL.Begin(PrimitiveType.Triangles);
 
-			//GL.End();
+            //GL.Color3(Color.MidnightBlue);
+            //GL.Vertex2(-1.0f, 1.0f);
+            //GL.Color3(Color.SpringGreen);
+            //GL.Vertex2(0.0f, -1.0f);
+            //GL.Color3(Color.Ivory);
+            //GL.Vertex2(1.0f, 1.0f);
 
-			//SwapBuffers();
-		}
+            //GL.End();
+
+            //SwapBuffers();
+        }
 
         public void OnUpdateFrame()
-		{
-			if(dsim)
-			{
-				Solver.SimulationStep(particles, forces, constrains, dt);
-			}
-			else
-			{
-				//todo reset
-			}
-		}
+        {
+            if (dsim)
+            {
+                Solver.SimulationStep(particles, forces, constrains, dt);
+            }
+            else
+            {
+                //todo reset
+            }
+        }
 
         public void OnKeyUp(object sender, KeyEventArgs keyEventArgs)
-		{
-		}
+        {
+        }
 
         public void OnKeyDown(object sender, KeyEventArgs keyEventArgs)
-		{
+        {
             switch (keyEventArgs.KeyCode)
-			{
-				case Keys.C:
-					ClearData();
-					break;
+            {
+                case Keys.C:
+                    ClearData();
+                    break;
 
-				case Keys.D:
-					dump_frames = !dump_frames;
-					break;
+                case Keys.D:
+                    dump_frames = !dump_frames;
+                    break;
 
-				case Keys.Q:
-					break;
+                case Keys.Q:
+                    break;
 
-				case Keys.Space:
-					dsim = !dsim;
-					break;
-			}
-		}
-        
-		public Game(int n, float dt, float d)
-		{
-			this.N = n;
-			this.dt = dt;
-			this.d = d;
+                case Keys.Space:
+                    dsim = !dsim;
+                    break;
+            }
+        }
 
-			dsim = false;
-			dump_frames = false;
-		    frame_number = 0;
+        public Game(int n, float dt, float d)
+        {
+            this.N = n;
+            this.dt = dt;
+            this.d = d;
 
-//			this.Load += OnLoad;
-//			this.Resize += OnResize;
-//			this.UpdateFrame += OnUpdateFrame;
-//			this.RenderFrame += OnRenderFrame;
-//			this.KeyDown += OnKeyDown;
-//			this.KeyUp += OnKeyUp;
-		}
+            dsim = false;
+            dump_frames = false;
+            frame_number = 0;
+
+            //			this.Load += OnLoad;
+            //			this.Resize += OnResize;
+            //			this.UpdateFrame += OnUpdateFrame;
+            //			this.RenderFrame += OnRenderFrame;
+            //			this.KeyDown += OnKeyDown;
+            //			this.KeyUp += OnKeyUp;
+        }
 
         public void Pause()
         {
@@ -361,53 +368,80 @@ namespace Project1
 
         public void OnMouseDown(object sender, MouseEventArgs e)
         {
-            if (!dsim || this.currentSelectedParticle != null || mouseSpringForce != null)
+            if (!dsim)
                 return;
 
-            if(e.Button == MouseButtons.Left)
+            if (e.Button == MouseButtons.Left)
             {
-                float mouseX = (float) (((e.Location.X / (float)drawWindow.Width) -  0.5) * viewWidth);
-                float mouseY = (float) (((e.Location.Y / (float)drawWindow.Height) - 0.5) * -viewHeight);
+                float mouseX = (float)(((e.Location.X / (float)drawWindow.Width) - 0.5) * viewWidth);
+                float mouseY = (float)(((e.Location.Y / (float)drawWindow.Height) - 0.5) * -viewHeight);
 
-                HyperPoint<float> mouseLoc = new HyperPoint<float>(mouseX, mouseY);
-
-                double minDistance = double.PositiveInfinity;
-                Particle selectedParticle = null;
-                foreach (Particle particle in particles)
+                if (_type == GameType.Particle)
                 {
-                    double distance = (particle.Position - mouseLoc).GetLengthSquared();
-                    if (distance < minDistance && distance < minParticleDistance)
+                    if (this.currentSelectedParticle != null || mouseSpringForce != null)
+                        return;
+
+                    HyperPoint<float> mouseLoc = new HyperPoint<float>(mouseX, mouseY);
+
+                    double minDistance = double.PositiveInfinity;
+                    Particle selectedParticle = null;
+                    foreach (Particle particle in particles)
                     {
-                        minDistance = distance;
-                        selectedParticle = particle;
+                        double distance = (particle.Position - mouseLoc).GetLengthSquared();
+                        if (distance < minDistance && distance < minParticleDistance)
+                        {
+                            minDistance = distance;
+                            selectedParticle = particle;
+                        }
+                    }
+
+                    if (selectedParticle != null)
+                    {
+                        this.mouseParticle = new Particle(0, mouseLoc, 1f);
+                        this.currentSelectedParticle = selectedParticle;
+                        this.currentSelectedParticle.isSelected = true;
+                        this.mouseSpringForce = new SpringForce(selectedParticle, mouseParticle, 0.01f, 3.0f, 1f);
+                        forces.Add(mouseSpringForce);
                     }
                 }
-
-                if (selectedParticle != null)
+                else if (_type == GameType.Cloth)
                 {
-                    this.mouseParticle = new Particle(0, mouseLoc, 1f);
-                    this.currentSelectedParticle = selectedParticle;
-                    this.currentSelectedParticle.isSelected = true;
-                    this.mouseSpringForce = new SpringForce(selectedParticle, mouseParticle, 0.01f, 3.0f, 1f);
-                    forces.Add(mouseSpringForce);
+                    foreach (Particle particle in particles)
+                    {
+                        double hor_distance = particle.Position.Y - mouseY;
+                        if (hor_distance < minHorDistance && hor_distance > -minHorDistance)
+                        {
+                            bool direction = particle.Position.X > mouseX;
+                            forces.Add(new HorizontalForce(particle, direction));
+                        }
+                    }
+                    hor_force_applied = true;
                 }
             }
         }
 
         public void OnMouseUp(object sender, MouseEventArgs e)
         {
-            if(!dsim)
+            if (!dsim)
                 return;
 
             if (e.Button == MouseButtons.Left)
             {
-                if (currentSelectedParticle != null)
+                if (_type == GameType.Particle)
                 {
-                    forces.Remove(mouseSpringForce);
-                    this.currentSelectedParticle.isSelected = false;
-                    this.mouseParticle = null;
-                    this.currentSelectedParticle = null;
-                    this.mouseSpringForce = null;
+                    if (currentSelectedParticle != null)
+                    {
+                        forces.Remove(mouseSpringForce);
+                        this.currentSelectedParticle.isSelected = false;
+                        this.mouseParticle = null;
+                        this.currentSelectedParticle = null;
+                        this.mouseSpringForce = null;
+                    }
+                }
+                else if (_type == GameType.Cloth)
+                {
+                    forces.RemoveAll(F => F.GetType() == typeof(HorizontalForce));
+                    hor_force_applied = false;
                 }
             }
         }
@@ -416,12 +450,33 @@ namespace Project1
         {
             float mouseX = (float)(((e.Location.X / (float)drawWindow.Width) - 0.5) * viewWidth);
             float mouseY = (float)(((e.Location.Y / (float)drawWindow.Height) - 0.5) * -viewHeight);
-            HyperPoint<float> mouseLoc = new HyperPoint<float>(mouseX, mouseY);
 
-            if(this.mouseParticle != null)
+            if (_type == GameType.Particle)
             {
-                mouseParticle.Position = mouseLoc;
+                HyperPoint<float> mouseLoc = new HyperPoint<float>(mouseX, mouseY);
+
+                if (this.mouseParticle != null)
+                {
+                    mouseParticle.Position = mouseLoc;
+                }
+            }
+            else if (_type == GameType.Cloth)
+            {
+                if (hor_force_applied)
+                {
+                    forces.RemoveAll(F => F.GetType() == typeof(HorizontalForce));
+
+                    foreach (Particle particle in particles)
+                    {
+                        double hor_distance = particle.Position.Y - mouseY;
+                        if (hor_distance < minHorDistance && hor_distance > -minHorDistance)
+                        {
+                            bool direction = particle.Position.X > mouseX;
+                            forces.Add(new HorizontalForce(particle, direction));
+                        }
+                    }
+                }
             }
         }
-	}
+    }
 }
