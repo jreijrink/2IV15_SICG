@@ -26,7 +26,11 @@ namespace Project1.Interface
             if (args.Length == 0)
             {
                 N = 64;
-                dt = 0.04f;                d = 5.0f;
+                //Particles
+                //dt = 0.005f;
+                //Cloth
+                dt = 0.04f;
+                d = 5.0f;
 
             }
             else

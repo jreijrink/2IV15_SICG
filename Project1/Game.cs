@@ -20,9 +20,7 @@ namespace Project1
         private bool dsim;
         private bool dump_frames;
         private int frame_number;
-
-        private GameType _type;
-
+        
         // static Particle *pList;
         private List<Particle> particles;
 
@@ -36,6 +34,7 @@ namespace Project1
         private double viewHeight;
         private List<Force> forces;
         private List<Constraint> constrains;
+        private List<FixedObject> objects;
 
         private Rectangle drawWindow = new Rectangle(0, 0, 400, 400);
         private double minParticleDistance = 0.02;
@@ -59,8 +58,6 @@ namespace Project1
 
         public void InitParticleSystem(Rectangle drawWindow)
         {
-            _type = GameType.Particle;
-
             this.viewWidth = 4.0;
             this.viewHeight = 4.0;
 
@@ -71,18 +68,23 @@ namespace Project1
 
             particles = new List<Particle>();
 
-            particles.Add(new Particle(0, center + offset * 1, 5.0f));
-            particles.Add(new Particle(1, center + offset * 2, 5.0f));
-            particles.Add(new Particle(2, center + offset * 4, 5.0f));
-            particles.Add(new Particle(3, center + offset * 5, 10.0f));
-            particles.Add(new Particle(4, center + new HyperPoint<float>(0, 1), 1));
-            particles.Add(new Particle(5, center + new HyperPoint<float>(-0.3f, 0.5f), 1));
+            particles.Add(new Particle(0, offset * 1, 5.0f));
+            particles.Add(new Particle(1, offset * 3, 5.0f));
+            particles.Add(new Particle(2, offset * 6, 5.0f));
+            particles.Add(new Particle(3, new HyperPoint<float>(1.5f, 1f), 10.0f));
+
+            particles.Add(new Particle(4, new HyperPoint<float>(0, 1.8f), 1));
+            particles.Add(new Particle(5, new HyperPoint<float>(0, 1.8f - dist * 2), 1));
+
+            particles.Add(new Particle(6, new HyperPoint<float>(-1.8f, 0), 1));
+            particles.Add(new Particle(7, new HyperPoint<float>(-1.8f, -dist * 2), 1));
+
+            particles.Add(new Particle(8, new HyperPoint<float>(1, 0), 1));
 
             forces = new List<Force>();
             forces.Add(new SpringForce(particles[0], particles[1], dist * 1, 1.0f, 1.0f));
             forces.Add(new SpringForce(particles[1], particles[2], dist * 5, 3.0f, 1.0f));
             forces.Add(new SpringForce(particles[2], particles[0], dist * 8, 1.0f, 1.0f));
-            forces.Add(new SpringForce(particles[4], particles[5], dist * 2, 1.0f, 1.0f));
 
             forces.Add(new GravityForce(particles[0]));
             forces.Add(new GravityForce(particles[1]));
@@ -90,32 +92,46 @@ namespace Project1
             forces.Add(new GravityForce(particles[3]));
             forces.Add(new GravityForce(particles[4]));
             forces.Add(new GravityForce(particles[5]));
+            forces.Add(new GravityForce(particles[6]));
+            forces.Add(new GravityForce(particles[7]));
+            forces.Add(new GravityForce(particles[8]));
 
             constrains = new List<Constraint>();
-            constrains.Add(new CircularWireConstraint(particles[0], center + offset * 0, dist * 1));
-            constrains.Add(new CircularWireConstraint(particles[1], center - offset * 1, dist * 3));
-            constrains.Add(new CircularWireConstraint(particles[2], center - offset * 2, dist * 6));
+            constrains.Add(new CircularWireConstraint(particles[0], center, dist * 1));
+            constrains.Add(new CircularWireConstraint(particles[1], center, dist * 3));
+            constrains.Add(new CircularWireConstraint(particles[2], center, dist * 6));
 
-            constrains.Add(new RodConstraint(particles[1], particles[3], dist * 3));
-            constrains.Add(new LineConstraint(particles[4], particles[4].Position + new HyperPoint<float>(-2, 0), particles[4].Position + new HyperPoint<float>(2, 0)));
+            constrains.Add(new RodConstraint(particles[2], particles[3], dist * 2));
+            constrains.Add(new RodConstraint(particles[4], particles[5], dist * 2));
+            constrains.Add(new RodConstraint(particles[6], particles[7], dist * 2));
+            constrains.Add(new LineConstraint(particles[4], particles[4].Position + new HyperPoint<float>(0, 10), particles[4].Position + new HyperPoint<float>(0, -10)));
+            constrains.Add(new LineConstraint(particles[6], particles[6].Position + new HyperPoint<float>(-10, 0), particles[6].Position + new HyperPoint<float>(10, 0)));
+
+
+            objects = new List<FixedObject>();
+            objects.Add(new VerLineObject(-1.95f, -2, 4, true));
+            objects.Add(new VerLineObject(1.95f, -2, 4, false));
+
+            objects.Add(new HorLineObject(-2f, -1.95f, 4, true));
+            objects.Add(new HorLineObject(-2f, 1.95f, 4, false));
         }
 
         public void InitClothSystem(Rectangle drawWindow)
         {
-            _type = GameType.Cloth;
             this.viewWidth = 4.0;
             this.viewHeight = 4.0;
 
             this.drawWindow = drawWindow;
 
             int size = 8;
-            float dist = 0.4f;
-            HyperPoint<float> start = new HyperPoint<float>(-1.2f, -1.2f);
+            float dist = 0.2f;
+            HyperPoint<float> start = new HyperPoint<float>(-0.8f, 0.0f);
             HyperPoint<float> offset = new HyperPoint<float>(0.0f, 0.0f);
 
             particles = new List<Particle>();
             forces = new List<Force>();
             constrains = new List<Constraint>();
+            objects = new List<FixedObject>();
 
             int index = 0;
             offset = new HyperPoint<float>(0.0f, dist * (size - 1));
@@ -173,12 +189,16 @@ namespace Project1
                         //Fixd point in left and right top
                         if (x == 0 || x == (size - 1))
                         {
-                            constrains.Add(new FixedConstraint(particle, particle.Position));
+                            //constrains.Add(new FixedConstraint(particle, particle.Position));
+                            constrains.Add(new LineConstraint(particle, particle.Position + new HyperPoint<float>(-2, 0), particle.Position + new HyperPoint<float>(2, 0)));
                         }
                     }
                     index++;
                 }
             }
+
+            objects.Add(new VerLineObject(-1.95f, -2, 4, true));
+            objects.Add(new VerLineObject(1.95f, -2, 4, false));
         }
 
         private SpringForce createSpringForce(Particle p1, Particle p2, float dist)
@@ -188,7 +208,7 @@ namespace Project1
 
         private SpringForce createStiffSpringForce(Particle p1, Particle p2, float dist)
         {
-            return new SpringForce(p1, p2, dist, 25.0f, 1.0f);
+            return new SpringForce(p1, p2, dist, 50.0f, 1.0f);
         }
 
         /*
@@ -252,6 +272,11 @@ namespace Project1
             constrains.ForEach(c => c.Draw());
         }
 
+        private void DrawObjects()
+        {
+            objects.ForEach(o => o.Draw());
+        }
+
         /*
         ----------------------------------------------------------------------
         relates mouse movements to tinker toy construction
@@ -288,6 +313,7 @@ namespace Project1
             DrawForces();
             DrawConstraints();
             DrawParticles();
+            DrawObjects();
 
             PostDisplay();
 
@@ -316,7 +342,7 @@ namespace Project1
         {
             if (dsim)
             {
-                Solver.SimulationStep(particles, forces, constrains, dt, 2);
+                Solver.SimulationStep(particles, forces, constrains, objects, dt, 2);
             }
             else
             {
@@ -377,52 +403,49 @@ namespace Project1
             if (!dsim)
                 return;
 
+            float mouseX = (float)(((e.Location.X / (float)drawWindow.Width) - 0.5) * viewWidth);
+            float mouseY = (float)(((e.Location.Y / (float)drawWindow.Height) - 0.5) * -viewHeight);
+
             if (e.Button == MouseButtons.Left)
             {
-                float mouseX = (float)(((e.Location.X / (float)drawWindow.Width) - 0.5) * viewWidth);
-                float mouseY = (float)(((e.Location.Y / (float)drawWindow.Height) - 0.5) * -viewHeight);
+                if (this.currentSelectedParticle != null || mouseSpringForce != null)
+                    return;
 
-                if (_type == GameType.Particle)
+                HyperPoint<float> mouseLoc = new HyperPoint<float>(mouseX, mouseY);
+
+                double minDistance = double.PositiveInfinity;
+                Particle selectedParticle = null;
+                foreach (Particle particle in particles)
                 {
-                    if (this.currentSelectedParticle != null || mouseSpringForce != null)
-                        return;
-
-                    HyperPoint<float> mouseLoc = new HyperPoint<float>(mouseX, mouseY);
-
-                    double minDistance = double.PositiveInfinity;
-                    Particle selectedParticle = null;
-                    foreach (Particle particle in particles)
+                    double distance = (particle.Position - mouseLoc).GetLengthSquared();
+                    if (distance < minDistance && distance < minParticleDistance)
                     {
-                        double distance = (particle.Position - mouseLoc).GetLengthSquared();
-                        if (distance < minDistance && distance < minParticleDistance)
-                        {
-                            minDistance = distance;
-                            selectedParticle = particle;
-                        }
-                    }
-
-                    if (selectedParticle != null)
-                    {
-                        this.mouseParticle = new Particle(0, mouseLoc, 1f);
-                        this.currentSelectedParticle = selectedParticle;
-                        this.currentSelectedParticle.isSelected = true;
-                        this.mouseSpringForce = new SpringForce(selectedParticle, mouseParticle, 0.01f, 3.0f, 1f);
-                        forces.Add(mouseSpringForce);
+                        minDistance = distance;
+                        selectedParticle = particle;
                     }
                 }
-                else if (_type == GameType.Cloth)
+
+                if (selectedParticle != null)
                 {
-                    foreach (Particle particle in particles)
-                    {
-                        double hor_distance = particle.Position.Y - mouseY;
-                        if (hor_distance < minHorDistance && hor_distance > -minHorDistance)
-                        {
-                            bool direction = particle.Position.X > mouseX;
-                            forces.Add(new HorizontalForce(particle, direction));
-                        }
-                    }
-                    hor_force_applied = true;
+                    this.mouseParticle = new Particle(0, mouseLoc, 1f);
+                    this.currentSelectedParticle = selectedParticle;
+                    this.currentSelectedParticle.isSelected = true;
+                    this.mouseSpringForce = new SpringForce(selectedParticle, mouseParticle, 0.01f, 3.0f, 1f);
+                    forces.Add(mouseSpringForce);
                 }
+            }
+            else if (e.Button == MouseButtons.Right)
+            {
+                foreach (Particle particle in particles)
+                {
+                    double hor_distance = particle.Position.Y - mouseY;
+                    if (hor_distance < minHorDistance && hor_distance > -minHorDistance)
+                    {
+                        bool direction = particle.Position.X > mouseX;
+                        forces.Add(new HorizontalForce(particle, direction));
+                    }
+                }
+                hor_force_applied = true;
             }
         }
 
@@ -433,22 +456,19 @@ namespace Project1
 
             if (e.Button == MouseButtons.Left)
             {
-                if (_type == GameType.Particle)
+                if (currentSelectedParticle != null)
                 {
-                    if (currentSelectedParticle != null)
-                    {
-                        forces.Remove(mouseSpringForce);
-                        this.currentSelectedParticle.isSelected = false;
-                        this.mouseParticle = null;
-                        this.currentSelectedParticle = null;
-                        this.mouseSpringForce = null;
-                    }
+                    forces.Remove(mouseSpringForce);
+                    this.currentSelectedParticle.isSelected = false;
+                    this.mouseParticle = null;
+                    this.currentSelectedParticle = null;
+                    this.mouseSpringForce = null;
                 }
-                else if (_type == GameType.Cloth)
-                {
-                    forces.RemoveAll(F => F.GetType() == typeof(HorizontalForce));
-                    hor_force_applied = false;
-                }
+            }
+            else if (e.Button == MouseButtons.Right)
+            {
+                forces.RemoveAll(F => F.GetType() == typeof(HorizontalForce));
+                hor_force_applied = false;
             }
         }
 
@@ -457,29 +477,24 @@ namespace Project1
             float mouseX = (float)(((e.Location.X / (float)drawWindow.Width) - 0.5) * viewWidth);
             float mouseY = (float)(((e.Location.Y / (float)drawWindow.Height) - 0.5) * -viewHeight);
 
-            if (_type == GameType.Particle)
-            {
-                HyperPoint<float> mouseLoc = new HyperPoint<float>(mouseX, mouseY);
+            HyperPoint<float> mouseLoc = new HyperPoint<float>(mouseX, mouseY);
 
-                if (this.mouseParticle != null)
-                {
-                    mouseParticle.Position = mouseLoc;
-                }
+            if (this.mouseParticle != null)
+            {
+                mouseParticle.Position = mouseLoc;
             }
-            else if (_type == GameType.Cloth)
+            
+            if (hor_force_applied)
             {
-                if (hor_force_applied)
-                {
-                    forces.RemoveAll(F => F.GetType() == typeof(HorizontalForce));
+                forces.RemoveAll(F => F.GetType() == typeof(HorizontalForce));
 
-                    foreach (Particle particle in particles)
+                foreach (Particle particle in particles)
+                {
+                    double hor_distance = particle.Position.Y - mouseY;
+                    if (hor_distance < minHorDistance && hor_distance > -minHorDistance)
                     {
-                        double hor_distance = particle.Position.Y - mouseY;
-                        if (hor_distance < minHorDistance && hor_distance > -minHorDistance)
-                        {
-                            bool direction = particle.Position.X > mouseX;
-                            forces.Add(new HorizontalForce(particle, direction));
-                        }
+                        bool direction = particle.Position.X > mouseX;
+                        forces.Add(new HorizontalForce(particle, direction));
                     }
                 }
             }

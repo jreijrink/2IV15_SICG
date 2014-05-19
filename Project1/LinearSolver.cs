@@ -33,7 +33,7 @@ namespace Project1
 			i = 0;
 			iMax = steps != 0 ? steps : MaxSteps;
 
-			if(rSqrLen < epsilon)
+			if(rSqrLen > epsilon)
 			{
 				while (i< iMax)
 				{
