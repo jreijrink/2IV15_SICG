@@ -64,8 +64,8 @@ namespace Project1
         public Particle(int index, HyperPoint<float> constructPos, float mass)
         {
             _index = index;
-            _constructPos = constructPos;
-            _position = constructPos;
+            _constructPos = new HyperPoint<float>(constructPos);
+            _position = new HyperPoint<float>(constructPos);
             _mass = mass;
             _velocity = new HyperPoint<float>(0, 0);
             _force = new HyperPoint<float>(0, 0);
