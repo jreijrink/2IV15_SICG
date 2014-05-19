@@ -316,7 +316,7 @@ namespace Project1
         {
             if (dsim)
             {
-                Solver.SimulationStep(particles, forces, constrains, dt);
+                Solver.SimulationStep(particles, forces, constrains, dt, 2);
             }
             else
             {
