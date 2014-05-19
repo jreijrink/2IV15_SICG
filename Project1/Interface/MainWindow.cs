@@ -26,7 +26,7 @@ namespace Project1.Interface
             if (args.Length == 0)
             {
                 N = 64;
-                dt = 0.001f;                d = 5.0f;
+                dt = 0.04f;                d = 5.0f;
 
             }
             else
@@ -51,6 +51,9 @@ namespace Project1.Interface
                     gameCloth = new Game(N, dt, d);
                     customGLControl2.init(gameCloth, GameType.Cloth);
                     settingsControl2.init(gameCloth);
+
+                    customGLControl1.setActive(true);
+                    customGLControl2.setActive(false);
                 }
             }
             catch (Exception exception)
@@ -61,12 +64,20 @@ namespace Project1.Interface
 
         private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            TabControl control = (TabControl)sender;
+            TabControl control = (TabControl) sender;
 
             if (control.SelectedIndex == 0)
+            {
                 gameCloth.Pause();
+                customGLControl1.setActive(true);
+                customGLControl2.setActive(false);
+            }
             else if (control.SelectedIndex == 1)
+            {
                 gameParticle.Pause();
+                customGLControl1.setActive(false);
+                customGLControl2.setActive(true);
+            }
         }
     }
 }

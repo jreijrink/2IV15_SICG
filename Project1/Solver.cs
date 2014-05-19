@@ -19,26 +19,125 @@ namespace Project1
             return result;
         }
 
-        public static void SimulationStep(List<Particle> particles, List<Force> forces, List<Constraint> constraints, float dt)
+        public static void SimulationStep(List<Particle> particles, List<Force> forces, List<Constraint> constraints, float dt, int mode)
+        {
+            //Euler
+            if(mode == 0)
+            {
+                eulerStep(particles, forces, constraints, dt);
+            }
+            // MidPoint
+            else if(mode == 1)
+            {
+                midPointStep(particles, forces, constraints, dt);
+            }
+            // Runga kutta
+            else
+            {
+                rungaKuttaStep(particles, forces, constraints, dt);
+            }
+        }
+
+        
+
+        private static void eulerStep(List<Particle> particles, List<Force> forces, List<Constraint> constraints, float dt)
+        {
+            clearForces(particles);
+            forces.ForEach(f => f.Calculate());
+            constraintForce(particles, constraints, constraint_ks, constraint_kd);
+
+            resolveForces(particles, dt);
+        }
+
+        private static void midPointStep(List<Particle> particles, List<Force> forces, List<Constraint> constraints, float dt)
+        {
+            List<Particle> backupParticles = particles.ConvertAll(p => new Particle(p.Index, p.Position, p.Mass) {Velocity = p.Velocity, Force = new HyperPoint<float>(0,0)});
+            eulerStep(particles, forces, constraints, dt / 2);
+
+            clearForces(particles);
+            forces.ForEach(f => f.Calculate());
+            constraintForce(particles, constraints, constraint_ks, constraint_kd);
+
+            foreach (Particle p in backupParticles)
+            {
+                particles[p.Index].Position = p.Position;
+            }
+
+            resolveForces(particles, dt);
+        }
+
+        private static void rungaKuttaStep(List<Particle> particles, List<Force> forces, List<Constraint> constraints, float dt)
+        {
+            List<Particle> backupParticles = particles.ConvertAll(p => new Particle(p.Index, p.Position, p.Mass) { Velocity = p.Velocity, Force = new HyperPoint<float>(0, 0) });
+            //List<Particle> finalParticles = particles.ConvertAll(p => new Particle(p.Index, p.Position, p.Mass) { Velocity = p.Velocity, Force = new HyperPoint<float>(0, 0) });
+            List<Particle> stepParticles = particles.ConvertAll(p => new Particle(p.Index, p.Position, p.Mass) { Velocity = p.Velocity, Force = new HyperPoint<float>(0, 0) });
+
+            // k1
+            clearForces(particles);
+            forces.ForEach(f => f.Calculate());
+            constraintForce(particles, constraints, constraint_ks, constraint_kd);
+
+            foreach (Particle p in backupParticles)
+            {
+                p.Force += particles[p.Index].Force * (1 / 6f);
+            }
+            resolveForces(particles, dt/2);
+
+            // k2
+            clearForces(particles);
+            forces.ForEach(f => f.Calculate());
+            constraintForce(particles, constraints, constraint_ks, constraint_kd);
+
+            foreach (Particle p in backupParticles)
+            {
+                p.Force += particles[p.Index].Force * (1 / 3f);
+            }
+
+            resolveForces(particles, dt/2);
+
+            // k3
+            clearForces(particles);
+            forces.ForEach(f => f.Calculate());
+            constraintForce(particles, constraints, constraint_ks, constraint_kd);
+
+            foreach (Particle p in backupParticles)
+            {
+                p.Force += particles[p.Index].Force * (1 / 3f);
+            }
+
+            resolveForces(particles, dt);
+
+            // k4
+            clearForces(particles);
+            forces.ForEach(f => f.Calculate());
+            constraintForce(particles, constraints, constraint_ks, constraint_kd);
+
+            foreach (Particle p in backupParticles)
+            {
+                p.Force += particles[p.Index].Force * (1 / 6f);
+                particles[p.Index].Position = p.Position;
+            }
+
+            resolveForces(particles, dt);
+        }
+
+        static void clearForces(List<Particle> particles )
+        {
+            particles.ForEach(p => p.Force = new HyperPoint<float>(0, 0));
+        }
+
+        public static void resolveForces(List<Particle> particles, float dt)
         {
             foreach (Particle particle in particles)
             {
-                particle.Force = new HyperPoint<float>(0, 0);
-            }
+                HyperPoint<float> vel = new HyperPoint<float>(particle.Velocity);
 
-            forces.ForEach(f => f.Calculate());
-
-
-            constraintForce(particles, constraints, constraint_ks, constraint_kd);
-
-            foreach (Particle particle in particles)
-            {
                 HyperPoint<float> acceleration = particle.Force / particle.Mass;
                 particle.Velocity += acceleration * dt;
                 particle.Position += particle.Velocity * dt;
             }
         }
-        
+
         static void constraintForce(List<Particle> particles, List<Constraint> constraints, float ks, float kd)
         {
 	        int nConstraint = constraints.Count;

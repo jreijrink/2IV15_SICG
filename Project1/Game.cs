@@ -70,7 +70,7 @@ namespace Project1
             particles.Add(new Particle(2, center + offset * 4, 5.0f));
             particles.Add(new Particle(3, center + offset * 5, 10.0f));
             particles.Add(new Particle(4, center + new HyperPoint<float>(0, 1), 1));
-            particles.Add(new Particle(5, center + new HyperPoint<float>(0, 1), 1));
+            particles.Add(new Particle(5, center + new HyperPoint<float>(-0.3f, 0.5f), 1));
 
             forces = new List<Force>();
             forces.Add(new SpringForce(particles[0], particles[1], dist * 1, 1.0f, 1.0f));
@@ -91,7 +91,7 @@ namespace Project1
             constrains.Add(new CircularWireConstraint(particles[2], center - offset * 2, dist * 6));
 
             constrains.Add(new RodConstraint(particles[1], particles[3], dist * 3));
-            //contrains.Add(new LineConstraint(particles[4], particles[5].Position + new HyperPoint<float>(-2, 0), particles[4].Position + new HyperPoint<float>(2, 0)));
+            constrains.Add(new LineConstraint(particles[4], particles[4].Position + new HyperPoint<float>(-2, 0), particles[4].Position + new HyperPoint<float>(2, 0)));
         }
 
         public void InitClothSystem(Rectangle drawWindow)
@@ -309,7 +309,7 @@ namespace Project1
 		{
 			if(dsim)
 			{
-				Solver.SimulationStep(particles, forces, constrains, dt);
+				Solver.SimulationStep(particles, forces, constrains, dt, 2);
 			}
 			else
 			{

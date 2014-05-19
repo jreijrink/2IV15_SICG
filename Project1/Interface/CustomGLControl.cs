@@ -13,6 +13,7 @@ namespace Project1.Interface
     public partial class CustomGLControl : GLControl
     {
         private Game game;
+        private bool isActive = false;
 
         public CustomGLControl()
         {
@@ -38,6 +39,14 @@ namespace Project1.Interface
                 game.InitParticleSystem(this.ClientRectangle);
             else if (type == GameType.Cloth)
                 game.InitClothSystem(this.ClientRectangle);
+
+        }
+
+        public void setActive(bool active)
+        {
+            isActive = active;
+            if (active)
+                MakeCurrent();
         }
 
         private void GameControl_render(object sender, PaintEventArgs e)
@@ -53,8 +62,11 @@ namespace Project1.Interface
 
         private void GameControl_Idle(object sender, EventArgs e)
         {
-            game.OnUpdateFrame();
-            this.Invalidate();
+            if (isActive)
+            {
+                game.OnUpdateFrame();
+                this.Invalidate();
+            }
         }
 
         protected override void OnKeyDown(KeyEventArgs e)

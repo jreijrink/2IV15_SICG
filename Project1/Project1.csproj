@@ -69,7 +69,7 @@
     <Compile Include="Interface\CustomGLControl.Designer.cs">
       <DependentUpon>CustomGLControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="Interface\LineConstraint.cs" />
+    <Compile Include="LineConstraint.cs" />
     <Compile Include="Interface\MainWindow.cs">
       <SubType>Form</SubType>
     </Compile>
