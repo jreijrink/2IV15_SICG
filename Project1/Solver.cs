@@ -8,8 +8,8 @@ namespace Project1
 {
     static class Solver
     {
-        private static float constraint_ks = 1000;
-        private static float constraint_kd = 100;
+        private static float constraint_ks = 10;
+        private static float constraint_kd = 10;
         //Particles
         private static float particle_size = 0.001f;
         //Cloth
@@ -114,7 +114,7 @@ namespace Project1
         {
             List<Particle> backupParticles = particles.ConvertAll(p => new Particle(p.Index, new HyperPoint<float>(p.Position), p.Mass) { Velocity = new HyperPoint<float>(p.Velocity), Force = new HyperPoint<float>(0, 0) });
             //List<Particle> finalParticles = particles.ConvertAll(p => new Particle(p.Index, p.Position, p.Mass) { Velocity = p.Velocity, Force = new HyperPoint<float>(0, 0) });
-            List<Particle> stepParticles = particles.ConvertAll(p => new Particle(p.Index, p.Position, p.Mass) { Velocity = p.Velocity, Force = new HyperPoint<float>(0, 0) });
+            List<Particle> stepParticles = particles.ConvertAll(p => new Particle(p.Index, new HyperPoint<float>(p.Position), p.Mass) { Velocity = new HyperPoint<float>(p.Velocity), Force = new HyperPoint<float>(0, 0) });
 
             // k1
             clearForces(particles);
@@ -123,11 +123,11 @@ namespace Project1
 
             foreach (Particle p in stepParticles)
             {
-                p.Velocity += ((backupParticles[p.Index].Force / particles[p.Index].Mass) / 6);
+                p.Velocity += ((backupParticles[p.Index].Force / particles[p.Index].Mass) / 6) * dt;
                 p.Position += (backupParticles[p.Index].Velocity * (dt / 6.0f));
 
-                particles[p.Index].Velocity += ((particles[p.Index].Force / particles[p.Index].Mass) * dt);
-                particles[p.Index].Position = backupParticles[p.Index].Position + (particles[p.Index].Velocity*(dt/2));
+                particles[p.Index].Velocity = backupParticles[p.Index].Velocity + ((particles[p.Index].Force / particles[p.Index].Mass) * (dt/2));
+                particles[p.Index].Position = backupParticles[p.Index].Position + (backupParticles[p.Index].Velocity * (dt / 2));
                 
                 
             }
@@ -139,7 +139,7 @@ namespace Project1
 
             foreach (Particle p in stepParticles)
             {
-                p.Velocity += ((particles[p.Index].Force / particles[p.Index].Mass) / 3.0f);
+                p.Velocity += ((particles[p.Index].Force / particles[p.Index].Mass) / 3.0f) * dt;
                 p.Position += (particles[p.Index].Velocity * (dt / 3.0f));
 
                 particles[p.Index].Velocity = backupParticles[p.Index].Velocity + ((particles[p.Index].Force / particles[p.Index].Mass) * (dt / 2));
@@ -153,7 +153,7 @@ namespace Project1
 
             foreach (Particle p in stepParticles)
             {
-                p.Velocity += ((particles[p.Index].Force / particles[p.Index].Mass) / 3.0f);
+                p.Velocity += ((particles[p.Index].Force / particles[p.Index].Mass) / 3.0f) * dt;
                 p.Position += (particles[p.Index].Velocity * (dt / 3.0f));
 
                 particles[p.Index].Velocity = backupParticles[p.Index].Velocity + ((particles[p.Index].Force / particles[p.Index].Mass) * (dt / 2));
@@ -167,7 +167,7 @@ namespace Project1
 
             foreach (Particle p in stepParticles)
             {
-                p.Velocity += ((particles[p.Index].Force / particles[p.Index].Mass) / 6.0f);
+                p.Velocity += ((particles[p.Index].Force / particles[p.Index].Mass) / 6.0f) * dt;
                 p.Position += (particles[p.Index].Velocity * (dt / 6.0f));
 
                 //particles[p.Index].Force = p.Force;

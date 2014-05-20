@@ -27,7 +27,7 @@ namespace Project1.Interface
 
         public void init(Game game, GameType type)
         {
-            //this.VSync = true;
+            this.VSync = true;
             this.game = game;
             //this.settings = settings;
 
