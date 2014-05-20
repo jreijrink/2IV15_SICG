@@ -26,8 +26,18 @@ namespace Project1
             GL.Color3(0f, 1f, 0f);
             GL.Vertex2(_p1.Position[0], _p1.Position[1]);
             GL.Color3(0f, 1f, 0f);
-			GL.Vertex2(_p2.Position[0], _p2.Position[1]); 
+            GL.Vertex2(_p2.Position[0], _p2.Position[1]);
 			GL.End();
+
+            /*
+            HyperPoint<float>  normal_line = (_p1.Position - _p2.Position).Rotate((float)Math.PI / 2);
+            GL.Begin(BeginMode.Lines);
+            GL.Color3(1f, 1f, 0f);
+            GL.Vertex2(_p1.Position[0], _p1.Position[1]);
+            GL.Color3(1f, 1f, 0f);
+            GL.Vertex2(_p1.Position[0] + normal_line[0], _p1.Position[1] + normal_line[1]);
+            GL.End();
+            */
 		}
 
         /*

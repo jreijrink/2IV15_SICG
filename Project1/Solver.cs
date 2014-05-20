@@ -41,10 +41,10 @@ namespace Project1
                 rungaKuttaStep(particles, forces, constraints, dt);
             }
 
-            collisionDetection(particles, objects, dt);
+            collisionDetection(particles, constraints, objects, dt);
         }
 
-        private static void collisionDetection(List<Particle> particles, List<FixedObject> objects, float dt)
+        private static void collisionDetection(List<Particle> particles, List<Constraint> constraints, List<FixedObject> objects, float dt)
         {
             foreach (Particle particle in particles)
             {
@@ -55,7 +55,7 @@ namespace Project1
                         fixedObject.SolveCollision(particle);
                     }
                 }
-
+                
                 foreach (Particle other_particle in particles)
                 {
                     HyperPoint<float> diff_pos = particle.Position - other_particle.Position;

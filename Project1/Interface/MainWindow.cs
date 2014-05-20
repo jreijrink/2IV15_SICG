@@ -28,9 +28,11 @@ namespace Project1.Interface
             {
                 N = 64;
                 //Particles
-                dt = 0.001f;
+                //dt = 0.001f;
                 //Cloth
                 //dt = 0.02f;
+                //Hair
+                dt = 0.01f;
                 d = 5.0f;
 
             }

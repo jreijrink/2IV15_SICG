@@ -211,62 +211,73 @@ namespace Project1
             float length = 0.2f;
             float ks = 0.1f;
             float kd = 1.0f;
-            HyperPoint<float> start = new HyperPoint<float>(0.0f, 1.8f);
-            HyperPoint<float> offset = new HyperPoint<float>(0.0f, 0.0f);
 
             particles = new List<Particle>();
             forces = new List<Force>();
             constrains = new List<Constraint>();
             objects = new List<FixedObject>();
 
-            particles.Add(new Particle(0, start));
-            particles.Add(new Particle(1, start - new HyperPoint<float>(length, length)));
-            particles.Add(new Particle(2, start - new HyperPoint<float>(0, length * 2)));
-            particles.Add(new Particle(3, start - new HyperPoint<float>(length, length * 3)));
-            particles.Add(new Particle(4, start - new HyperPoint<float>(0, length * 4)));
-            particles.Add(new Particle(5, start - new HyperPoint<float>(length, length * 5)));
-            particles.Add(new Particle(6, start - new HyperPoint<float>(0, length * 6)));
-            particles.Add(new Particle(7, start - new HyperPoint<float>(length, length * 7)));
-            particles.Add(new Particle(8, start - new HyperPoint<float>(0, length * 8)));
-            particles.Add(new Particle(9, start - new HyperPoint<float>(length, length * 9)));
+            int index = 0;
+            for (float i = -0.3f; i <= 0.3f; i += 0.3f)
+            {
+                HyperPoint<float> start = new HyperPoint<float>(i, 1.8f);
+                createHair(particles, forces, constrains, index, start, length, ks, kd);
+                index += 10;
+            }
+        }
 
-            forces.Add(new GravityForce(particles[0]));
-            forces.Add(new GravityForce(particles[1]));
-            forces.Add(new GravityForce(particles[2]));
-            forces.Add(new GravityForce(particles[3]));
-            forces.Add(new GravityForce(particles[4]));
-            forces.Add(new GravityForce(particles[5]));
-            forces.Add(new GravityForce(particles[6]));
-            forces.Add(new GravityForce(particles[7]));
-            forces.Add(new GravityForce(particles[8]));
-            forces.Add(new GravityForce(particles[9]));
+        private void createHair(List<Particle> particels, List<Force> forces, List<Constraint> constraints,
+            int start_index, HyperPoint<float> start, float length, float ks, float kd)
+        {
+
+            particles.Add(new Particle(start_index, start));
+            particles.Add(new Particle(start_index + 1, start - new HyperPoint<float>(length, length)));
+            particles.Add(new Particle(start_index + 2, start - new HyperPoint<float>(0, length * 2)));
+            particles.Add(new Particle(start_index + 3, start - new HyperPoint<float>(length, length * 3)));
+            particles.Add(new Particle(start_index + 4, start - new HyperPoint<float>(0, length * 4)));
+            particles.Add(new Particle(start_index + 5, start - new HyperPoint<float>(length, length * 5)));
+            particles.Add(new Particle(start_index + 6, start - new HyperPoint<float>(0, length * 6)));
+            particles.Add(new Particle(start_index + 7, start - new HyperPoint<float>(length, length * 7)));
+            particles.Add(new Particle(start_index + 8, start - new HyperPoint<float>(0, length * 8)));
+            particles.Add(new Particle(start_index + 9, start - new HyperPoint<float>(length, length * 9)));
+
+            forces.Add(new GravityForce(particles[start_index]));
+            forces.Add(new GravityForce(particles[start_index + 1]));
+            forces.Add(new GravityForce(particles[start_index + 2]));
+            forces.Add(new GravityForce(particles[start_index + 3]));
+            forces.Add(new GravityForce(particles[start_index + 4]));
+            forces.Add(new GravityForce(particles[start_index + 5]));
+            forces.Add(new GravityForce(particles[start_index + 6]));
+            forces.Add(new GravityForce(particles[start_index + 7]));
+            forces.Add(new GravityForce(particles[start_index + 8]));
+            forces.Add(new GravityForce(particles[start_index + 9]));
 
             float spring_lenght = (float)length * (float)Math.Sin(45);
-            forces.Add(new SpringForce(particles[0], particles[2], spring_lenght, ks, kd));
-            forces.Add(new SpringForce(particles[1], particles[3], spring_lenght, ks, kd));
-            forces.Add(new SpringForce(particles[2], particles[4], spring_lenght, ks, kd));
-            forces.Add(new SpringForce(particles[3], particles[5], spring_lenght, ks, kd));
-            forces.Add(new SpringForce(particles[4], particles[6], spring_lenght, ks, kd));
-            forces.Add(new SpringForce(particles[5], particles[7], spring_lenght, ks, kd));
-            forces.Add(new SpringForce(particles[6], particles[8], spring_lenght, ks, kd));
-            forces.Add(new SpringForce(particles[7], particles[9], spring_lenght, ks, kd));
+            forces.Add(new SpringForce(particles[start_index + 0], particles[start_index + 2], spring_lenght, ks, kd));
+            forces.Add(new SpringForce(particles[start_index + 1], particles[start_index + 3], spring_lenght, ks, kd));
+            forces.Add(new SpringForce(particles[start_index + 2], particles[start_index + 4], spring_lenght, ks, kd));
+            forces.Add(new SpringForce(particles[start_index + 3], particles[start_index + 5], spring_lenght, ks, kd));
+            forces.Add(new SpringForce(particles[start_index + 4], particles[start_index + 6], spring_lenght, ks, kd));
+            forces.Add(new SpringForce(particles[start_index + 5], particles[start_index + 7], spring_lenght, ks, kd));
+            forces.Add(new SpringForce(particles[start_index + 6], particles[start_index + 8], spring_lenght, ks, kd));
+            forces.Add(new SpringForce(particles[start_index + 7], particles[start_index + 9], spring_lenght, ks, kd));
 
             float width = (float)Math.Pow(length, 2);
             float height = width;
             float hair_lenght = (float)Math.Sqrt(width + height);
 
-            constrains.Add(new FixedConstraint(particles[0], particles[0].Position));
-            constrains.Add(new RodConstraint(particles[0], particles[1], hair_lenght));
-            constrains.Add(new RodConstraint(particles[1], particles[2], hair_lenght));
-            constrains.Add(new RodConstraint(particles[2], particles[3], hair_lenght));
-            constrains.Add(new RodConstraint(particles[3], particles[4], hair_lenght));
-            constrains.Add(new RodConstraint(particles[4], particles[5], hair_lenght));
-            constrains.Add(new RodConstraint(particles[5], particles[6], hair_lenght));
-            constrains.Add(new RodConstraint(particles[6], particles[7], hair_lenght));
-            constrains.Add(new RodConstraint(particles[7], particles[8], hair_lenght));
-            constrains.Add(new RodConstraint(particles[8], particles[9], hair_lenght)); 
+            constrains.Add(new FixedConstraint(particles[start_index + 0], particles[start_index + 0].Position));
+            constrains.Add(new RodConstraint(particles[start_index + 0], particles[start_index + 1], hair_lenght));
+            constrains.Add(new RodConstraint(particles[start_index + 1], particles[start_index + 2], hair_lenght));
+            constrains.Add(new RodConstraint(particles[start_index + 2], particles[start_index + 3], hair_lenght));
+            constrains.Add(new RodConstraint(particles[start_index + 3], particles[start_index + 4], hair_lenght));
+            constrains.Add(new RodConstraint(particles[start_index + 4], particles[start_index + 5], hair_lenght));
+            constrains.Add(new RodConstraint(particles[start_index + 5], particles[start_index + 6], hair_lenght));
+            constrains.Add(new RodConstraint(particles[start_index + 6], particles[start_index + 7], hair_lenght));
+            constrains.Add(new RodConstraint(particles[start_index + 7], particles[start_index + 8], hair_lenght));
+            constrains.Add(new RodConstraint(particles[start_index + 8], particles[start_index + 9], hair_lenght)); 
         }
-        
+
         private SpringForce createSpringForce(Particle p1, Particle p2, float dist)
         {
             return new SpringForce(p1, p2, dist, 1.0f, 1.0f);
@@ -408,7 +419,7 @@ namespace Project1
         {
             if (dsim)
             {
-                Solver.SimulationStep(particles, forces, constrains, objects, dt, 2);
+                Solver.SimulationStep(particles, forces, constrains, objects, dt, 0);
             }
             else
             {
