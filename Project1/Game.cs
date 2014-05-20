@@ -16,7 +16,7 @@ namespace Project1
     public class Game
 	{
 		private int N;
-		private float dt, d;
+		public float dt, d;
 		private bool dsim;
 		private bool dump_frames;
 		private int frame_number;
@@ -40,6 +40,9 @@ namespace Project1
         private Particle currentSelectedParticle;
         private Particle mouseParticle;
         private SpringForce mouseSpringForce;
+
+        public int integrationMode = 0;
+        public float speedUp = 0.25f;
 
 
         /*
@@ -309,7 +312,9 @@ namespace Project1
 		{
 			if(dsim)
 			{
-				Solver.SimulationStep(particles, forces, constrains, dt, 2);
+			    int steps = (int)Math.Max(1, (1/dt)*speedUp);
+			    //Console.Out.WriteLine(steps);
+                Solver.SimulationStep(particles, forces, constrains, dt, integrationMode);
 			}
 			else
 			{
@@ -325,6 +330,18 @@ namespace Project1
 		{
             switch (keyEventArgs.KeyCode)
 			{
+                case Keys.NumPad4:
+			        speedUp = speedUp/2;
+			        break;
+                case Keys.NumPad6:
+			        speedUp *= 2;
+                    break;
+                case Keys.NumPad8:
+                    dt += 0.005f;
+                    break;
+                case Keys.NumPad2:
+                    dt -= 0.005f;
+                    break;
 				case Keys.C:
 					ClearData();
 					break;
@@ -335,7 +352,9 @@ namespace Project1
 
 				case Keys.Q:
 					break;
-
+                case Keys.I:
+			        integrationMode = (integrationMode + 1)%3;
+			        break;
 				case Keys.Space:
 					dsim = !dsim;
 					break;

@@ -26,7 +26,8 @@ namespace Project1.Interface
             if (args.Length == 0)
             {
                 N = 64;
-                dt = 0.04f;                d = 5.0f;
+                dt = 0.01f;                
+                d = 5.0f;
 
             }
             else
@@ -62,6 +63,8 @@ namespace Project1.Interface
             }
         }
 
+        
+
         private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
         {
             TabControl control = (TabControl) sender;
@@ -78,6 +81,39 @@ namespace Project1.Interface
                 customGLControl1.setActive(false);
                 customGLControl2.setActive(true);
             }
+        }
+
+        private void MainWindow_KeyDown(object sender, KeyEventArgs e)
+        {
+            base.OnKeyDown(e);
+
+            if (e.KeyCode == Keys.I)
+            {
+                int intMode;
+                if(tabControl1.SelectedIndex == 0)
+                {
+                    intMode = gameParticle.integrationMode;
+                }
+                else
+                {
+                    intMode = gameCloth.integrationMode;
+                }
+
+                string windowText = "TinkerToy: ";
+                if(intMode == 0)
+                {
+                    this.Text = windowText + " Euler";
+                }
+                else if (intMode == 1)
+                {
+                    this.Text = windowText + " MidPoint";
+                }
+                else if (intMode == 2)
+                {
+                    this.Text = windowText + " RungaKutta";
+                }
+            }
+                 
         }
     }
 }
