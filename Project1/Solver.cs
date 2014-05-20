@@ -9,11 +9,11 @@ namespace Project1
     static class Solver
     {
         private static float constraint_ks = 1000;
-        private static float constraint_kd = 1;
+        private static float constraint_kd = 100;
         //Particles
-        //private static float particle_size = 0.001f;
+        private static float particle_size = 0.001f;
         //Cloth
-        private static float particle_size = 0.015f;
+        //private static float particle_size = 0.015f;
 
         public const float Damp = 0.98f;
         private static Random rand = new Random();

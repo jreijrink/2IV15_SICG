@@ -11,7 +11,7 @@ using MouseEventArgs = System.Windows.Forms.MouseEventArgs;
 
 namespace Project1
 {
-    public enum GameType { Particle, Cloth }
+    public enum GameType { Particle, Cloth, Hair }
 
     public class Game
     {
@@ -115,7 +115,7 @@ namespace Project1
             objects.Add(new HorLineObject(-2f, -1.95f, 4, true));
             objects.Add(new HorLineObject(-2f, 1.95f, 4, false));
         }
-
+        
         public void InitClothSystem(Rectangle drawWindow)
         {
             this.viewWidth = 4.0;
@@ -201,6 +201,72 @@ namespace Project1
             objects.Add(new VerLineObject(1.95f, -2, 4, false));
         }
 
+        public void InitHairSystem(Rectangle drawWindow)
+        {
+            this.viewWidth = 4.0;
+            this.viewHeight = 4.0;
+
+            this.drawWindow = drawWindow;
+
+            float length = 0.2f;
+            float ks = 0.1f;
+            float kd = 1.0f;
+            HyperPoint<float> start = new HyperPoint<float>(0.0f, 1.8f);
+            HyperPoint<float> offset = new HyperPoint<float>(0.0f, 0.0f);
+
+            particles = new List<Particle>();
+            forces = new List<Force>();
+            constrains = new List<Constraint>();
+            objects = new List<FixedObject>();
+
+            particles.Add(new Particle(0, start));
+            particles.Add(new Particle(1, start - new HyperPoint<float>(length, length)));
+            particles.Add(new Particle(2, start - new HyperPoint<float>(0, length * 2)));
+            particles.Add(new Particle(3, start - new HyperPoint<float>(length, length * 3)));
+            particles.Add(new Particle(4, start - new HyperPoint<float>(0, length * 4)));
+            particles.Add(new Particle(5, start - new HyperPoint<float>(length, length * 5)));
+            particles.Add(new Particle(6, start - new HyperPoint<float>(0, length * 6)));
+            particles.Add(new Particle(7, start - new HyperPoint<float>(length, length * 7)));
+            particles.Add(new Particle(8, start - new HyperPoint<float>(0, length * 8)));
+            particles.Add(new Particle(9, start - new HyperPoint<float>(length, length * 9)));
+
+            forces.Add(new GravityForce(particles[0]));
+            forces.Add(new GravityForce(particles[1]));
+            forces.Add(new GravityForce(particles[2]));
+            forces.Add(new GravityForce(particles[3]));
+            forces.Add(new GravityForce(particles[4]));
+            forces.Add(new GravityForce(particles[5]));
+            forces.Add(new GravityForce(particles[6]));
+            forces.Add(new GravityForce(particles[7]));
+            forces.Add(new GravityForce(particles[8]));
+            forces.Add(new GravityForce(particles[9]));
+
+            float spring_lenght = (float)length * (float)Math.Sin(45);
+            forces.Add(new SpringForce(particles[0], particles[2], spring_lenght, ks, kd));
+            forces.Add(new SpringForce(particles[1], particles[3], spring_lenght, ks, kd));
+            forces.Add(new SpringForce(particles[2], particles[4], spring_lenght, ks, kd));
+            forces.Add(new SpringForce(particles[3], particles[5], spring_lenght, ks, kd));
+            forces.Add(new SpringForce(particles[4], particles[6], spring_lenght, ks, kd));
+            forces.Add(new SpringForce(particles[5], particles[7], spring_lenght, ks, kd));
+            forces.Add(new SpringForce(particles[6], particles[8], spring_lenght, ks, kd));
+            forces.Add(new SpringForce(particles[7], particles[9], spring_lenght, ks, kd));
+
+            float width = (float)Math.Pow(length, 2);
+            float height = width;
+            float hair_lenght = (float)Math.Sqrt(width + height);
+
+            constrains.Add(new FixedConstraint(particles[0], particles[0].Position));
+            constrains.Add(new RodConstraint(particles[0], particles[1], hair_lenght));
+            constrains.Add(new RodConstraint(particles[1], particles[2], hair_lenght));
+            constrains.Add(new RodConstraint(particles[2], particles[3], hair_lenght));
+            constrains.Add(new RodConstraint(particles[3], particles[4], hair_lenght));
+            constrains.Add(new RodConstraint(particles[4], particles[5], hair_lenght));
+            constrains.Add(new RodConstraint(particles[5], particles[6], hair_lenght));
+            constrains.Add(new RodConstraint(particles[6], particles[7], hair_lenght));
+            constrains.Add(new RodConstraint(particles[7], particles[8], hair_lenght));
+            constrains.Add(new RodConstraint(particles[8], particles[9], hair_lenght)); 
+        }
+        
         private SpringForce createSpringForce(Particle p1, Particle p2, float dist)
         {
             return new SpringForce(p1, p2, dist, 1.0f, 1.0f);
@@ -208,7 +274,7 @@ namespace Project1
 
         private SpringForce createStiffSpringForce(Particle p1, Particle p2, float dist)
         {
-            return new SpringForce(p1, p2, dist, 50.0f, 1.0f);
+            return new SpringForce(p1, p2, dist, 200.0f, 1.0f);
         }
 
         /*

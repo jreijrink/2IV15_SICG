@@ -14,6 +14,7 @@ namespace Project1.Interface
     {
         private Game gameParticle;
         private Game gameCloth;
+        private Game gameHair;
 
         int N;
         float dt;
@@ -27,9 +28,9 @@ namespace Project1.Interface
             {
                 N = 64;
                 //Particles
-                //dt = 0.005f;
+                dt = 0.001f;
                 //Cloth
-                dt = 0.04f;
+                //dt = 0.02f;
                 d = 5.0f;
 
             }
@@ -56,8 +57,14 @@ namespace Project1.Interface
                     customGLControl2.init(gameCloth, GameType.Cloth);
                     settingsControl2.init(gameCloth);
 
+                    gameHair = new Game(N, dt, d);
+                    customGLControl3.init(gameHair, GameType.Hair);
+                    settingsControl3.init(gameHair);
+
                     customGLControl1.setActive(true);
                     customGLControl2.setActive(false);
+                    customGLControl3.setActive(false);
+
                 }
             }
             catch (Exception exception)
@@ -75,12 +82,21 @@ namespace Project1.Interface
                 gameCloth.Pause();
                 customGLControl1.setActive(true);
                 customGLControl2.setActive(false);
+                customGLControl3.setActive(false);
             }
             else if (control.SelectedIndex == 1)
             {
                 gameParticle.Pause();
                 customGLControl1.setActive(false);
                 customGLControl2.setActive(true);
+                customGLControl3.setActive(false);
+            }
+            else if (control.SelectedIndex == 2)
+            {
+                gameHair.Pause();
+                customGLControl1.setActive(false);
+                customGLControl2.setActive(false);
+                customGLControl3.setActive(true);
             }
         }
     }

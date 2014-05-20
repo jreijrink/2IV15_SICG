@@ -28,9 +28,9 @@ namespace Project1
         public override void Draw()
         {
             GL.Begin(BeginMode.Lines);
-            GL.Color3(0.8f, 0.7f, 0.6f);
+            GL.Color3(0.1f, 0.1f, 1.0f);
             GL.Vertex2(_p1.Position[0], _p1.Position[1]);
-            GL.Color3(0.8f, 0.7f, 0.6f);
+            GL.Color3(0.1f, 0.1f, 1.0f);
             GL.Vertex2(_p2.Position[0], _p2.Position[1]);
             GL.End();
         }

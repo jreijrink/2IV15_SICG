@@ -37,6 +37,10 @@
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.settingsControl2 = new Project1.Interface.SettingsControl();
             this.customGLControl2 = new Project1.Interface.CustomGLControl();
+            this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.splitContainer3 = new System.Windows.Forms.SplitContainer();
+            this.customGLControl3 = new Project1.Interface.CustomGLControl();
+            this.settingsControl3 = new Project1.Interface.SettingsControl();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -48,12 +52,18 @@
             this.splitContainer2.Panel1.SuspendLayout();
             this.splitContainer2.Panel2.SuspendLayout();
             this.splitContainer2.SuspendLayout();
+            this.tabPage3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer3)).BeginInit();
+            this.splitContainer3.Panel1.SuspendLayout();
+            this.splitContainer3.Panel2.SuspendLayout();
+            this.splitContainer3.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl1
             // 
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.Controls.Add(this.tabPage3);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Margin = new System.Windows.Forms.Padding(4);
@@ -167,6 +177,55 @@
             this.customGLControl2.TabIndex = 0;
             this.customGLControl2.VSync = false;
             // 
+            // tabPage3
+            // 
+            this.tabPage3.Controls.Add(this.splitContainer3);
+            this.tabPage3.Location = new System.Drawing.Point(4, 25);
+            this.tabPage3.Name = "tabPage3";
+            this.tabPage3.Size = new System.Drawing.Size(1348, 703);
+            this.tabPage3.TabIndex = 2;
+            this.tabPage3.Text = "Hair";
+            this.tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // splitContainer3
+            // 
+            this.splitContainer3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer3.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer3.Name = "splitContainer3";
+            // 
+            // splitContainer3.Panel1
+            // 
+            this.splitContainer3.Panel1.Controls.Add(this.settingsControl3);
+            // 
+            // splitContainer3.Panel2
+            // 
+            this.splitContainer3.Panel2.Controls.Add(this.customGLControl3);
+            this.splitContainer3.Size = new System.Drawing.Size(1348, 703);
+            this.splitContainer3.SplitterDistance = 449;
+            this.splitContainer3.TabIndex = 0;
+            // 
+            // customGLControl3
+            // 
+            this.customGLControl3.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.customGLControl3.BackColor = System.Drawing.Color.Black;
+            this.customGLControl3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.customGLControl3.Location = new System.Drawing.Point(0, 0);
+            this.customGLControl3.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.customGLControl3.Name = "customGLControl3";
+            this.customGLControl3.Size = new System.Drawing.Size(895, 703);
+            this.customGLControl3.TabIndex = 0;
+            this.customGLControl3.VSync = false;
+            // 
+            // settingsControl3
+            // 
+            this.settingsControl3.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.settingsControl3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.settingsControl3.Location = new System.Drawing.Point(0, 0);
+            this.settingsControl3.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.settingsControl3.Name = "settingsControl3";
+            this.settingsControl3.Size = new System.Drawing.Size(449, 703);
+            this.settingsControl3.TabIndex = 0;
+            // 
             // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -188,6 +247,11 @@
             this.splitContainer2.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer2)).EndInit();
             this.splitContainer2.ResumeLayout(false);
+            this.tabPage3.ResumeLayout(false);
+            this.splitContainer3.Panel1.ResumeLayout(false);
+            this.splitContainer3.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer3)).EndInit();
+            this.splitContainer3.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -203,5 +267,9 @@
         private System.Windows.Forms.SplitContainer splitContainer2;
         private SettingsControl settingsControl2;
         private CustomGLControl customGLControl2;
+        private System.Windows.Forms.TabPage tabPage3;
+        private System.Windows.Forms.SplitContainer splitContainer3;
+        private SettingsControl settingsControl3;
+        private CustomGLControl customGLControl3;
     }
 }

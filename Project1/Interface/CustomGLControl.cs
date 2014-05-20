@@ -39,6 +39,8 @@ namespace Project1.Interface
                 game.InitParticleSystem(this.ClientRectangle);
             else if (type == GameType.Cloth)
                 game.InitClothSystem(this.ClientRectangle);
+            else if (type == GameType.Hair)
+                game.InitHairSystem(this.ClientRectangle);
 
         }
 
