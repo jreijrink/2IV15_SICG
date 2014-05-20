@@ -14,15 +14,12 @@ namespace Project1
     public enum GameType { Particle, Cloth, Hair }
 
     public class Game
-    {
-        private int N;
-        private float dt, d;
-        private bool dsim;
-        private bool dump_frames;
-        private int frame_number;
-        
-        // static Particle *pList;
-        private List<Particle> particles;
+	{
+		private int N;
+		public float dt, d;
+		private bool dsim;
+		private bool dump_frames;
+		private int frame_number;
 
         private int win_id;
         private int[] mouse_down;
@@ -32,6 +29,7 @@ namespace Project1
         private int hmx, hmy;
         private double viewWidth;
         private double viewHeight;
+        private List<Particle> particles;
         private List<Force> forces;
         private List<Constraint> constrains;
         private List<FixedObject> objects;
@@ -43,6 +41,9 @@ namespace Project1
         private Particle mouseParticle;
         private bool hor_force_applied;
         private SpringForce mouseSpringForce;
+
+        public int integrationMode = 0;
+        public float speedUp = 0.25f;
 
 
         /*
@@ -419,7 +420,7 @@ namespace Project1
         {
             if (dsim)
             {
-                Solver.SimulationStep(particles, forces, constrains, objects, dt, 0);
+                Solver.SimulationStep(particles, forces, constrains, objects, dt, integrationMode);
             }
             else
             {
@@ -434,10 +435,22 @@ namespace Project1
         public void OnKeyDown(object sender, KeyEventArgs keyEventArgs)
         {
             switch (keyEventArgs.KeyCode)
-            {
-                case Keys.C:
-                    ClearData();
+			{
+                case Keys.NumPad4:
+			        speedUp = speedUp/2;
+			        break;
+                case Keys.NumPad6:
+			        speedUp *= 2;
                     break;
+                case Keys.NumPad8:
+                    dt += 0.005f;
+                    break;
+                case Keys.NumPad2:
+                    dt -= 0.005f;
+                    break;
+				case Keys.C:
+					ClearData();
+					break;
 
                 case Keys.D:
                     dump_frames = !dump_frames;
@@ -445,7 +458,9 @@ namespace Project1
 
                 case Keys.Q:
                     break;
-
+                case Keys.I:
+			        integrationMode = (integrationMode + 1)%3;
+			        break;
                 case Keys.Space:
                     dsim = !dsim;
                     break;

@@ -90,8 +90,11 @@ namespace Project1
 
         private static void midPointStep(List<Particle> particles, List<Force> forces, List<Constraint> constraints, float dt)
         {
-            List<Particle> backupParticles = particles.ConvertAll(p => new Particle(p.Index, p.Position, p.Mass) {Velocity = p.Velocity, Force = new HyperPoint<float>(0,0)});
-            eulerStep(particles, forces, constraints, dt / 2);
+            List<Particle> backupParticles = particles.ConvertAll(p => new Particle(p.Index, new HyperPoint<float>(p.Position), p.Mass) { Velocity = new HyperPoint<float>(p.Velocity), Force = new HyperPoint<float>(0, 0) });
+            clearForces(particles);
+            forces.ForEach(f => f.Calculate());
+            constraintForce(particles, constraints, constraint_ks, constraint_kd);
+            resolveForces(particles, dt / 2);
 
             clearForces(particles);
             forces.ForEach(f => f.Calculate());
@@ -99,7 +102,9 @@ namespace Project1
 
             foreach (Particle p in backupParticles)
             {
+                particles[p.Index].Force = (p.Force + particles[p.Index].Force)/2;
                 particles[p.Index].Position = p.Position;
+                particles[p.Index].Velocity = p.Velocity;
             }
 
             resolveForces(particles, dt);
@@ -107,7 +112,7 @@ namespace Project1
 
         private static void rungaKuttaStep(List<Particle> particles, List<Force> forces, List<Constraint> constraints, float dt)
         {
-            List<Particle> backupParticles = particles.ConvertAll(p => new Particle(p.Index, p.Position, p.Mass) { Velocity = p.Velocity, Force = new HyperPoint<float>(0, 0) });
+            List<Particle> backupParticles = particles.ConvertAll(p => new Particle(p.Index, new HyperPoint<float>(p.Position), p.Mass) { Velocity = new HyperPoint<float>(p.Velocity), Force = new HyperPoint<float>(0, 0) });
             //List<Particle> finalParticles = particles.ConvertAll(p => new Particle(p.Index, p.Position, p.Mass) { Velocity = p.Velocity, Force = new HyperPoint<float>(0, 0) });
             List<Particle> stepParticles = particles.ConvertAll(p => new Particle(p.Index, p.Position, p.Mass) { Velocity = p.Velocity, Force = new HyperPoint<float>(0, 0) });
 
@@ -116,48 +121,60 @@ namespace Project1
             forces.ForEach(f => f.Calculate());
             constraintForce(particles, constraints, constraint_ks, constraint_kd);
 
-            foreach (Particle p in backupParticles)
+            foreach (Particle p in stepParticles)
             {
-                p.Force += particles[p.Index].Force * (1 / 6f);
+                p.Velocity += ((backupParticles[p.Index].Force / particles[p.Index].Mass) / 6);
+                p.Position += (backupParticles[p.Index].Velocity * (dt / 6.0f));
+
+                particles[p.Index].Velocity += ((particles[p.Index].Force / particles[p.Index].Mass) * dt);
+                particles[p.Index].Position = backupParticles[p.Index].Position + (particles[p.Index].Velocity*(dt/2));
+                
+                
             }
-            resolveForces(particles, dt/2);
 
             // k2
             clearForces(particles);
             forces.ForEach(f => f.Calculate());
             constraintForce(particles, constraints, constraint_ks, constraint_kd);
 
-            foreach (Particle p in backupParticles)
+            foreach (Particle p in stepParticles)
             {
-                p.Force += particles[p.Index].Force * (1 / 3f);
-            }
+                p.Velocity += ((particles[p.Index].Force / particles[p.Index].Mass) / 3.0f);
+                p.Position += (particles[p.Index].Velocity * (dt / 3.0f));
 
-            resolveForces(particles, dt/2);
+                particles[p.Index].Velocity = backupParticles[p.Index].Velocity + ((particles[p.Index].Force / particles[p.Index].Mass) * (dt / 2));
+                particles[p.Index].Position = backupParticles[p.Index].Position + (particles[p.Index].Velocity * (dt / 2));
+            }
 
             // k3
             clearForces(particles);
             forces.ForEach(f => f.Calculate());
             constraintForce(particles, constraints, constraint_ks, constraint_kd);
 
-            foreach (Particle p in backupParticles)
+            foreach (Particle p in stepParticles)
             {
-                p.Force += particles[p.Index].Force * (1 / 3f);
-            }
+                p.Velocity += ((particles[p.Index].Force / particles[p.Index].Mass) / 3.0f);
+                p.Position += (particles[p.Index].Velocity * (dt / 3.0f));
 
-            resolveForces(particles, dt);
+                particles[p.Index].Velocity = backupParticles[p.Index].Velocity + ((particles[p.Index].Force / particles[p.Index].Mass) * (dt / 2));
+                particles[p.Index].Position = backupParticles[p.Index].Position + (particles[p.Index].Velocity * (dt / 2));
+            }
 
             // k4
             clearForces(particles);
             forces.ForEach(f => f.Calculate());
             constraintForce(particles, constraints, constraint_ks, constraint_kd);
 
-            foreach (Particle p in backupParticles)
+            foreach (Particle p in stepParticles)
             {
-                p.Force += particles[p.Index].Force * (1 / 6f);
+                p.Velocity += ((particles[p.Index].Force / particles[p.Index].Mass) / 6.0f);
+                p.Position += (particles[p.Index].Velocity * (dt / 6.0f));
+
+                //particles[p.Index].Force = p.Force;
+                particles[p.Index].Velocity = p.Velocity;
                 particles[p.Index].Position = p.Position;
             }
 
-            resolveForces(particles, dt);
         }
 
         static void clearForces(List<Particle> particles )
@@ -255,7 +272,7 @@ namespace Project1
             
             HyperPoint<float> Bvec = new HyperPoint<float>(B.m);
             int steps = 100;
-            LinearSolver.ConjGrad(nConstraint, A, Bvec, 1.0f / 10000.0f, ref steps, out lambda);
+            LinearSolver.ConjGrad(nConstraint, A, Bvec, 1.0f / 1000.0f, ref steps, out lambda);
             Matrix<float> lambdaM = new Matrix<float>(lambda.p.Count(), 1, lambda.p);
             Matrix<float> force = lambdaM.Transpose() * J;
 

@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Data;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using OpenTK;
+using System.Threading;
 
 namespace Project1.Interface
 {
@@ -14,6 +16,9 @@ namespace Project1.Interface
     {
         private Game game;
         private bool isActive = false;
+        private int fps = 200;
+        private long elapsedTime;
+        private System.Threading.Timer timer;
 
         public CustomGLControl()
         {
@@ -22,6 +27,7 @@ namespace Project1.Interface
 
         public void init(Game game, GameType type)
         {
+            //this.VSync = true;
             this.game = game;
             //this.settings = settings;
 
@@ -42,13 +48,24 @@ namespace Project1.Interface
             else if (type == GameType.Hair)
                 game.InitHairSystem(this.ClientRectangle);
 
+            timer = new System.Threading.Timer(frameElapsed);
+
+        }
+
+        private void frameElapsed(object state)
+        {
+            throw new NotImplementedException();
         }
 
         public void setActive(bool active)
         {
             isActive = active;
             if (active)
+            {
                 MakeCurrent();
+                SetWindowText();
+                //sw.Start();
+            }
         }
 
         private void GameControl_render(object sender, PaintEventArgs e)
@@ -64,6 +81,9 @@ namespace Project1.Interface
 
         private void GameControl_Idle(object sender, EventArgs e)
         {
+            if(!isActive)
+                return;
+
             if (isActive)
             {
                 game.OnUpdateFrame();
@@ -77,7 +97,37 @@ namespace Project1.Interface
                 Application.Exit();
 
             base.OnKeyDown(e);
+ 
+            if (!isActive)
+            {
+                return;
+            }
+
+            SetWindowText();
         }
-        
+
+        private void SetWindowText()
+        {
+            int intMode = game.integrationMode;
+
+            string windowText = "TinkerToy: ";
+            if (intMode == 0)
+            {
+                windowText = windowText + " Euler";
+            }
+            else if (intMode == 1)
+            {
+                windowText = windowText + " MidPoint";
+            }
+            else if (intMode == 2)
+            {
+                windowText = windowText + " RungaKutta";
+            }
+
+            windowText += ", TimeStep : " + game.dt;
+            windowText += ", SpeedUp : " + game.speedUp;
+
+            this.TopLevelControl.Text = windowText;
+        }
     }
 }
