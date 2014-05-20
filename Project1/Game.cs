@@ -43,7 +43,7 @@ namespace Project1
         private SpringForce mouseSpringForce;
 
         public int integrationMode = 0;
-        public float speedUp = 0.25f;
+        public int numSteps = 1;
 
 
         /*
@@ -420,7 +420,8 @@ namespace Project1
         {
             if (dsim)
             {
-                Solver.SimulationStep(particles, forces, constrains, objects, dt, integrationMode);
+                for (int i = 0; i < numSteps; i++ )
+                    Solver.SimulationStep(particles, forces, constrains, objects, dt, integrationMode);
             }
             else
             {
@@ -436,17 +437,19 @@ namespace Project1
         {
             switch (keyEventArgs.KeyCode)
 			{
-                case Keys.NumPad4:
-			        speedUp = speedUp/2;
-			        break;
                 case Keys.NumPad6:
-			        speedUp *= 2;
+			        numSteps += 1;
+			        break;
+                case Keys.NumPad4:
+			        numSteps -=1;
+                    numSteps = (numSteps > 1) ? numSteps : 1;
                     break;
                 case Keys.NumPad8:
-                    dt += 0.005f;
+                    dt += 0.001f;
                     break;
                 case Keys.NumPad2:
-                    dt -= 0.005f;
+                    dt -= 0.001f;
+			        dt = (dt > 0) ? dt : 0.001f;
                     break;
 				case Keys.C:
 					ClearData();

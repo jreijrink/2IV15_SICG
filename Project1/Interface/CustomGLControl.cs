@@ -125,7 +125,7 @@ namespace Project1.Interface
             }
 
             windowText += ", TimeStep : " + game.dt;
-            windowText += ", SpeedUp : " + game.speedUp;
+            windowText += ", SpeedUp : " + game.numSteps;
 
             this.TopLevelControl.Text = windowText;
         }
