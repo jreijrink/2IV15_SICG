@@ -15,22 +15,39 @@ namespace Project1
         private readonly float _dist;
         private readonly float _ks;
         private readonly float _kd;
+        private readonly Color _color;
 
         public SpringForce(Particle p1, Particle p2, float dist, float ks, float kd)
-		{
-			_p1 = p1;
-			_p2 = p2;
-			_dist = dist;
-			_ks = ks;
-			_kd = kd;
-		}
+        {
+            _p1 = p1;
+            _p2 = p2;
+            _dist = dist;
+            _ks = ks;
+            _kd = kd;
+        }
+        public SpringForce(Particle p1, Particle p2, float dist, float ks, float kd, Color color)
+        {
+            _p1 = p1;
+            _p2 = p2;
+            _dist = dist;
+            _ks = ks;
+            _kd = kd;
+            _color = color;
+        }
 
         public override void Draw()
         {
             GL.Begin(BeginMode.Lines);
-            GL.Color3(0.1f, 0.1f, 1.0f);
+            if(_color == null || _color == Color.Empty)
+                GL.Color3(0.1f, 0.1f, 1.0f);
+            else
+                GL.Color3(_color);
+
             GL.Vertex2(_p1.Position[0], _p1.Position[1]);
-            GL.Color3(0.1f, 0.1f, 1.0f);
+            if (_color == null || _color == Color.Empty)
+                GL.Color3(0.1f, 0.1f, 1.0f);
+            else
+                GL.Color3(_color);
             GL.Vertex2(_p2.Position[0], _p2.Position[1]);
             GL.End();
         }

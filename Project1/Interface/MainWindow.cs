@@ -70,8 +70,6 @@ namespace Project1.Interface
             }
         }
 
-        
-
         private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
         {
             TabControl control = (TabControl) sender;

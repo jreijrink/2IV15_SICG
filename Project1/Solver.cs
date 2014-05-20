@@ -8,12 +8,8 @@ namespace Project1
 {
     static class Solver
     {
-        private static float constraint_ks = 1;
-        private static float constraint_kd = 50;
-        //Particles
-        private static float particle_size = 0.001f;
-        //Cloth
-        //private static float particle_size = 0.015f;
+        private static float constraint_ks = 1.0f;
+        private static float constraint_kd = 100.0f;
 
         public const float Damp = 0.98f;
         private static Random rand = new Random();
@@ -23,7 +19,7 @@ namespace Project1
             return result;
         }
 
-        public static void SimulationStep(List<Particle> particles, List<Force> forces, List<Constraint> constraints, List<FixedObject> objects, float dt, int mode)
+        public static void SimulationStep(List<Particle> particles, List<Force> forces, List<Constraint> constraints, List<FixedObject> objects, float particle_size, float dt, int mode)
         {
             //Euler
             if(mode == 0)
@@ -41,10 +37,10 @@ namespace Project1
                 rungaKuttaStep(particles, forces, constraints, dt);
             }
 
-            collisionDetection(particles, constraints, objects, dt);
+            collisionDetection(particles, constraints, objects, particle_size, dt);
         }
 
-        private static void collisionDetection(List<Particle> particles, List<Constraint> constraints, List<FixedObject> objects, float dt)
+        private static void collisionDetection(List<Particle> particles, List<Constraint> constraints, List<FixedObject> objects, float particle_size, float dt)
         {
             foreach (Particle particle in particles)
             {

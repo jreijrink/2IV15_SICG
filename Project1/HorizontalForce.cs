@@ -12,7 +12,7 @@ namespace Project1
 		private readonly Particle _p1;
         private readonly bool _right;
         
-        private const float _force = -0.2f;
+        private const float _force = -0.4f;
 
         public HorizontalForce(Particle p1, bool right)
 		{
