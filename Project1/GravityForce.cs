@@ -19,7 +19,12 @@ namespace Project1
 
         public override void Draw()
         {
-
+            GL.Begin(BeginMode.Lines);
+            GL.Color3(0.1f, 0.1f, 1.0f);
+            GL.Vertex2(_p1.Position[0], _p1.Position[1]);
+            GL.Color3(0.1f, 0.1f, 1.0f);
+            GL.Vertex2(_p1.Position[0], _p1.Position[1] + _gravity);
+            GL.End();
 		}
 
         public override void Calculate()

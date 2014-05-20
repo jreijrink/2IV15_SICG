@@ -10,6 +10,10 @@ namespace Project1
     {
         private static float constraint_ks = 1000;
         private static float constraint_kd = 1;
+        //Particles
+        //private static float particle_size = 0.001f;
+        //Cloth
+        private static float particle_size = 0.015f;
 
         public const float Damp = 0.98f;
         private static Random rand = new Random();
@@ -19,7 +23,7 @@ namespace Project1
             return result;
         }
 
-        public static void SimulationStep(List<Particle> particles, List<Force> forces, List<Constraint> constraints, float dt, int mode)
+        public static void SimulationStep(List<Particle> particles, List<Force> forces, List<Constraint> constraints, List<FixedObject> objects, float dt, int mode)
         {
             //Euler
             if(mode == 0)
@@ -36,9 +40,44 @@ namespace Project1
             {
                 rungaKuttaStep(particles, forces, constraints, dt);
             }
+
+            collisionDetection(particles, objects, dt);
         }
 
-        
+        private static void collisionDetection(List<Particle> particles, List<FixedObject> objects, float dt)
+        {
+            foreach (Particle particle in particles)
+            {
+                foreach (FixedObject fixedObject in objects)
+                {
+                    if(fixedObject.HasCollision(particle))
+                    {
+                        fixedObject.SolveCollision(particle);
+                    }
+                }
+
+                foreach (Particle other_particle in particles)
+                {
+                    HyperPoint<float> diff_pos = particle.Position - other_particle.Position;
+                    float distance = diff_pos.GetLengthSquared();
+
+                    if (distance != 0 && distance < particle_size)
+                    {
+                        //Particle collision!
+                        HyperPoint<float> normal = diff_pos / diff_pos.GetLength();
+                        HyperPoint<float> v_n = normal * normal.DotProduct(particle.Velocity);
+                        HyperPoint<float> v_t = particle.Velocity - v_n;
+                        particle.Velocity = v_t - (v_n * 0.1f);
+
+                        diff_pos = other_particle.Position - particle.Position;
+                        normal = diff_pos / diff_pos.GetLength();
+                        v_n = normal * normal.DotProduct(other_particle.Velocity);
+                        v_t = other_particle.Velocity - v_n;
+                        other_particle.Velocity = v_t - (v_n * 0.1f);
+                    }
+                }
+            }
+        }        
 
         private static void eulerStep(List<Particle> particles, List<Force> forces, List<Constraint> constraints, float dt)
         {
