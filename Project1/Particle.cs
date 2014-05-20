@@ -100,6 +100,7 @@ namespace Project1
 //            GL.Color3(0.1f, 1f, 1f);
 //            GL.Vertex2(_position[0] + _velocity[0], _position[1] + _velocity[1]);
 //            GL.End();
+            */
 		}
 	}
 }
