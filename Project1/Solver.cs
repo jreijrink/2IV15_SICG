@@ -8,8 +8,8 @@ namespace Project1
 {
     static class Solver
     {
-        private static float constraint_ks = 10;
-        private static float constraint_kd = 10;
+        private static float constraint_ks = 1;
+        private static float constraint_kd = 50;
         //Particles
         private static float particle_size = 0.001f;
         //Cloth

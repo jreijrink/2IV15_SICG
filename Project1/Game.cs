@@ -43,7 +43,7 @@ namespace Project1
         private SpringForce mouseSpringForce;
 
         public int integrationMode = 0;
-        public float speedUp = 0.25f;
+        public float speedUp = 1f;
 
 
         /*
@@ -107,7 +107,6 @@ namespace Project1
             constrains.Add(new RodConstraint(particles[6], particles[7], dist * 2));
             constrains.Add(new LineConstraint(particles[4], particles[4].Position + new HyperPoint<float>(0, 10), particles[4].Position + new HyperPoint<float>(0, -10)));
             constrains.Add(new LineConstraint(particles[6], particles[6].Position + new HyperPoint<float>(-10, 0), particles[6].Position + new HyperPoint<float>(10, 0)));
-
 
             objects = new List<FixedObject>();
             objects.Add(new VerLineObject(-1.95f, -2, 4, true));
