@@ -44,9 +44,11 @@ namespace Project1.Interface
             if(type == GameType.Particle)
                 game.InitParticleSystem(this.ClientRectangle);
             else if (type == GameType.Cloth)
-                game.InitClothSystem(this.ClientRectangle);
+                game.InitFlagSystem(this.ClientRectangle);
             else if (type == GameType.Hair)
                 game.InitHairSystem(this.ClientRectangle);
+            else if (type == GameType.Curtain)
+                game.InitCurtainSystem(this.ClientRectangle);
 
             timer = new System.Threading.Timer(frameElapsed);
 

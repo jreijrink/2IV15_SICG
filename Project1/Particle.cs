@@ -59,7 +59,7 @@ namespace Project1
             : this(index, new HyperPoint<float>(0, 0), 1.0f) { }
         
         public Particle(int index, HyperPoint<float> constructPos)
-            : this(index, constructPos, 5.0f) { }
+            : this(index, constructPos, 1.0f) { }
 
         public Particle(int index, HyperPoint<float> constructPos, float mass)
         {

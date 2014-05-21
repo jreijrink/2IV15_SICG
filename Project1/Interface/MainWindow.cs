@@ -15,7 +15,12 @@ namespace Project1.Interface
         private Game gameParticle;
         private Game gameCloth;
         private Game gameHair;
+        private Game gameCurtain;
+        private int activeGameIndex;
 
+        private List<Game> games;
+        private List<CustomGLControl> gameTabs;
+ 
         int N;
         float dt;
         float d;
@@ -37,65 +42,68 @@ namespace Project1.Interface
                 dt = int.Parse(args[1]);
                 d = int.Parse(args[2]);
             }
+
+            games = new List<Game>();
+            gameTabs = new List<CustomGLControl>();
         }
 
         private void MainWindow_Load_1(object sender, EventArgs e)
         {
-            try
+            ErrorReporting.Instance.ReportInfo(this, "starting game");
+            if (Site == null || !Site.DesignMode)
             {
-                ErrorReporting.Instance.ReportInfo(this, "starting game");
-                if (Site == null || !Site.DesignMode)
-                {
-                    gameParticle = new Game(N, dt, d);
-                    customGLControl1.init(gameParticle, GameType.Particle);
-                    settingsControl1.init(gameParticle);
+                gameParticle = new Game(N, dt, d);
+                customGLControl1.init(gameParticle, GameType.Particle);
+                settingsControl1.init(gameParticle);
+                games.Add(gameParticle);
+                gameTabs.Add(customGLControl1);
 
-                    gameCloth = new Game(N, dt, d);
-                    customGLControl2.init(gameCloth, GameType.Cloth);
-                    settingsControl2.init(gameCloth);
+                gameCloth = new Game(N, dt, d);
+                customGLControl2.init(gameCloth, GameType.Cloth);
+                settingsControl2.init(gameCloth);
+                games.Add(gameCloth);
+                gameTabs.Add(customGLControl2);
 
-                    gameHair = new Game(N, dt, d);
-                    customGLControl3.init(gameHair, GameType.Hair);
-                    settingsControl3.init(gameHair);
+                gameHair = new Game(N, dt, d);
+                customGLControl3.init(gameHair, GameType.Hair);
+                settingsControl3.init(gameHair);
+                games.Add(gameHair);
+                gameTabs.Add(customGLControl3);
 
-                    customGLControl1.setActive(true);
-                    customGLControl2.setActive(false);
-                    customGLControl3.setActive(false);
+                gameCurtain = new Game(N, dt, d);
+                customGLControl4.init(gameCurtain, GameType.Curtain);
+                settingsControl4.init(gameHair);
+                games.Add(gameCurtain);
+                gameTabs.Add(customGLControl4);
 
-                }
-            }
-            catch (Exception exception)
-            {
-                ErrorReporting.Instance.ReportFatalT(this, "Erro", exception);
+                customGLControl1.setActive(true);
+                activeGameIndex = 0;
             }
         }
 
         private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
         {
             TabControl control = (TabControl) sender;
+            games[activeGameIndex].Pause();
 
-            if (control.SelectedIndex == 0)
+            for (int i = 0; i < games.Count; i++)
             {
-                gameCloth.Pause();
-                customGLControl1.setActive(true);
-                customGLControl2.setActive(false);
-                customGLControl3.setActive(false);
+                Game game = games[i];
+                CustomGLControl glControl = gameTabs[i];
+                
+                if(i == control.SelectedIndex)
+                {
+                    glControl.setActive(true);
+                    
+                }
+                else
+                {
+                    glControl.setActive(false);
+                }
             }
-            else if (control.SelectedIndex == 1)
-            {
-                gameParticle.Pause();
-                customGLControl1.setActive(false);
-                customGLControl2.setActive(true);
-                customGLControl3.setActive(false);
-            }
-            else if (control.SelectedIndex == 2)
-            {
-                gameHair.Pause();
-                customGLControl1.setActive(false);
-                customGLControl2.setActive(false);
-                customGLControl3.setActive(true);
-            }
+            activeGameIndex = control.SelectedIndex;
         }
+
 
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
@@ -128,6 +136,11 @@ namespace Project1.Interface
                 }
             }
                  
+        }
+
+        private void settingsControl1_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }

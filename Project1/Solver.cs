@@ -8,8 +8,8 @@ namespace Project1
 {
     static class Solver
     {
-        private static float constraint_ks = 1.0f;
-        private static float constraint_kd = 100.0f;
+        private static float constraint_ks = 20.0f;
+        private static float constraint_kd = 50.0f;
 
         public const float Damp = 0.98f;
         private static Random rand = new Random();
@@ -87,10 +87,16 @@ namespace Project1
         private static void midPointStep(List<Particle> particles, List<Force> forces, List<Constraint> constraints, float dt)
         {
             List<Particle> backupParticles = particles.ConvertAll(p => new Particle(p.Index, new HyperPoint<float>(p.Position), p.Mass) { Velocity = new HyperPoint<float>(p.Velocity), Force = new HyperPoint<float>(0, 0) });
+            
             clearForces(particles);
             forces.ForEach(f => f.Calculate());
             constraintForce(particles, constraints, constraint_ks, constraint_kd);
-            resolveForces(particles, dt / 2);
+
+//            foreach (Particle p in backupParticles)
+//            {
+//                p.Velocity += ((backupParticles[p.Index].Force/particles[p.Index].Mass)/6)*dt;
+//                p.Position += (backupParticles[p.Index].Velocity*(dt/6.0f));
+//            }
 
             clearForces(particles);
             forces.ForEach(f => f.Calculate());

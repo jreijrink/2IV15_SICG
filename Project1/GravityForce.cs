@@ -10,7 +10,7 @@ namespace Project1
 	class GravityForce : Force
 	{
 		private readonly Particle _p1;
-        private const float _gravity = -9.81f / 50.0f;
+        private const float _gravity = -9.81f / 100.0f;
 
         public GravityForce(Particle p1)
 		{
