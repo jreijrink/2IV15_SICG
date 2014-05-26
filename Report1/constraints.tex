@@ -1,0 +1,51 @@
+\section{Constraints}
+
+The constraints are implemented using a generic solver.
+..
+\\
+
+Each constraint is implement using the \verb"Constraint" interface.
+This interface requires a constraint to have the following functions:
+\begin{itemize}
+  \item GetC\\
+  \emph{ This function contains the constraint }
+  \item GetCdot\\
+  \todo { wat hier? }
+  \item GetDerivative\\
+  \emph{ This function contains the partial derivative of the constraint  }
+  \item GetTimeDerivative\\
+  \emph{ This function contains the time derivative of the constraint }
+\end{itemize}
+
+All constraints are resolved using the 
+To resolve all constraint the 
+\noindent Calculate $J$, the jacobian matrix.\\
+We loop through all constraints and add their GetDerivative() values to the appropriate places in the matrix.
+The resulting matrix has the structure as shown in figure \todo { verwijzing }, where $C$ is a constraint and $x$ is a particle.
+\todo{ image jacobian matrix }
+
+Calculate $W$, inverse mass \\
+Calculate $\dot{J}$, jacobian time derivative matrix\\
+Calculate $\dot{q}$, velocity vector\\
+Calculate $Q$, constraint force vector\\
+Calculate $C$, constrain vector\\
+Calculate $\dot{C}$, partial derivative of constraints vector\\
+$k_s$ and $k_d$ are constants used for..\\
+Solve $Ax = B$ where\\
+\;\;  $A = J W J^{T}$\\
+\;\;  $B = (-\dot{J} \dot{q}^{T} - J W Q^{T}) - (C k_s) - (\dot{C} k_d)$\\
+We added the feedback term $- (C k_s) - (\dot{C} k_d)$ to prevent drifting in the constraint force calculation.
+With the calculated $x$ matrix we can calculate the constraint forces matrix using the formula $x^{T} J$.
+The forces of each particles are updated using this resulting constraint forces matrix.\\
+
+\subsection{Rod}
+Used for..\\
+Impl\\
+
+\subsection{CircularWire}
+Used for..\\
+Impl\\
+
+\subsection{FixedPoint}
+Used for..\\
+Impl\\

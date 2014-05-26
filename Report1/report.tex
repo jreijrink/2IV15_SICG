@@ -1,0 +1,104 @@
+\documentclass[a4paper,twoside,11pt]{article}
+\usepackage{a4wide,algo,graphicx,fancyhdr,amsmath,amssymb,amsthm,ifthen,path,todonotes}
+\usepackage[ruled, noline, algo2e, noend]{algorithm2e}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{color}
+\usepackage{caption}
+\urlstyle{rm}
+\usepackage{tikz}
+\usetikzlibrary{shapes.multipart}
+\usetikzlibrary{shapes}
+\usepackage{xifthen}
+\usepackage{listings}
+\usepackage{pgfplots}
+\usepackage{subfigure}
+\usepackage{comment}
+\usepackage{parskip}
+\usepackage{tabularx, colortbl}
+
+%----------------------- Macros and Definitions --------------------------
+
+\setlength\headheight{10pt}
+\addtolength\topmargin{-10pt}
+\addtolength\footskip{20pt}
+
+\newenvironment{myindentpar}[1]%
+{\begin{list}{}%
+	{\setlength{\leftmargin}{#1}}%
+	\item[]%
+}
+ {\end{list}}
+
+\fancypagestyle{plain}{
+\fancyhf{}
+\fancyfoot[LO,RE]{\sffamily\bfseries Eindhoven University of Technology}
+\fancyfoot[RO,LE]{\sffamily\bfseries\thepage}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+}
+
+\newcommand{\List}{\mathcal{L}}
+\newcommand{\T}{\mathcal{T}}
+\newcommand{\G}{\mathcal{G}}
+\newcommand{\s}{\mathcal{S}}
+
+\newcommand{\opt}{\textsc{opt}}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[LE]{\sffamily\bfseries }
+\fancyhead[RO]{\sffamily\bfseries Project1 - Particles}
+\fancyfoot[LO,RE]{\sffamily\bfseries 2IV15 Simulation in computer graphics - Eindhoven University of Technology}
+\fancyfoot[RO,LE]{\sffamily\bfseries\thepage}
+
+%-------------------------------- Title ----------------------------------
+
+\title{\sffamily\bfseries
+Project1 \\[1ex]
+\large Particles
+}
+
+\author{
+    Wouter Lok \\
+    Student number: 0832518 \\
+    \texttt{w.lok@student.tue.n}
+    \and
+    Joris Reijrink \\
+    Student number: 0847198 \\
+    \texttt{j.reijrink@student.tue.nl}\\
+}
+
+\date{\today}
+
+\setlength{\parindent}{24pt}
+
+% Set \item separation length
+%\newlength{\wideitemsep}
+%\setlength{\wideitemsep}{1\itemsep}
+%\addtolength{\wideitemsep}{-7pt}
+%\let\olditem\item
+%\renewcommand{\item}{\setlength{\itemsep}{\wideitemsep}\olditem}
+
+
+%--------------------------------- Text ----------------------------------
+
+\begin{document}
+
+\maketitle
+\vspace{1cm}
+
+\todo{ COMMENTAAR BIJ CODE! }
+\input{abstract.tex}
+\setlength{\parindent}{24pt}
+\input{introduction.tex}
+\input{forces.tex}
+\input{constraints.tex}
+\input{interaction.tex}
+\input{integration.tex}
+\input{cloth.tex}
+\input{hair.tex}
+\input{collisions.tex}
+
+
+\end{document}
