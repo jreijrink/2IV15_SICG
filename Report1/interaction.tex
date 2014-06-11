@@ -1,5 +1,21 @@
 \section{Interaction}
-
-Mouse interaction:\\
-- Select particle\\
-- Horizontal force\\
+To be able to create a more dynamic simulation and to be able to test the system, some user interaction have been implemented. All inputs are displayed in table \ref{tab:input}.Firstly the user is able to change to time-step that is used in the simulation. Varying the time-step can be used to test the stability of the system and to create more precise simulations. Secondly the user is able to set the amount of simulation steps performed per frame such that the simulation on screen can be speed up and furthermore the user is able to change the integration method on the fly to test the precision and stability of each method.\\
+\begin{table}[h]
+\begin{tabular}{l|l}
+  \bf{Button} & \bf{Functionality} \\ \hline
+  % \> for next tab, \\ for new line...
+  numpad8 & Increase time-step by 0.001s \\
+  numpad2 & Decrease time-step by 0.001s \\
+  numpad4 & Increase amount simulation steps by 1 \\
+  numpad6 & Decrease amount simulation steps by 1  \\
+  c & Reset simulation \\
+  d & Start/Stop Screenshots dumps \\
+  i & Toggle to next integration mode \\
+  space &  Start/Pause simulation\\
+  left mouse button & Select and drag particle to apply spring force \\
+  right mouse button & Apply wind/horizontal force at mouse position
+\end{tabular}
+\caption{User interaction buttons and functionality}
+\label{tab:input}
+\end{table} 
+To create a dynamic simulation the user is also able to apply forces on a single or a set of particles. The user is able to select a particle and drag it around. Selecting a particle will cause a spring to be created between the mouse position and the selected particle, causing a new force to be applied on the selected particle. The user is also able to apply a horizontal wind like force to the particles. When the user uses the right mouse button, then a horizontal force will be applied to all particles that are close to the horizontal line projected at the mouse position.
