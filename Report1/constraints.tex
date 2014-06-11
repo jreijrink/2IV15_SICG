@@ -46,7 +46,8 @@ The forces of each particles are updated using this resulting constraint forces 
 \subsection{Rod}
 Used to constrain two particles $p_1 = (x_1,y_1)$ and $p_2 = (x_2,y_2)$ to be a fixed distance $r$ apart.
 \begin{itemize}
-  \item GetC: $C = (x_1 - x_2)^2 + (y_1 - y_2)^2 - r^2$
+  \item GetC: \\
+  $C = (x_1 - x_2)^2 + (y_1 - y_2)^2 - r^2$
   \item GetCdot:\\
     $\dot{C} = {v_1}^T \frac{\partial C}{\partial p_1} + {v_2}^T \frac{\partial C}{\partial p_2}$
   \item GetDerivative:\\
@@ -60,7 +61,8 @@ Used to constrain two particles $p_1 = (x_1,y_1)$ and $p_2 = (x_2,y_2)$ to be a 
 \subsection{CircularWire}
 Used to constrain a particle $p = (x, y)$ to be a fixed distance $r$ from some point $p_c = (x_c, y_c)$.
 \begin{itemize}
-  \item GetC: $C = (x - x_c)^2 + (y - y_c)^2 - r^2$
+  \item GetC:\\
+   $C = (x - x_c)^2 + (y - y_c)^2 - r^2$
   \item GetCdot:\\
     $\dot{C} = {v}^T \frac{\partial C}{\partial p}$
   \item GetDerivative:\\
@@ -74,20 +76,21 @@ Used to constrain a particle $p = (x, y)$ to be a fixed point $p_c = (x_c, y_c)$
 This constraint has the same implementation as CircularWire, but with $r = 0$.
 
 \subsection{Line}
-Used to constrain a particle $p_L = (x_L, y_L)$ to be on a fixed horizontal or vertical line.
-This line is defined by a point $p_1 = (x_1, y_1)$ and boolean $isHorizontal$.
+Used to constrain a particle $p = (p_x, p_y)$ to be on a fixed horizontal or vertical line.
+This line is defined by a point $L = (L_x, L_y)$ and boolean $isHorizontal$.
 Below the constraint of a horizontal line is described, the vertical line follows naturally.
 \begin{itemize}
-  \item GetC: $C = y_L - y_1$
+  \item GetC:\\
+   $C = p_y - L_y$
   \item GetCdot:\\
-    $\dot{C} = y_L$
+    $\dot{C} = v_{p_y}$
   \item GetDerivative:\\
-    $\frac{\partial C}{\partial p_L} = $
+    $\frac{\partial C}{\partial p_y} = $
     $\bigl(\begin{smallmatrix}
     0\\ 1
     \end{smallmatrix} \bigr)$
   \item GetTimeDerivative:\\
-    $\frac{\partial^2 C}{\partial p_L \partial t} = $
+    $\frac{\partial^2 C}{\partial p_y \partial t} = $
     $\bigl(\begin{smallmatrix}
     0\\ 0
     \end{smallmatrix} \bigr)$
