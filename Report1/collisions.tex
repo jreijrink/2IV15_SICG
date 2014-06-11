@@ -8,11 +8,14 @@ We start with iteration through all pairs of particles $(p_1, p_2)$.
 For each pair the distance between them is calculated.
 If the distance is less than a fixed parameter $distance$, then a collision has occurred.
 Now the collision is solved:\\
-$diffpos = p_1 - p_2$\\
-$normal = \frac{diffpos}{eucledian\;of\;diffpos}$\\
-$v_n = normal (normal \cdot v_1)$\\
-$v_t = v_1 - v_n$\\
-The new velocity of $p_1$ is $v_t - (v_n * 0.1f)$, where $0.1f$ is a damping factor.
+\begin{eqnarray*}
+    % \nonumber to remove numbering (before each equation)
+     \mathit{diffpos} &=& p_1 - p_2 \\
+     \mathit{normal} &=& \frac{\mathit{diffpos}}{\text{length of diffpos}} \\
+     v_n &=& \mathit{normal} (\mathit{normal} \cdot v_1) \\
+     v_t &=& v_1 - v_n
+\end{eqnarray*}
+The new velocity of $p_1$ is $v_t - (v_n * f_D)$, where $f_d$ is a damping factor.
 The velocity of $p_2$ follows naturally.
 
 \subsection{Fixed objects}
@@ -31,4 +34,3 @@ If the line is vertical, then the horizontal velocity of the particle is inverte
 We use a constant $k_r$ for the damping.
 For the horizontal line the vertical velocity is inverted.
 
- 
