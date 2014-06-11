@@ -1,5 +1,34 @@
 \section{Collisions}
+We implemented two different collision detections.
+The first is collision between particles where particles can collide with each other.
+The second is particles colliding with fixed objects, fixed object are implemented using an interface.
 
-Collision detection:\\
-- Fixed objects\\
-- Paticles\\
+\subsection{Particles}
+We start with iteration through all pairs of particles $(p_1, p_2)$.
+For each pair the distance between them is calculated.
+If the distance is less than a fixed parameter $distance$, then a collision has occurred.
+Now the collision is solved:\\
+$diffpos = p_1 - p_2$\\
+$normal = \frac{diffpos}{eucledian\;of\;diffpos}$\\
+$v_n = normal (normal \cdot v_1)$\\
+$v_t = v_1 - v_n$\\
+The new velocity of $p_1$ is $v_t - (v_n * 0.1f)$, where $0.1f$ is a damping factor.
+The velocity of $p_2$ follows naturally.
+
+\subsection{Fixed objects}
+Fixed object are implemented with a \verb"Fixed Object" interface.
+This interface requires a fixed object to have the following functions:
+\begin{itemize}
+  \item HasCollision(Particle p)\\
+  \emph{ Check if a particle $p$ is colliding with the fixed object }
+  \item SolveCollision(Particle p)\\
+  \emph{ Fix the collision with $p$ }
+\end{itemize}
+Two fixed objects are implemented, a vertical and horizontal line.
+If the position of a particle has changed from one side of the line to the other, a collision has occurred.
+To resolve this collision the position of the particle is made equal to that of the line.
+If the line is vertical, then the horizontal velocity of the particle is inverted.
+We use a constant $k_r$ for the damping.
+For the horizontal line the vertical velocity is inverted.
+
+ 
