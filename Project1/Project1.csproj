@@ -56,6 +56,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AngularSpring.cs" />
     <Compile Include="CircularWireConstraint.cs" />
     <Compile Include="Constraint.cs" />
     <Compile Include="HorLineObject.cs" />

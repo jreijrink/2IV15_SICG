@@ -92,11 +92,11 @@ namespace Project1
             forces.ForEach(f => f.Calculate());
             constraintForce(particles, constraints, constraint_ks, constraint_kd);
 
-//            foreach (Particle p in backupParticles)
-//            {
-//                p.Velocity += ((backupParticles[p.Index].Force/particles[p.Index].Mass)/6)*dt;
-//                p.Position += (backupParticles[p.Index].Velocity*(dt/6.0f));
-//            }
+            foreach (Particle p in backupParticles)
+            {
+                particles[p.Index].Velocity = p.Velocity + ((particles[p.Index].Force / particles[p.Index].Mass) * (dt / 2));
+                particles[p.Index].Position = p.Position + (p.Velocity * (dt / 2));              
+            }
 
             clearForces(particles);
             forces.ForEach(f => f.Calculate());
@@ -104,7 +104,6 @@ namespace Project1
 
             foreach (Particle p in backupParticles)
             {
-                particles[p.Index].Force = (p.Force + particles[p.Index].Force)/2;
                 particles[p.Index].Position = p.Position;
                 particles[p.Index].Velocity = p.Velocity;
             }
@@ -129,9 +128,7 @@ namespace Project1
                 p.Position += (backupParticles[p.Index].Velocity * (dt / 6.0f));
 
                 particles[p.Index].Velocity = backupParticles[p.Index].Velocity + ((particles[p.Index].Force / particles[p.Index].Mass) * (dt/2));
-                particles[p.Index].Position = backupParticles[p.Index].Position + (backupParticles[p.Index].Velocity * (dt / 2));
-                
-                
+                particles[p.Index].Position = backupParticles[p.Index].Position + (backupParticles[p.Index].Velocity * (dt / 2));                
             }
 
             // k2
