@@ -17,7 +17,7 @@ namespace FluidsProject
         private float force, source;
         private bool dvel;
 
-        private float[] u, v, u_prev, v_prev;
+        private float[] u, v, u_prev, v_prev, o;
         private float[] dens, dens_prev;
 
         private int win_id;
@@ -25,6 +25,7 @@ namespace FluidsProject
         private bool[] mouse_down = { false, false, false };
         private int omx, omy, mx, my;
         private Rectangle drawWindow;
+        private float gravity = -0.01f;//-9.81f / 100.0f;
 
 
         public void init(int width, int height, string[] args)
@@ -64,7 +65,6 @@ namespace FluidsProject
             }   
         }
 
-
         private void allocate_data()
         {
             int size = (N + 2) * (N + 2);
@@ -75,13 +75,27 @@ namespace FluidsProject
             v_prev = new float[size];
             dens = new float[size];
             dens_prev = new float[size];
+            o = new float[size];
+        }
+
+        private void apply_grafity()
+        {
+            int i, j;
+            for (i = 0; i <= N + 1; i++)
+            {
+                for (j = 0; j <= N + 1; j++)
+                {
+                    v[IX(i, j)] = gravity;
+                }
+            }
         }
 
         public void OnUpdateFrame()
         {
-            get_from_UI ( dens_prev, u_prev, v_prev );
-            Solver.vel_step(N, u, v, u_prev, v_prev, visc, dt);
-            Solver.dens_step(N, dens, dens_prev, u, v, diff, dt);
+            get_from_UI(dens_prev, u_prev, v_prev);
+            apply_grafity();
+            Solver.vel_step(N, u, v, u_prev, v_prev, o, visc, dt);
+            Solver.dens_step(N, dens, dens_prev, u, v, o, diff, dt);
         }
 
         private void get_from_UI(float[] d, float[] u, float[] v)
@@ -93,7 +107,7 @@ namespace FluidsProject
                 u[i] = v[i] = d[i] = 0.0f;
             }
 
-            if (!mouse_down[0] && !mouse_down[2] && !mouse_down[1]) return;
+            //if (!mouse_down[0] && !mouse_down[2] && !mouse_down[1]) return;
 
             i = (int)((mx / (float)win_x) * N + 1);
             j = (int)(((win_y - my) / (float)win_y) * N + 1);
@@ -104,6 +118,11 @@ namespace FluidsProject
             {
                 u[IX(i, j)] = force * (mx - omx);
                 v[IX(i, j)] = force * (omy - my);
+            }
+
+            if (mouse_down[1])
+            {
+                o[IX(i, j)] = 1;
             }
 
             if (mouse_down[2])
@@ -119,9 +138,15 @@ namespace FluidsProject
         public void OnRenderFrame()
         {
             PreDisplay();
-            if (dvel) draw_velocities();
-            else draw_density();
-
+            if (dvel)
+            {
+                draw_velocities();
+            }
+            else
+            {
+                draw_density();
+                draw_object();
+            }
         }
 
         private void PreDisplay()
@@ -161,6 +186,42 @@ namespace FluidsProject
             GL.End();
         }
 
+        private void draw_object()
+        {
+            int i, j;
+            float x1, x2, y1, y2, h;
+
+            h = 1.0f / N;
+
+            GL.Color3(1.0f, 1.0f, 0.0f);
+            GL.LineWidth(1.0f);
+
+            GL.Begin(BeginMode.Quads);
+
+            for (i = 1; i <= N; i++)
+            {
+                x1 = (i - 0.5f) * h;
+                x2 = (i + 0.5f) * h;
+                for (j = 1; j <= N; j++)
+                {
+                    y1 = (j - 0.5f) * h;
+                    y2 = (j + 0.5f) * h;
+
+                    if (o[IX(i, j)] == 1)
+                    {
+                        GL.Color3(1.0f, 1.0f, 0.0f);
+
+                        GL.Vertex2(x1 - 1 * h, y1 - 1 * h);
+                        GL.Vertex2(x1 + 1 * h, y1 - 1 * h);
+                        GL.Vertex2(x1 + 1 * h, y1 + 1 * h);
+                        GL.Vertex2(x1 - 1 * h, y1 + 1 * h);
+                    }
+                }
+            }
+
+            GL.End();
+        }
+
         private void draw_density()
         {
             int i, j;
@@ -186,10 +247,17 @@ namespace FluidsProject
                     {
                         d00 = d00;
                     }
+                    /*
                     GL.Color3(d00, d00, d00); GL.Vertex2(x, y);
                     GL.Color3(d10, d10, d10); GL.Vertex2(x + h, y);
                     GL.Color3(d11, d11, d11); GL.Vertex2(x + h, y + h);
                     GL.Color3(d01, d01, d01); GL.Vertex2(x, y + h);
+                    */
+                    //0, .5, 1
+                    GL.Color3(0, d00 * .3, d00); GL.Vertex2(x, y);
+                    GL.Color3(0, d10 * .3, d10); GL.Vertex2(x + h, y);
+                    GL.Color3(0, d11 * .3, d11); GL.Vertex2(x + h, y + h);
+                    GL.Color3(0, d01 * .3, d01); GL.Vertex2(x, y + h);
                 }
             }
 
@@ -202,7 +270,7 @@ namespace FluidsProject
 
             for (int i = 0; i < size; i++)
             {
-                u[i] = v[i] = u_prev[i] = v_prev[i] = dens[i] = dens_prev[i] = 0.0f;
+                u[i] = v[i] = u_prev[i] = v_prev[i] = dens[i] = dens_prev[i] = o[i] = 0.0f;
             }
         }
 
@@ -268,9 +336,5 @@ namespace FluidsProject
             mx = e.X;
             my = e.Y;
         }
-
-
-
-
     }
 }

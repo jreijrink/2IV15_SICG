@@ -21,7 +21,7 @@ namespace FluidsProject
                 x[i] += dt * s[i];
         }
 
-        private static void lin_solve(int N, int b, float[] x, float[] x0, float a, float c)
+        private static void lin_solve(int N, int b, float[] x, float[] x0, float[] o, float a, float c)
         {
             for (int k = 0; k < 20; k++)
             {
@@ -33,17 +33,17 @@ namespace FluidsProject
                     }
                 }
 
-                set_bnd(N, b, x);
+                set_bnd(N, b, x, o);
             }
         }
 
-        private static void diffuse(int N, int b, float[] x, float[] x0, float diff, float dt)
+        private static void diffuse(int N, int b, float[] x, float[] x0, float[] o, float diff, float dt)
         {
             float a = dt * diff * N * N;
-            lin_solve(N, b, x, x0, a, 1 + 4 * a);
+            lin_solve(N, b, x, x0, o, a, 1 + 4 * a);
         }
 
-        private static void advect(int N, int b, float[] d, float[] d0, float[] u, float[] v, float dt)
+        private static void advect(int N, int b, float[] d, float[] d0, float[] u, float[] v, float[] o, float dt)
         {
             int i0, j0, i1, j1;
             float x, y, s0, t0, s1, t1, dt0;
@@ -71,11 +71,10 @@ namespace FluidsProject
                                   s1 * (t0 * d0[IX(i1, j0)] + t1 * d0[IX(i1, j1)]);
                 }
             }
-            set_bnd(N, b, d);
+            set_bnd(N, b, d, o);
         }
 
-
-        private static void project(int N, float[] u, float[] v, float[] p, float[] div)
+        private static void project(int N, float[] u, float[] v, float[] p, float[] div, float[] o)
         {
 
             for (int i = 1; i <= N; i++)
@@ -86,9 +85,9 @@ namespace FluidsProject
                     p[IX(i, j)] = 0;
                 }
             }
-            set_bnd(N, 0, div); set_bnd(N, 0, p);
+            set_bnd(N, 0, div, o); set_bnd(N, 0, p, o);
 
-            lin_solve(N, 0, p, div, 1, 4);
+            lin_solve(N, 0, p, div, o, 1, 4);
 
             for (int i = 1; i <= N; i++)
             {
@@ -98,17 +97,17 @@ namespace FluidsProject
                     v[IX(i, j)] -= 0.5f * N * (p[IX(i, j + 1)] - p[IX(i, j - 1)]);
                 }
             }
-            set_bnd(N, 1, u); set_bnd(N, 2, v);
+            set_bnd(N, 1, u, o); set_bnd(N, 2, v, o);
         }
 
-        public static void dens_step(int N, float[] x, float[] x0, float[] u, float[] v, float diff, float dt)
+        public static void dens_step(int N, float[] x, float[] x0, float[] u, float[] v, float[] o, float diff, float dt)
         {
             add_source(N, x, x0, dt);
-            SWAP(ref x0, ref x); diffuse(N, 0, x, x0, diff, dt);
-            SWAP(ref x0, ref x); advect(N, 0, x, x0, u, v, dt);
+            SWAP(ref x0, ref x); diffuse(N, 0, x, x0, o, diff, dt);
+            SWAP(ref x0, ref x); advect(N, 0, x, x0, u, v, o, dt);
         }
 
-        public static void vel_step(int N, float[] u, float[] v, float[] u0, float[] v0, float visc, float dt)
+        public static void vel_step(int N, float[] u, float[] v, float[] u0, float[] v0, float[] o, float visc, float dt)
         {
             float[] g = new float[(N + 2) * (N + 2)];
             for (int i = 1; i <= N; i++)
@@ -121,12 +120,12 @@ namespace FluidsProject
 
             add_source ( N, u, u0, dt ); add_source ( N, v, v0, dt ); 
             add_source(N, v, g, dt);
-            SWAP(ref u0, ref u); diffuse(N, 1, u, u0, visc, dt);
-            SWAP(ref v0, ref v); diffuse(N, 2, v, v0, visc, dt);
-            project(N, u, v, u0, v0);
+            SWAP(ref u0, ref u); diffuse(N, 1, u, u0, o, visc, dt);
+            SWAP(ref v0, ref v); diffuse(N, 2, v, v0, o, visc, dt);
+            project(N, u, v, u0, v0, o);
             SWAP(ref u0, ref u); SWAP(ref v0, ref v);
-            advect(N, 1, u, u0, u0, v0, dt); advect(N, 2, v, v0, u0, v0, dt);
-            project(N, u, v, u0, v0);
+            advect(N, 1, u, u0, u0, v0, o, dt); advect(N, 2, v, v0, u0, v0, o, dt);
+            project(N, u, v, u0, v0, o);
         }
 
         private static void SWAP(ref float[] x0, ref float[] p1)
@@ -136,9 +135,9 @@ namespace FluidsProject
             p1 = temp;
         }
 
-        private static void set_bnd(int N, int b, float[] x)
+        private static void set_bnd(int N, int b, float[] x, float[] o)
         {
-            int i;
+            int i, j;
 
             for (i = 1; i <= N; i++)
             {
@@ -146,6 +145,27 @@ namespace FluidsProject
                 x[IX(N + 1, i)] = b == 1 ? -x[IX(N, i)] : x[IX(N, i)];
                 x[IX(i, 0)] = b == 2 ? -x[IX(i, 1)] : x[IX(i, 1)];
                 x[IX(i, N + 1)] = b == 2 ? -x[IX(i, N)] : x[IX(i, N)];
+            }
+
+            for (i = 1; i <= N; i++)
+            {
+                for (j = 1; j <= N; j++)
+                {
+                    if (o[IX(i, j)] == 1)
+                    {
+                        //Center
+                        x[IX(i, j)] = 0;
+                        //Left, invert x
+                        x[IX(i - 1, j)] = b == 1 ? -x[IX(i - 2, j)] : x[IX(i - 2, j)];
+                        //Right, invert x
+                        x[IX(i + 1, j)] = b == 1 ? -x[IX(i + 2, j)] : x[IX(i + 2, j)];
+
+                        //Bottom, invert y
+                        x[IX(i, j - 1)] = b == 2 ? -x[IX(i, j - 2)] : x[IX(i, j - 2)];
+                        //Top, invert y
+                        x[IX(i, j + 1)] = b == 2 ? -x[IX(i, j + 2)] : x[IX(i, j + 2)];
+                    }
+                }
             }
             x[IX(0, 0)] = 0.5f * (x[IX(1, 0)] + x[IX(0, 1)]);
             x[IX(0, N + 1)] = 0.5f * (x[IX(1, N + 1)] + x[IX(0, N)]);
