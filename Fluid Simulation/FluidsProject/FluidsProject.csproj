@@ -50,6 +50,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="SquareObject.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="Interface\CustomGLControl.cs">
       <SubType>UserControl</SubType>
@@ -63,6 +64,7 @@
     <Compile Include="Interface\MainWindow.Designer.cs">
       <DependentUpon>MainWindow.cs</DependentUpon>
     </Compile>
+    <Compile Include="MovingObject.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Solver.cs" />

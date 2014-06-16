@@ -18,6 +18,7 @@ namespace FluidsProject
         private bool dvel;
 
         private float[] u, v, u_prev, v_prev, o;
+        private List<MovingObject> objects;
         private float[] dens, dens_prev;
 
         private int win_id;
@@ -35,6 +36,7 @@ namespace FluidsProject
 
             initConfiguration(args);
             allocate_data();
+            create_solid_object();
 
             PreDisplay();
         }
@@ -76,6 +78,7 @@ namespace FluidsProject
             dens = new float[size];
             dens_prev = new float[size];
             o = new float[size];
+            objects = new List<MovingObject>();
         }
 
         private void apply_grafity()
@@ -90,12 +93,24 @@ namespace FluidsProject
             }
         }
 
+        private void create_solid_object()
+        {
+            SquareObject square = new SquareObject(N / 2, N / 2, N / 4, N / 4, N);
+            objects.Add(square);
+        }
+
         public void OnUpdateFrame()
         {
             get_from_UI(dens_prev, u_prev, v_prev);
-            apply_grafity();
-            Solver.vel_step(N, u, v, u_prev, v_prev, o, visc, dt);
-            Solver.dens_step(N, dens, dens_prev, u, v, o, diff, dt);
+            //apply_grafity();
+
+            foreach (MovingObject movingObject in objects)
+            {
+                movingObject.UpdatePosition();
+            }
+
+            Solver.vel_step(N, u, v, u_prev, v_prev, o, objects, visc, dt);
+            Solver.dens_step(N, dens, dens_prev, u, v, o, objects, diff, dt);
         }
 
         private void get_from_UI(float[] d, float[] u, float[] v)
@@ -248,6 +263,11 @@ namespace FluidsProject
                 }
             }
 
+            foreach (MovingObject movingObject in objects)
+            {
+                movingObject.Draw();
+            }
+
             GL.End();
         }
 
@@ -301,6 +321,8 @@ namespace FluidsProject
             {
                 u[i] = v[i] = u_prev[i] = v_prev[i] = dens[i] = dens_prev[i] = o[i] = 0.0f;
             }
+            objects = new List<MovingObject>();
+            create_solid_object();
         }
 
         public static int IX(int i, int j)
