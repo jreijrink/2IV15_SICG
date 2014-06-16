@@ -120,7 +120,7 @@ namespace FluidsProject
                 v[IX(i, j)] = force * (omy - my);
             }
 
-            if (mouse_down[1])
+            if (mouse_down[1] && (j >= 2 && j < N) && (i >= 2 && i < N))
             {
                 o[IX(i, j)] = 1;
             }
@@ -146,6 +146,7 @@ namespace FluidsProject
             {
                 draw_density();
                 draw_object();
+                drawBoundry();
             }
         }
 
@@ -184,6 +185,34 @@ namespace FluidsProject
             }
 
             GL.End();
+        }
+
+        private void drawBoundry()
+        {
+            GL.Color3(1.0f, 1.0f, 1.0f);
+            GL.LineWidth(1.0f);
+
+            GL.Begin(BeginMode.Lines);
+            
+            drawLineForIJ(1, N, N, N);
+            drawLineForIJ(N, N, N, 1);
+            drawLineForIJ(N, 1, 1, 1);
+            drawLineForIJ(1, 1, 1, N);
+
+            GL.End();
+        }
+
+        private void drawLineForIJ(int i0, int j0, int i1, int j1)
+        {
+            float h = h = 1.0f / N;
+            float x0 = (i0 - 0.5f) * h;
+            float y0 = (j0 - 0.5f) * h;
+
+            float x1 = (i1 - 0.5f) * h;
+            float y1 = (j1 - 0.5f) * h;
+
+            GL.Vertex2(x0, y0);
+            GL.Vertex2(x1, y1);
         }
 
         private void draw_object()
@@ -231,10 +260,10 @@ namespace FluidsProject
 
             GL.Begin(BeginMode.Quads);
 
-            for (i = 0; i <= N; i++)
+            for (i = 1; i < N; i++)
             {
                 x = (i - 0.5f) * h;
-                for (j = 0; j <= N; j++)
+                for (j = 1; j < N; j++)
                 {
                     y = (j - 0.5f) * h;
 

@@ -108,18 +108,8 @@ namespace FluidsProject
         }
 
         public static void vel_step(int N, float[] u, float[] v, float[] u0, float[] v0, float[] o, float visc, float dt)
-        {
-            float[] g = new float[(N + 2) * (N + 2)];
-            for (int i = 1; i <= N; i++)
-            {
-                for (int j = 1; j <= N; j++)
-                {
-                    g[IX(i, j)] = -9.81f / 100.0f;
-                }
-            }
-
+        {   
             add_source ( N, u, u0, dt ); add_source ( N, v, v0, dt ); 
-            add_source(N, v, g, dt);
             SWAP(ref u0, ref u); diffuse(N, 1, u, u0, o, visc, dt);
             SWAP(ref v0, ref v); diffuse(N, 2, v, v0, o, visc, dt);
             project(N, u, v, u0, v0, o);
