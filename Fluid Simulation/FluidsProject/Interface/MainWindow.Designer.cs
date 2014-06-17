@@ -37,7 +37,7 @@
             this.customGLControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.customGLControl1.Location = new System.Drawing.Point(0, 0);
             this.customGLControl1.Name = "customGLControl1";
-            this.customGLControl1.Size = new System.Drawing.Size(875, 548);
+            this.customGLControl1.Size = new System.Drawing.Size(584, 561);
             this.customGLControl1.TabIndex = 0;
             this.customGLControl1.VSync = false;
             // 
@@ -45,7 +45,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(875, 548);
+            this.ClientSize = new System.Drawing.Size(584, 561);
             this.Controls.Add(this.customGLControl1);
             this.Name = "MainWindow";
             this.Text = "MainWindow";

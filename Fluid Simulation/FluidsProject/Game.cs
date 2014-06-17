@@ -27,7 +27,7 @@ namespace FluidsProject
         private Rectangle drawWindow;
         private float gravity = -0.01f;//-9.81f / 100.0f;
 
-
+        
         public void init(int width, int height, string[] args)
         {
             win_x = width;
@@ -93,7 +93,7 @@ namespace FluidsProject
         public void OnUpdateFrame()
         {
             get_from_UI(dens_prev, u_prev, v_prev);
-            apply_grafity();
+            //apply_grafity();
             Solver.vel_step(N, u, v, u_prev, v_prev, o, visc, dt);
             Solver.dens_step(N, dens, dens_prev, u, v, o, diff, dt);
         }
@@ -241,9 +241,9 @@ namespace FluidsProject
                         GL.Color3(1.0f, 1.0f, 0.0f);
 
                         GL.Vertex2(x1 - 1 * h, y1 - 1 * h);
-                        GL.Vertex2(x1 + 1 * h, y1 - 1 * h);
-                        GL.Vertex2(x1 + 1 * h, y1 + 1 * h);
-                        GL.Vertex2(x1 - 1 * h, y1 + 1 * h);
+                        GL.Vertex2(x2 + 1 * h, y1 - 1 * h);
+                        GL.Vertex2(x2 + 1 * h, y2 + 1 * h);
+                        GL.Vertex2(x1 - 1 * h, y2 + 1 * h);
                     }
                 }
             }
