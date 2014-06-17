@@ -25,8 +25,8 @@ namespace FluidsProject
             _width_half = width / 2;
             _N = N;
 
-            _u = -0.4f;
-            _v = -0.6f;
+            //_u = -0.4f;
+            _v = 1;
         }
 
         public override void Draw()
@@ -44,10 +44,10 @@ namespace FluidsProject
             float y1 = (_y - _height_half - 0.5f) * h;
             float y2 = (_y + _height_half + 0.5f) * h;
 
-            GL.Vertex2(x1, y1);
-            GL.Vertex2(x2, y1);
-            GL.Vertex2(x2, y2);
-            GL.Vertex2(x1, y2);
+            GL.Color3(1, 1, 0.6f); GL.Vertex2(x1, y1);
+            GL.Color3(1, 1, 0.1f); GL.Vertex2(x2, y1);
+            GL.Color3(1, 1, 0.1f); GL.Vertex2(x2, y2);
+            GL.Color3(1, 1, 0.6f); GL.Vertex2(x1, y2);
 
             GL.End();
         }
@@ -66,23 +66,23 @@ namespace FluidsProject
             if (x2 > 1)
             {
                 _x = _N - _width_half - 0.5f;
-                _u = 0;
+                _u *= -1;
             }
             if (x1 < 0)
             {
                 _x = _width_half + 0.5f;
-                _u = 0;
+                _u *= -1;
             }
 
             if (y2 > 1)
             {
                 _y = _N - _height_half - 0.5f;
-                _v = 0;
+                _v *= -1;
             }
             if (y1 < 0)
             {
                 _y = _height_half + 0.5f;
-                _v = 0;
+                _v *= -1;
             }
         }
 
@@ -103,6 +103,17 @@ namespace FluidsProject
             return false;
         }
 
+        public override void SetVelocity(float u, float v)
+        {
+            _u = u * 0.01f;
+            _v = v * 0.01f;
+        }
+        public override void SetPosition(float x, float y)
+        {
+            _x = x;
+            _y = y;
+        }
+
         public override float GetVelocityX(int x, int y, float[] u)
         {
             if (x == Math.Floor(_x) + _width_half)
@@ -114,7 +125,6 @@ namespace FluidsProject
             {
                 return -u[Solver.IX(x - 1, y)] + (_u > 0 ? 0 : _u);
             }
-
 
             return 0;
         }
@@ -132,6 +142,31 @@ namespace FluidsProject
             }
 
             return 0;
+        }
+
+        public override float GetVelocityDensity(int x, int y, float[] d)
+        {
+            if (x == Math.Floor(_x) + _width_half)
+            {
+                return d[Solver.IX(x + 1, y)];
+            }
+
+            if (x == Math.Ceiling(_x) - _width_half)
+            {
+                return d[Solver.IX(x - 1, y)];
+            }
+
+            if (y == Math.Floor(_y) + _height_half)
+            {
+                return d[Solver.IX(x, y + 1)];
+            }
+
+            if (y == Math.Ceiling(_y) - _height_half)
+            {
+                return d[Solver.IX(x, y - 1)];
+            }
+
+            return 0;// d[Solver.IX(x, y)];
         }
     }
 }

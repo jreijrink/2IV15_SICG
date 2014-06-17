@@ -16,6 +16,7 @@ namespace FluidsProject
         private float dt, diff, visc;
         private float force, source;
         private bool dvel;
+        private MovingObject on_movingObject;
 
         private float[] u, v, u_prev, v_prev, o;
         private List<MovingObject> objects;
@@ -135,6 +136,12 @@ namespace FluidsProject
                 v[IX(i, j)] = force * (omy - my);
             }
 
+            if (on_movingObject != null)
+            {
+                on_movingObject.SetPosition(i, j);
+                on_movingObject.SetVelocity((mx - omx), (omy - my));
+            }
+
             if (mouse_down[1] && (j >= 2 && j < N) && (i >= 2 && i < N))
             {
                 o[IX(i, j)] = 1;
@@ -195,7 +202,7 @@ namespace FluidsProject
                     y = (j - 0.5f) * h;
 
                     GL.Vertex2(x, y);
-                    GL.Vertex2(x + u[IX(i, j)], y + v[IX(i, j)]);
+                    GL.Vertex2(x + 0.1f * u[IX(i, j)], y + 0.1f * v[IX(i, j)]);
                 }
             }
 
@@ -242,23 +249,31 @@ namespace FluidsProject
 
             GL.Begin(BeginMode.Quads);
 
-            for (i = 1; i <= N; i++)
+            for (j = 1; j <= N; j++)
             {
-                x1 = (i - 0.5f) * h;
-                x2 = (i + 0.5f) * h;
-                for (j = 1; j <= N; j++)
+                for (i = 1; i <= N; i++)
                 {
+                    x1 = (i - 0.5f) * h;
+                    x2 = (i + 0.5f) * h;
                     y1 = (j - 0.5f) * h;
                     y2 = (j + 0.5f) * h;
 
                     if (o[IX(i, j)] == 1)
                     {
-                        GL.Color3(1.0f, 1.0f, 0.0f);
 
-                        GL.Vertex2(x1 - 1 * h, y1 - 1 * h);
-                        GL.Vertex2(x1 + 1 * h, y1 - 1 * h);
-                        GL.Vertex2(x1 + 1 * h, y1 + 1 * h);
-                        GL.Vertex2(x1 - 1 * h, y1 + 1 * h);
+                        /*
+                        GL.Color3(d00, d00, d00); GL.Vertex2(x, y);
+                        GL.Color3(d10, d10, d10); GL.Vertex2(x + h, y);
+                        GL.Color3(d11, d11, d11); GL.Vertex2(x + h, y + h);
+                        GL.Color3(d01, d01, d01); GL.Vertex2(x, y + h);
+                        */
+
+                        GL.Color3(0, 1, 0.6f); GL.Vertex2(x1 - 1 * h, y1 - 1 * h);
+                        GL.Color3(0, 1, 0.1f); GL.Vertex2(x1 + 1 * h, y1 - 1 * h);
+                        GL.Color3(0, 1, 0.1f); GL.Vertex2(x1 + 1 * h, y1 + 1 * h);
+                        GL.Color3(0, 1, 0.6f); GL.Vertex2(x1 - 1 * h, y1 + 1 * h);
+
+                        //GL.Color3(1.0f, 1.0f, 0.0f);
                     }
                 }
             }
@@ -367,6 +382,21 @@ namespace FluidsProject
                 mouse_down[2] = true;
             if (e.Button == MouseButtons.Middle)
                 mouse_down[1] = true;
+
+            int i, j, size = (N + 2) * (N + 2);
+
+            i = (int)((mx / (float)win_x) * N + 1);
+            j = (int)(((win_y - my) / (float)win_y) * N + 1);
+
+            foreach (MovingObject movingObject in objects)
+            {
+                if (movingObject.IsObjectCell(i, j))
+                {
+                    movingObject.SetVelocity(0, 0);
+                    movingObject.SetPosition(i, j);
+                    on_movingObject = movingObject;
+                }
+            }
         }
 
         public void OnMouseUp(object sender, MouseEventArgs e)
@@ -380,6 +410,7 @@ namespace FluidsProject
                 mouse_down[2] = false;
             if (e.Button == MouseButtons.Middle)
                 mouse_down[1] = false;
+            on_movingObject = null;
         }
 
         public void OnMouseMove(object sender, MouseEventArgs e)
