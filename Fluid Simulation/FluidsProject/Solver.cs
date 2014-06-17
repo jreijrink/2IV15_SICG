@@ -8,6 +8,8 @@ namespace FluidsProject
 {
     class Solver
     {
+        static float gravity = -0.01f;//-9.81f / 100.0f;
+
         public static int IX(int i, int j)
         {
             int index = Game.IX(i, j);
@@ -108,7 +110,8 @@ namespace FluidsProject
         }
 
         public static void vel_step(int N, float[] u, float[] v, float[] u0, float[] v0, float[] o, List<MovingObject> objects, float visc, float dt)
-        {   
+        {
+            grafity(N, v);
             add_source ( N, u, u0, dt ); add_source ( N, v, v0, dt ); 
             SWAP(ref u0, ref u); diffuse(N, 1, u, u0, o, objects, visc, dt);
             SWAP(ref v0, ref v); diffuse(N, 2, v, v0, o, objects, visc, dt);
@@ -166,27 +169,7 @@ namespace FluidsProject
                     {
                         if (movingObject.IsObjectCell(i, j))
                         {
-                            /*
-                            float u = movingObject.GetVelocityX();
-                            float v = movingObject.GetVelocityY();
-                            */
-
-                            x[IX(i, j)] = b == 1 ? movingObject.GetVelocityX(i, j, x) : (b == 2) ? movingObject.GetVelocityY(i, j, x) : x[IX(i, j)];
-
-                            /*
-                            //Center
-                            x[IX(i, j)] = 0;
-
-                            //Left, invert x
-                            x[IX(i - 1, j)] = b == 1 ? -x[IX(i - 2, j)] : x[IX(i - 2, j)];
-                            //Right, invert x
-                            x[IX(i + 1, j)] = b == 1 ? -x[IX(i + 2, j)] : x[IX(i + 2, j)];
-
-                            //Bottom, invert y
-                            x[IX(i, j - 1)] = b == 2 ? -x[IX(i, j - 2)] + v : x[IX(i, j - 2)];
-                            //Top, invert y
-                            x[IX(i, j + 1)] = b == 2 ? -x[IX(i, j + 2)] + v : x[IX(i, j + 2)];
-                            */
+                            x[IX(i, j)] = b == 1 ? movingObject.GetVelocityX(i, j, x) : (b == 2) ? movingObject.GetVelocityY(i, j, x) : movingObject.GetVelocityDensity(i, j, x);
                         }
                     }
                 }
@@ -196,6 +179,20 @@ namespace FluidsProject
             x[IX(0, N + 1)] = 0.5f * (x[IX(1, N + 1)] + x[IX(0, N)]);
             x[IX(N + 1, 0)] = 0.5f * (x[IX(N, 0)] + x[IX(N + 1, 1)]);
             x[IX(N + 1, N + 1)] = 0.5f * (x[IX(N, N + 1)] + x[IX(N + 1, N)]);
+        }
+
+        private static void grafity(int N, float[] v)
+        {
+            /*
+            int i, j;
+            for (i = 2; i <= N - 1; i++)
+            {
+                for (j = 2; j <= N - 1; j++)
+                {
+                    v[IX(i, j)] += gravity;
+                }
+            }
+            */
         }
     }
 }
