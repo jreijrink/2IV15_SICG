@@ -5,8 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using FluidsProject.Objects;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
+using micfort.GHL.Math2;
 
 namespace FluidsProject
 {
@@ -28,7 +30,8 @@ namespace FluidsProject
         private Rectangle drawWindow;
         private float gravity = -0.01f;//-9.81f / 100.0f;
 
-        
+        private List<RigidBody> rigids = new List<RigidBody>();
+ 
         public void init(int width, int height, string[] args)
         {
             win_x = width;
@@ -38,7 +41,14 @@ namespace FluidsProject
             allocate_data();
             create_solid_object();
 
+            create_bodies();
             PreDisplay();
+        }
+
+        private void create_bodies()
+        {
+            Box box = new Box(new HyperPoint<float>(0,0), 100, 10.0f/N, 10.0f/N);
+            rigids.Add(box);
         }
 
         private void initConfiguration(string[] args)
@@ -106,7 +116,7 @@ namespace FluidsProject
 
             foreach (MovingObject movingObject in objects)
             {
-                movingObject.UpdatePosition();
+                //movingObject.UpdatePosition();
             }
 
             Solver.vel_step(N, u, v, u_prev, v_prev, o, objects, visc, dt);
@@ -122,7 +132,7 @@ namespace FluidsProject
                 u[i] = v[i] = d[i] = 0.0f;
             }
 
-            //if (!mouse_down[0] && !mouse_down[2] && !mouse_down[1]) return;
+            if (!mouse_down[0] && !mouse_down[2] && !mouse_down[1]) return;
 
             i = (int)((mx / (float)win_x) * N + 1);
             j = (int)(((win_y - my) / (float)win_y) * N + 1);
@@ -162,6 +172,15 @@ namespace FluidsProject
                 draw_density();
                 draw_object();
                 drawBoundry();
+                //drawBodies();
+            }
+        }
+
+        private void drawBodies()
+        {
+            foreach (RigidBody body in rigids)
+            {
+                //body.draw();
             }
         }
 
@@ -215,6 +234,7 @@ namespace FluidsProject
             drawLineForIJ(1, 1, 1, N);
 
             GL.End();
+            GL.Color3(0, 0, 0);
         }
 
         private void drawLineForIJ(int i0, int j0, int i1, int j1)
