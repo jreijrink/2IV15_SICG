@@ -48,7 +48,11 @@ namespace FluidsProject
 
         private void create_bodies()
         {
-            Box box = new Box(new HyperPoint<float>(0,0), 100, 10.0f/N, 10.0f/N);
+            float h = 1.0f / N;
+            float x0 = (N/2.0f - 0.5f) * h;
+            float y0 = (N/2.0f - 0.5f) * h;
+
+            Box box = new Box(new HyperPoint<float>(x0, y0), 100, 10.0f * h, 10.0f * h);
             rigids.Add(box);
         }
 
@@ -177,9 +181,9 @@ namespace FluidsProject
             else
             {
                 draw_density();
-                draw_object();
+                //draw_object();
                 drawBoundry();
-                //drawBodies();
+                drawBodies();
             }
         }
 
@@ -187,7 +191,7 @@ namespace FluidsProject
         {
             foreach (RigidBody body in rigids)
             {
-                //body.draw();
+                body.draw();
             }
         }
 
@@ -241,7 +245,6 @@ namespace FluidsProject
             drawLineForIJ(1, 1, 1, N);
 
             GL.End();
-            GL.Color3(0, 0, 0);
         }
 
         private void drawLineForIJ(int i0, int j0, int i1, int j1)
