@@ -105,6 +105,7 @@ namespace FluidsProject.Objects
             return x;
         }
 
+
         abstract public void calculateInertia();
 
         public Matrix<float> getRotationMatrix(float angle)

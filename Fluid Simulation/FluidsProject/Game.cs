@@ -53,8 +53,8 @@ namespace FluidsProject
         private void create_bodies()
         {
             float h = 1.0f / N;
-            float x0 = (N/2.0f - 0.5f) * h;
-            float y0 = (N/2.0f - 0.5f) * h;
+            float x0 = (N/2.0f) * h;
+            float y0 = (N/2.0f) * h;
 
             Box box = new Box(new HyperPoint<float>(x0, y0), 100, 10.0f * h, 10.0f * h, N);
             rigids.Add(box);
@@ -114,8 +114,9 @@ namespace FluidsProject
 
         private void create_solid_object()
         {
-            SquareObject square = new SquareObject(N / 2, N / 2, N / 4, N / 4, N);
+            SquareObject square = new SquareObject(N / 4, N / 4, N / 4, N / 4, N);
             objects.Add(square);
+            square.SetVelocity(0,2f);
         }
 
         public void OnUpdateFrame()
@@ -126,8 +127,8 @@ namespace FluidsProject
             Solver.setBoundaryConditionsSolidObjects(objects, N);
             Solver.setBoundaryConditionsRigidBodies(rigids, N);
 
-            Solver.vel_step(N, u, v, u_prev, v_prev, o, objects, visc, dt, rigids);
-            Solver.dens_step(N, dens, dens_prev, u, v, o, objects, diff, dt, rigids);
+            Solver.vel_step(N, u, v, u_prev, v_prev, o, visc, dt);
+            Solver.dens_step(N, dens, dens_prev, u, v, o, diff, dt);
 
             foreach (RigidBody body in rigids)
             {
@@ -519,7 +520,7 @@ namespace FluidsProject
                 {
                     if (movingObject.IsObjectCell(i, j))
                     {
-                        movingObject.SetVelocity(0, 0);
+                        //movingObject.SetVelocity(0, 0);
                         movingObject.SetPosition(i, j);
                         on_movingObject = movingObject;
                     }

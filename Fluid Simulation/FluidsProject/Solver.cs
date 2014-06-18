@@ -27,7 +27,30 @@ namespace FluidsProject
                 x[i] += dt * s[i];
         }
 
-        private static void lin_solve(int N, int b, float[] x, float[] x0, float[] o, List<MovingObject> objects, float a, float c, List<RigidBody> bodies)
+
+        public static void add_rigid_velocity(List<RigidBody> bodies, int N)
+        {
+            foreach (RigidBody body in bodies)
+            {
+                int[] minMaxIJ = getMinMaxIJ(body.getGlobalVertices().ConvertAll(p => p.Position), N);
+
+                int minI = minMaxIJ[0];
+                int maxI = minMaxIJ[1];
+
+                int minJ = minMaxIJ[2];
+                int maxJ = minMaxIJ[3];
+
+                for (int i = minI; i < maxI; i++)
+                {
+                    for (int j = minJ; j < maxJ; j++)
+                    {
+
+                    }
+                }  
+            }
+        }
+
+        private static void lin_solve(int N, int b, float[] x, float[] x0, float[] o, float a, float c)
         {
             for (int k = 0; k < 20; k++)
             {
@@ -39,17 +62,17 @@ namespace FluidsProject
                     }
                 }
 
-                set_bnd(N, b, x, o, objects, bodies);
+                set_bnd(N, b, x, o);
             }
         }
 
-        private static void diffuse(int N, int b, float[] x, float[] x0, float[] o, List<MovingObject> objects, float diff, float dt, List<RigidBody> bodies)
+        private static void diffuse(int N, int b, float[] x, float[] x0, float[] o, float diff, float dt)
         {
             float a = dt * diff * N * N;
-            lin_solve(N, b, x, x0, o, objects, a, 1 + 4 * a, bodies);
+            lin_solve(N, b, x, x0, o, a, 1 + 4 * a);
         }
 
-        private static void advect(int N, int b, float[] d, float[] d0, float[] u, float[] v, float[] o, List<MovingObject> objects, float dt, List<RigidBody> bodies)
+        private static void advect(int N, int b, float[] d, float[] d0, float[] u, float[] v, float[] o, float dt)
         {
             int i0, j0, i1, j1;
             float x, y, s0, t0, s1, t1, dt0;
@@ -76,10 +99,10 @@ namespace FluidsProject
                     d[IX(i, j)] = s0 * (t0 * d0[IX(i0, j0)] + t1 * d0[IX(i0, j1)]) + s1 * (t0 * d0[IX(i1, j0)] + t1 * d0[IX(i1, j1)]);
                 }
             }
-            set_bnd(N, b, d, o, objects, bodies);
+            set_bnd(N, b, d, o);
         }
 
-        private static void project(int N, float[] u, float[] v, float[] p, float[] div, float[] o, List<MovingObject> objects, List<RigidBody> bodies)
+        private static void project(int N, float[] u, float[] v, float[] p, float[] div, float[] o)
         {
 
             for (int i = 1; i <= N; i++)
@@ -90,9 +113,9 @@ namespace FluidsProject
                     p[IX(i, j)] = 0;
                 }
             }
-            set_bnd(N, 0, div, o, objects, bodies); set_bnd(N, 0, p, o, objects, bodies);
+            set_bnd(N, 0, div, o); set_bnd(N, 0, p, o);
 
-            lin_solve(N, 0, p, div, o, objects, 1, 4, bodies);
+            lin_solve(N, 0, p, div, o, 1, 4);
 
             for (int i = 1; i <= N; i++)
             {
@@ -102,27 +125,27 @@ namespace FluidsProject
                     v[IX(i, j)] -= 0.5f * N * (p[IX(i, j + 1)] - p[IX(i, j - 1)]);
                 }
             }
-            set_bnd(N, 1, u, o, objects, bodies); set_bnd(N, 2, v, o, objects, bodies);
+            set_bnd(N, 1, u, o); set_bnd(N, 2, v, o);
         }
 
-        public static void dens_step(int N, float[] x, float[] x0, float[] u, float[] v, float[] o, List<MovingObject> objects, float diff, float dt, List<RigidBody> bodies)
+        public static void dens_step(int N, float[] x, float[] x0, float[] u, float[] v, float[] o, float diff, float dt)
         {
             add_source(N, x, x0, dt);
-            SWAP(ref x0, ref x); diffuse(N, 0, x, x0, o, objects, diff, dt, bodies);
-            SWAP(ref x0, ref x); advect(N, 0, x, x0, u, v, o, objects, dt, bodies);
+            SWAP(ref x0, ref x); diffuse(N, 0, x, x0, o, diff, dt);
+            SWAP(ref x0, ref x); advect(N, 0, x, x0, u, v, o, dt);
         }
 
-        public static void vel_step(int N, float[] u, float[] v, float[] u0, float[] v0, float[] o, List<MovingObject> objects, float visc, float dt, List<RigidBody> bodies)
+        public static void vel_step(int N, float[] u, float[] v, float[] u0, float[] v0, float[] o, float visc, float dt)
         {
             //float[] g = grafity(N);
             //add_source(N, v, g, dt);
             add_source(N, u, u0, dt); add_source(N, v, v0, dt);
-            SWAP(ref u0, ref u); diffuse(N, 1, u, u0, o, objects, visc, dt, bodies);
-            SWAP(ref v0, ref v); diffuse(N, 2, v, v0, o, objects, visc, dt, bodies);
-            project(N, u, v, u0, v0, o, objects, bodies);
+            SWAP(ref u0, ref u); diffuse(N, 1, u, u0, o, visc, dt);
+            SWAP(ref v0, ref v); diffuse(N, 2, v, v0, o, visc, dt);
+            project(N, u, v, u0, v0, o);
             SWAP(ref u0, ref u); SWAP(ref v0, ref v);
-            advect(N, 1, u, u0, u0, v0, o, objects, dt, bodies); advect(N, 2, v, v0, u0, v0, o, objects, dt, bodies);
-            project(N, u, v, u0, v0, o, objects, bodies);
+            advect(N, 1, u, u0, u0, v0, o, dt); advect(N, 2, v, v0, u0, v0, o, dt);
+            project(N, u, v, u0, v0, o);
         }
 
         private static void SWAP(ref float[] x0, ref float[] p1)
@@ -141,7 +164,7 @@ namespace FluidsProject
             }
         }
 
-        private static void set_bnd(int N, int b, float[] x, float[] o, List<MovingObject> objects, List<RigidBody> bodies)
+        private static void set_bnd(int N, int b, float[] x, float[] o)
         {
             int i, j;
 
@@ -171,34 +194,30 @@ namespace FluidsProject
                         x[IX(i, j - 1)] = b == 2 ? -x[IX(i, j - 2)] : x[IX(i, j - 2)];
                         //Top, invert y
                         x[IX(i, j + 1)] = b == 2 ? -x[IX(i, j + 2)] : x[IX(i, j + 2)];
-
-                        
                     }
 
-                    BoundrySettings bs = b == 1
-                                                 ? boundaries[IX(i, j)].u
-                                                 : b == 2 ? boundaries[IX(i, j)].v : boundaries[IX(i, j)].d;
+                    BoundrySettings bs = b == 1 ? boundaries[IX(i, j)].u
+                                                : b == 2 ? boundaries[IX(i, j)].v 
+                                                : boundaries[IX(i, j)].d;
+
                     Source source = boundaries[IX(i, j)].source;
                     if (bs == BoundrySettings.Copy)
                     {
                         if (source == Source.left) x[IX(i, j)] = x[IX(i - 1, j)];
-                        if (source == Source.up) x[IX(i, j)] = x[IX(i, j + 1)];
-                        if (source == Source.right) x[IX(i, j)] = x[IX(i + 1, j)];
-                        if (source == Source.down) x[IX(i, j)] = x[IX(i, j - 1)];
+                        else if (source == Source.up) x[IX(i, j)] = x[IX(i, j + 1)];
+                        else if (source == Source.right) x[IX(i, j)] = x[IX(i + 1, j)];
+                        else if (source == Source.down) x[IX(i, j)] = x[IX(i, j - 1)];
                     }
                     else if (bs == BoundrySettings.Invert)
                     {
                         if (source == Source.left) x[IX(i, j)] = -x[IX(i - 1, j)];
-                        if (source == Source.up) x[IX(i, j)] = -x[IX(i, j + 1)];
-                        if (source == Source.right) x[IX(i, j)] = -x[IX(i + 1, j)];
-                        if (source == Source.down) x[IX(i, j)] = -x[IX(i, j - 1)];
+                        else if (source == Source.up) x[IX(i, j)] = -x[IX(i, j + 1)];
+                        else if (source == Source.right) x[IX(i, j)] = -x[IX(i + 1, j)];
+                        else if (source == Source.down) x[IX(i, j)] = -x[IX(i, j - 1)];
                     }
                     else if (bs == BoundrySettings.Zero)
                     {
-                        if (source == Source.left) x[IX(i, j)] = 0;
-                        if (source == Source.up) x[IX(i, j)] = 0;
-                        if (source == Source.right) x[IX(i, j)] = 0;
-                        if (source == Source.down) x[IX(i, j)] = 0;
+                        x[IX(i, j)] = 0;
                     }
                 }
             }
@@ -215,7 +234,7 @@ namespace FluidsProject
         {
             foreach (RigidBody body in bodies)
             {
-                int[] minMaxIJ = getMinMaxIJ(bodies.ConvertAll(b => b.getPosition()), N);
+                int[] minMaxIJ = getMinMaxIJ(body.getGlobalVertices().ConvertAll(p => p.Position), N);
 
                 int minI = minMaxIJ[0];
                 int maxI = minMaxIJ[1];
@@ -227,16 +246,16 @@ namespace FluidsProject
                 {
                     for (int j = minJ; j < maxJ; j++)
                     {
-                        float xi = i / N;
-                        float yj = i / N;
+                        float xi = (float)i / N;
+                        float yj = (float)j / N;
 
                         bool ijIn = body.pointInPolygon(new HyperPoint<float>(xi, yj));
                         if (ijIn)
                         {
-                            float xLeft = (i - 1) / N;
-                            float xRight = (i + 1) / N;
-                            float yUp = (j + 1) / N;
-                            float yDown = (j - 1) / N;
+                            float xLeft = (float)(i - 1) / N;
+                            float xRight = (float)(i + 1) / N;
+                            float yUp = (float)(j + 1) / N;
+                            float yDown = (float)(j - 1) / N;
 
                             bool leftIn = body.pointInPolygon(new HyperPoint<float>(xLeft, yj));
                             bool rightIn = body.pointInPolygon(new HyperPoint<float>(xRight, yj));
@@ -296,8 +315,8 @@ namespace FluidsProject
 
             foreach (HyperPoint<float> p in points)
             {
-                int i = (int)(p.X * N);
-                int j = (int)(p.Y * N);
+                int i = (int)Math.Floor(p.X * N);
+                int j = (int)Math.Floor(p.Y * N);
 
                 if (i < minI)
                 {
@@ -336,16 +355,16 @@ namespace FluidsProject
                 {
                     for (int j = minJ; j < maxJ; j++)
                     {
-                        float xi = i / N;
-                        float yj = i / N;
+                        float xi = (float)i / N;
+                        float yj = (float)j / N;
 
                         bool ijIn = movingObject.pointInObject(new HyperPoint<float>(xi, yj));
                         if (ijIn)
                         {
-                            float xLeft = (i - 1) / N;
-                            float xRight = (i + 1) / N;
-                            float yUp = (j + 1) / N;
-                            float yDown = (j - 1) / N;
+                            float xLeft = (float)(i - 1) / N;
+                            float xRight = (float)(i + 1) / N;
+                            float yUp = (float)(j + 1) / N;
+                            float yDown = (float)(j - 1) / N;
 
                             bool leftIn = movingObject.pointInObject(new HyperPoint<float>(xLeft, yj));
                             bool rightIn = movingObject.pointInObject(new HyperPoint<float>(xRight, yj));
@@ -374,19 +393,19 @@ namespace FluidsProject
                                 boundaries[IX(i, j)].d = BoundrySettings.Copy;
                                 boundaries[IX(i, j)].source = Source.left;
                             }
-                            if (!upIn && downIn)
+                            if (upIn && !downIn)
                             {
                                 boundaries[IX(i, j)].u = BoundrySettings.Copy;
                                 boundaries[IX(i, j)].v = BoundrySettings.Invert;
                                 boundaries[IX(i, j)].d = BoundrySettings.Copy;
-                                boundaries[IX(i, j)].source = Source.up;
+                                boundaries[IX(i, j)].source = Source.down;
                             }
                             if (!upIn && downIn)
                             {
                                 boundaries[IX(i, j)].u = BoundrySettings.Copy;
                                 boundaries[IX(i, j)].v = BoundrySettings.Invert;
                                 boundaries[IX(i, j)].d = BoundrySettings.Copy;
-                                boundaries[IX(i, j)].source = Source.down;
+                                boundaries[IX(i, j)].source = Source.up;
                             }
                         }
                     }
