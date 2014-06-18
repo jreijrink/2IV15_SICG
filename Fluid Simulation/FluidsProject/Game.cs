@@ -386,6 +386,8 @@ namespace FluidsProject
             GLControl control = (GLControl)sender;
             win_x = control.ClientRectangle.Width;
             win_y = control.ClientRectangle.Height;
+            
+            cloth.OnResize(win_x, win_y);
 
             GL.Viewport(0, 0, win_x, win_y);
         }

@@ -12,8 +12,8 @@ namespace FluidsProject.Particles
 {
     class Cloth
     {
-		private int N;
-		public float dt, d;
+        private int N;
+        public float dt, d;
         private int windowWidth, windowHeigt;
 
         private List<Particle> particles;
@@ -21,14 +21,14 @@ namespace FluidsProject.Particles
         private List<Constraint> constrains;
         private List<FixedObject> objects;
 
-        private double minParticleDistance = 0.0002f;
+        private double minParticleDistance = 0.0005f;
         private double minHorDistance = 0.2;
         private Particle currentSelectedParticle;
         private Particle mouseParticle;
         //private bool hor_force_applied;
         private SpringForce mouseSpringForce;
 
-        public int integrationMode = 0;
+        public int integrationMode = 2;
         public int numSteps = 1;
         private float particle_size;
 
@@ -46,13 +46,13 @@ namespace FluidsProject.Particles
             constrains = new List<Constraint>();
             objects = new List<FixedObject>();
         }
-        
+
         public void ClearData()
         {
             particles.ForEach(x => x.reset());
         }
-                
-        public void InitFlagSystem()
+
+        public void InitFlagSystem(float[] d, float[] u, float[] v)
         {
             this.particle_size = 0.015f;
 
@@ -61,7 +61,7 @@ namespace FluidsProject.Particles
             HyperPoint<float> start = new HyperPoint<float>(0.2f, 0.4f);
             HyperPoint<float> offset = new HyperPoint<float>(0.0f, 0.0f);
 
-            createFlag(particles, forces, constrains, objects, start, offset, size, dist);
+            createFlag(particles, forces, constrains, objects, start, offset, size, dist, d, u, v);
             //createCurtain(particles, forces, constrains, objects, start, offset, size, dist);
         }
 
@@ -69,7 +69,7 @@ namespace FluidsProject.Particles
         {
             this.particle_size = 0.01f;
 
-            HyperPoint<int> size = new HyperPoint<int>(5,7);
+            HyperPoint<int> size = new HyperPoint<int>(5, 7);
             float dist = 0.05f;
             HyperPoint<float> start = new HyperPoint<float>(0.1f, 0.5f);
             HyperPoint<float> offset = new HyperPoint<float>(0.0f, 0.0f);
@@ -91,17 +91,17 @@ namespace FluidsProject.Particles
             HyperPoint<float> start, HyperPoint<float> offset, HyperPoint<int> size, float dist, float[] d, float[] u, float[] v)
         {
             int index = 0;
-            
+
             for (int i = 0; i < 2; i++)
             {
                 if (i == 1)
-                    start = start + new HyperPoint<float>(size.X*dist*i, 0) + new HyperPoint<float>(0.35f, 0);
+                    start = start + new HyperPoint<float>(size.X * dist * i, 0) + new HyperPoint<float>(0.35f, 0);
                 for (int y = 0; y < size.Y; y++)
                 {
                     for (int x = 0; x < size.X; x++)
                     {
-                        offset = new HyperPoint<float>(dist*x, dist*y);
-                        Particle particle = new Particle(index, start + offset, 5.0f);
+                        offset = new HyperPoint<float>(dist * x, dist * y);
+                        Particle particle = new Particle(index, start + offset, 2.0f);
                         particles.Add(particle);
 
                         PressureForce pressureForce = new PressureForce(particle, dt, N, d, u, v);
@@ -120,7 +120,7 @@ namespace FluidsProject.Particles
                         if (x > 1)
                         {
                             //Long spring to particle 2 to left
-                            forces.Add(createSpringForce(particle, particles[index - 2], dist*2));
+                            forces.Add(createSpringForce(particle, particles[index - 2], dist * 2));
                         }
 
                         if (y != 0)
@@ -133,20 +133,20 @@ namespace FluidsProject.Particles
                             if (x != 0)
                             {
                                 forces.Add(createStiffSpringForce(particle, particles[index - size.X - 1],
-                                                                  (float) Math.Sqrt(2*dist*dist)));
+                                                                  (float)Math.Sqrt(2 * dist * dist)));
                                 //constrains.Add(new RodConstraint(particle, particles[index - size - 1], (float)Math.Sqrt(2 * dist * dist)));
                             }
                             if (x < (size.X - 1))
                             {
                                 forces.Add(createStiffSpringForce(particle, particles[index - size.X + 1],
-                                                                  (float) Math.Sqrt(2*dist*dist)));
+                                                                  (float)Math.Sqrt(2 * dist * dist)));
                                 //constrains.Add(new RodConstraint(particle, particles[index - size + 1], (float)Math.Sqrt(2 * dist * dist)));
                             }
                         }
                         if (y > 1)
                         {
                             //Long spring to particle 2 to above
-                            forces.Add(createSpringForce(particle, particles[index - (size.X*2)], dist*2));
+                            forces.Add(createSpringForce(particle, particles[index - (size.X * 2)], dist * 2));
                         }
 
                         if (y == size.Y - 1)
@@ -160,12 +160,12 @@ namespace FluidsProject.Particles
                 }
             }
 
-            objects.Add(new VerLineObject(-1.95f, -2, 4, true));
-            objects.Add(new VerLineObject(1.95f, -2, 4, false));
+            objects.Add(new VerLineObject((0.5f)/N, 0, 1, true));
+            objects.Add(new VerLineObject(1 - (0.5f) / N, 0, 1, false));
         }
 
         private void createFlag(List<Particle> particels, List<Force> forces, List<Constraint> constraints, List<FixedObject> objects,
-            HyperPoint<float> start, HyperPoint<float> offset, int size, float dist)
+            HyperPoint<float> start, HyperPoint<float> offset, int size, float dist, float[] d, float[] u, float[] v)
         {
             int index = 0;
             offset = new HyperPoint<float>(0.0f, dist * (size - 1));
@@ -189,6 +189,13 @@ namespace FluidsProject.Particles
                     offset = new HyperPoint<float>(dist * x, dist * y);
                     Particle particle = new Particle(index, start + offset, 5.0f);
                     particles.Add(particle);
+                    forces.Add(new GravityForce(particle));
+
+                    PressureForce pressureForce = new PressureForce(particle, dt, N, d, u, v);
+                    forces.Add(pressureForce);
+                    DragForce dragForce = new DragForce(particle);
+
+                    forces.Add(dragForce);
                     forces.Add(new GravityForce(particle));
 
                     if (x != 0)
@@ -237,7 +244,7 @@ namespace FluidsProject.Particles
                 }
             }
         }
-        
+
         private SpringForce createSpringForce(Particle p1, Particle p2, float dist)
         {
             return new SpringForce(p1, p2, dist, 1.0f, 1.0f, Color.Empty);
@@ -257,7 +264,7 @@ namespace FluidsProject.Particles
         {
             return new SpringForce(p1, p2, dist, 50.0f, 10.0f, color);
         }
-        
+
         private void DrawParticles()
         {
             particles.ForEach(x => x.draw());
@@ -277,7 +284,7 @@ namespace FluidsProject.Particles
         {
             objects.ForEach(o => o.Draw());
         }
-                
+
         public void OnRenderFrame()
         {
             DrawForces();
@@ -295,12 +302,12 @@ namespace FluidsProject.Particles
         public void OnKeyDown(object sender, KeyEventArgs keyEventArgs)
         {
             switch (keyEventArgs.KeyCode)
-			{
+            {
                 case Keys.NumPad6:
-			        numSteps += 1;
-			        break;
+                    numSteps += 1;
+                    break;
                 case Keys.NumPad4:
-			        numSteps -=1;
+                    numSteps -= 1;
                     numSteps = (numSteps > 1) ? numSteps : 1;
                     break;
                 case Keys.NumPad8:
@@ -308,24 +315,24 @@ namespace FluidsProject.Particles
                     break;
                 case Keys.NumPad2:
                     dt -= 0.001f;
-			        dt = (dt > 0) ? dt : 0.001f;
+                    dt = (dt > 0) ? dt : 0.001f;
                     break;
-				case Keys.C:
-					ClearData();
-					break;
+                case Keys.C:
+                    ClearData();
+                    break;
 
                 case Keys.Q:
                     break;
                 case Keys.I:
-			        integrationMode = (integrationMode + 1)%3;
-			        break;
+                    integrationMode = (integrationMode + 1) % 3;
+                    break;
             }
         }
 
         public bool OnMouseDown(MouseEventArgs e)
         {
             float mouseX = (float)(e.Location.X / (float)windowWidth);
-            float mouseY = 1 -(float)(e.Location.Y / (float)windowHeigt);
+            float mouseY = 1 - (float)(e.Location.Y / (float)windowHeigt);
 
             if (e.Button == MouseButtons.Left)
             {
@@ -410,7 +417,7 @@ namespace FluidsProject.Particles
             {
                 mouseParticle.Position = mouseLoc;
             }
-            
+
             /*
             if (hor_force_applied)
             {
@@ -427,6 +434,12 @@ namespace FluidsProject.Particles
                 }
             }
             */
+        }
+
+        public void OnResize(int windowWidth, int windowHeigt)
+        {
+            this.windowWidth = windowWidth;
+            this.windowHeigt = windowHeigt;
         }
     }
 }
