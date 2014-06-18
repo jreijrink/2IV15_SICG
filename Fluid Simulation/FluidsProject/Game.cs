@@ -59,7 +59,7 @@ namespace FluidsProject
             float x0 = (N/2.0f - 0.5f) * h;
             float y0 = (N/2.0f - 0.5f) * h;
 
-            Box box = new Box(new HyperPoint<float>(x0, y0), 100, 10.0f * h, 10.0f * h);
+            Box box = new Box(new HyperPoint<float>(x0, y0), 100, 10.0f * h, 10.0f * h, N);
             rigids.Add(box);
         }
 
@@ -126,15 +126,20 @@ namespace FluidsProject
             get_from_UI(dens_prev, u_prev, v_prev);
             //apply_grafity();
 
-            foreach (MovingObject movingObject in objects)
+//            foreach (MovingObject movingObject in objects)
+//            {
+//                movingObject.UpdatePosition();
+//            }
+
+            foreach (RigidBody body in rigids)
             {
-                //movingObject.UpdatePosition();
+                body.update(dt, N, dens, u, v);
             }
 
             Solver.vel_step(N, u, v, u_prev, v_prev, o, objects, visc, dt);
             Solver.dens_step(N, dens, dens_prev, u, v, o, objects, diff, dt);
 
-            cloth.OnUpdateFrame();
+            //cloth.OnUpdateFrame();
         }
 
         private void get_from_UI(float[] d, float[] u, float[] v)
@@ -194,7 +199,7 @@ namespace FluidsProject
                 drawBoundry();
                 drawBodies();
 
-                cloth.OnRenderFrame();
+               // cloth.OnRenderFrame();
             }
         }
 
@@ -311,13 +316,12 @@ namespace FluidsProject
                     }
                 }
             }
+            GL.End();
 
             foreach (MovingObject movingObject in objects)
             {
                 movingObject.Draw();
             }
-
-            GL.End();
         }
 
         private void draw_density()
@@ -374,6 +378,11 @@ namespace FluidsProject
             create_solid_object();
 
             cloth.ClearData();
+
+            foreach (RigidBody b in rigids)
+            {
+                b.reset();
+            }
         }
 
         public static int IX(int i, int j)

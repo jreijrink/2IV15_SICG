@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FluidsProject.Particles;
 using OpenTK.Graphics.OpenGL;
 using micfort.GHL.Math2;
 
@@ -11,36 +12,44 @@ namespace FluidsProject.Objects
     class Box : RigidBody
     {
         private float width, height;
-        private HyperPoint<float> v1, v2, v3, v4;
 
-        public Box(HyperPoint<float> x, float mass, float height, float width)
+        public Box(HyperPoint<float> x, float mass, float height, float width, int N)
             : base(x, mass)
         {
             this.width = width;
             this.height = height;
 
-            v1 = new HyperPoint<float>(x.X - width / 2.0f, x.Y - height / 2.0f);
-            v2 = new HyperPoint<float>(x.X + width / 2.0f, x.Y - height / 2.0f);
-            v3 = new HyperPoint<float>(x.X + width / 2.0f, x.Y + height / 2.0f);
-            v4 = new HyperPoint<float>(x.X - width / 2.0f, x.Y + height / 2.0f);
+
+            HyperPoint<float> v1 = new HyperPoint<float>(x.X - width / 2.0f, x.Y - height / 2.0f);
+            HyperPoint<float> v2 = new HyperPoint<float>(x.X + width / 2.0f, x.Y - height / 2.0f);
+            HyperPoint<float> v3 = new HyperPoint<float>(x.X + width / 2.0f, x.Y + height / 2.0f);
+            HyperPoint<float> v4 = new HyperPoint<float>(x.X - width / 2.0f, x.Y + height / 2.0f);
+
+            constructEdge(v1, v2, N);
+            constructEdge(v2, v3, N);
+            constructEdge(v3, v4, N);
+            constructEdge(v4, v1, N);
+            
+            calculateInertia();
+        }
+        
+        public void constructEdge(HyperPoint<float> x1, HyperPoint<float> x2, int N)
+        {
+            int amount = (int) ((x1 - x2).GetLength() * N) + 1;
+            HyperPoint<float> dir = (x2 - x1) / amount;
+
+            for (int i = 0; i < amount; i++)
+            {
+                HyperPoint<float> px = x1 + dir*i;
+                vertices.Add(new Particle(0, px, 1));
+                localVertices.Add(px - this.x);
+            }
+            
         }
 
         public override void calculateInertia()
         {
-            this.inertia = (1/12.0f)*width*height*(width*width + height*height);
-        }
-
-        public override void draw()
-        {
-            GL.Color3(0.25f, 0.4f, 0.89f);
-            GL.Begin(BeginMode.Quads);
-
-            GL.Vertex2(v1.X, v1.Y);
-            GL.Vertex2(v2.X, v2.Y);
-            GL.Vertex2(v3.X, v3.Y);
-            GL.Vertex2(v4.X, v4.Y);
-
-            GL.End();
+            this.inertia = mass * (width*width + height*height);
         }
     }
 }
