@@ -8,7 +8,7 @@ namespace FluidsProject
 {
     class Solver
     {
-        static float gravity = -0.01f;//-9.81f / 100.0f;
+        static float gravity = -9.81f / 100.0f;
 
         public static int IX(int i, int j)
         {
@@ -69,8 +69,7 @@ namespace FluidsProject
                     s0 = 1 - s1;
                     t1 = y - j0;
                     t0 = 1 - t1;
-                    d[IX(i, j)] = s0 * (t0 * d0[IX(i0, j0)] + t1 * d0[IX(i0, j1)]) +
-                                  s1 * (t0 * d0[IX(i1, j0)] + t1 * d0[IX(i1, j1)]);
+                    d[IX(i, j)] = s0 * (t0 * d0[IX(i0, j0)] + t1 * d0[IX(i0, j1)]) + s1 * (t0 * d0[IX(i1, j0)] + t1 * d0[IX(i1, j1)]);
                 }
             }
             set_bnd(N, b, d, o, objects);
@@ -111,8 +110,9 @@ namespace FluidsProject
 
         public static void vel_step(int N, float[] u, float[] v, float[] u0, float[] v0, float[] o, List<MovingObject> objects, float visc, float dt)
         {
-            grafity(N, v);
-            add_source ( N, u, u0, dt ); add_source ( N, v, v0, dt ); 
+            //float[] g = grafity(N);
+            //add_source(N, v, g, dt);
+            add_source(N, u, u0, dt); add_source(N, v, v0, dt); 
             SWAP(ref u0, ref u); diffuse(N, 1, u, u0, o, objects, visc, dt);
             SWAP(ref v0, ref v); diffuse(N, 2, v, v0, o, objects, visc, dt);
             project(N, u, v, u0, v0, o, objects);
@@ -134,10 +134,17 @@ namespace FluidsProject
 
             for (i = 1; i <= N; i++)
             {
-                x[IX(0, i)] = b == 1 ? -x[IX(1, i)] : x[IX(1, i)];
-                x[IX(N + 1, i)] = b == 1 ? -x[IX(N, i)] : x[IX(N, i)];
-                x[IX(i, 0)] = b == 2 ? -x[IX(i, 1)] : x[IX(i, 1)];
-                x[IX(i, N + 1)] = b == 2 ? -x[IX(i, N)] : x[IX(i, N)];
+                x[IX(1, i)] = b == 1 ? -x[IX(2, i)] : x[IX(2, i)];
+                x[IX(0, i)] = b == 1 ? x[IX(1, i)] : x[IX(1, i)];
+
+                x[IX(N, i)] = b == 1 ? -x[IX(N - 1, i)] : x[IX(N - 1, i)];
+                x[IX(N + 1, i)] = b == 1 ? x[IX(N, i)] : x[IX(N, i)];
+
+                x[IX(i, 1)] = b == 2 ? -x[IX(i, 2)] : x[IX(i, 2)];
+                x[IX(i, 0)] = b == 2 ? x[IX(i, 1)] : x[IX(i, 1)];
+
+                x[IX(i, N)] = b == 2 ? -x[IX(i, N - 1)] : x[IX(i, N - 1)];
+                x[IX(i, N + 1)] = b == 2 ? x[IX(i, N)] : x[IX(i, N)];
             }
 
             for (i = 1; i <= N; i++)
@@ -181,18 +188,21 @@ namespace FluidsProject
             x[IX(N + 1, N + 1)] = 0.5f * (x[IX(N, N + 1)] + x[IX(N + 1, N)]);
         }
 
-        private static void grafity(int N, float[] v)
+        private static float[] grafity(int N)
         {
-            /*
+            int size = (N + 2) * (N + 2);
+            float[] g = new float[size];
+
             int i, j;
             for (i = 2; i <= N - 1; i++)
             {
                 for (j = 2; j <= N - 1; j++)
                 {
-                    v[IX(i, j)] += gravity;
+                    g[IX(i, j)] = gravity;
                 }
             }
-            */
+
+            return g;
         }
     }
 }

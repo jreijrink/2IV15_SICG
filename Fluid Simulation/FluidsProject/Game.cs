@@ -31,7 +31,7 @@ namespace FluidsProject
         private int win_x, win_y;
         private bool[] mouse_down = { false, false, false };
         private int omx, omy, mx, my;
-        private float gravity = -0.01f;//-9.81f / 100.0f;
+        private float gravity = -9.81f / 100.0f;
 
         private List<RigidBody> rigids = new List<RigidBody>();
 
