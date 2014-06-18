@@ -38,14 +38,14 @@ namespace FluidsProject.Particles
         public override void Draw()
         {
             GL.Begin(BeginMode.Lines);
-            if(_color == null || _color == Color.Empty)
-                GL.Color3(0.1f, 0.1f, 1.0f);
+            if (_color == null || _color == Color.Empty)
+                GL.Color3(0.1f, 1.0f, 1.0f);
             else
                 GL.Color3(_color);
 
             GL.Vertex2(_p1.Position[0], _p1.Position[1]);
             if (_color == null || _color == Color.Empty)
-                GL.Color3(0.1f, 0.1f, 1.0f);
+                GL.Color3(0.1f, 1.0f, 1.0f);
             else
                 GL.Color3(_color);
             GL.Vertex2(_p2.Position[0], _p2.Position[1]);

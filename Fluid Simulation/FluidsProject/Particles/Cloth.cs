@@ -49,7 +49,10 @@ namespace FluidsProject.Particles
 
         public void ClearData()
         {
-            particles.ForEach(x => x.reset());
+            particles = new List<Particle>();
+            forces = new List<Force>();
+            constrains = new List<Constraint>();
+            objects = new List<FixedObject>();
         }
 
         public void InitFlagSystem(float[] d, float[] u, float[] v)
@@ -101,7 +104,7 @@ namespace FluidsProject.Particles
                     for (int x = 0; x < size.X; x++)
                     {
                         offset = new HyperPoint<float>(dist * x, dist * y);
-                        Particle particle = new Particle(index, start + offset, 2.0f);
+                        Particle particle = new Particle(index, start + offset, 3.0f);
                         particles.Add(particle);
 
                         PressureForce pressureForce = new PressureForce(particle, dt, N, d, u, v);
@@ -252,7 +255,7 @@ namespace FluidsProject.Particles
 
         private SpringForce createSpringForce(Particle p1, Particle p2, float dist, Color color)
         {
-            return new SpringForce(p1, p2, dist, 1.0f, 1.0f, color);
+            return new SpringForce(p1, p2, dist, 5.0f, 5.0f, color);
         }
 
         private SpringForce createStiffSpringForce(Particle p1, Particle p2, float dist)
@@ -262,7 +265,7 @@ namespace FluidsProject.Particles
 
         private SpringForce createStiffSpringForce(Particle p1, Particle p2, float dist, Color color)
         {
-            return new SpringForce(p1, p2, dist, 50.0f, 10.0f, color);
+            return new SpringForce(p1, p2, dist, 250.0f, 10.0f, color);
         }
 
         private void DrawParticles()
@@ -358,7 +361,7 @@ namespace FluidsProject.Particles
                     this.mouseParticle = new Particle(0, mouseLoc, 1f);
                     this.currentSelectedParticle = selectedParticle;
                     this.currentSelectedParticle.isSelected = true;
-                    this.mouseSpringForce = new SpringForce(selectedParticle, mouseParticle, 0.01f, 10.0f, 1f);
+                    this.mouseSpringForce = new SpringForce(selectedParticle, mouseParticle, 0.01f, 50.0f, 20.0f);
                     forces.Add(mouseSpringForce);
                     return true;
                 }

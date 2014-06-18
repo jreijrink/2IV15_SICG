@@ -27,7 +27,7 @@ namespace FluidsProject
             _N = N;
 
             //_u = -0.4f;
-            _v = 1;
+            _v = -0.5f;
         }
 
         public override void Draw()

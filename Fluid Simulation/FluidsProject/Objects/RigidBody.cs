@@ -49,7 +49,7 @@ namespace FluidsProject.Objects
             return i - j;
         }
 
-        public void update(float dt, int N, float[] d, float[] u, float[] v)
+        public void update(float dt, int N, float[] d, float[] u, float[] v, float[] o)
         {
             foreach (Particle particle in vertices)
             {
@@ -71,20 +71,16 @@ namespace FluidsProject.Objects
                 int i = (int)(particle.Position.X * N);
                 int j = (int)(particle.Position.Y * N);
 
-                if (i >= 0 && i <= N && j >= 0 && j <= N)
+                if (i > 0 && i < N && j > 0 && j < N)
                 {
-                    //v[Game.IX(i, j)] = d[Game.IX(i, j)] * this.v.X;
-                    //u[Game.IX(i, j)] = d[Game.IX(i, j)] * this.v.Y;
-                    //u[Game.IX(i, j)] = d[Game.IX(i, j)] * (10 * this.v.X);//-u[Game.IX(i + 1, j)] + ;
-                    //v[Game.IX(i, j)] = d[Game.IX(i, j)]*(10 * this.v.Y);//-v[Game.IX(i, j + 1)] + ;
-                }
-                if (i <= 1 || i >= N - 1)
-                {
-                    this.v.X = old_x * -1;
-                }
-                if (j <= 1 || j >= N - 1)
-                {
-                    this.v.Y = old_y * -1;
+                    if (i <= 1 || i >= N - 1 || o[Game.IX(i, j)] == 1)
+                    {
+                        this.v.X = old_x * -1;
+                    }
+                    if (j <= 1 || j >= N - 1 || o[Game.IX(i, j)] == 1)
+                    {
+                        this.v.Y = old_y * -1;
+                    }
                 }
             }
             this.x += this.v * dt;
@@ -103,7 +99,7 @@ namespace FluidsProject.Objects
                 vertices[i].Velocity = this.v;
             }
         }
-        
+
         public HyperPoint<float> getPosition()
         {
             return x;

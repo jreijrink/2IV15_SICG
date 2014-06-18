@@ -18,8 +18,9 @@ namespace FluidsProject
         private static int N;
         private float dt, diff, visc;
         private float force, source;
-        private bool dvel;
+        private bool dvel, show_v;
         private MovingObject on_movingObject;
+        private int current_stage = 1;
 
         float d;
         private Cloth cloth;
@@ -42,13 +43,9 @@ namespace FluidsProject
 
             initConfiguration(args);
             allocate_data();
-            create_solid_object();
-
-            create_bodies();
 
             d = 5.0f;
             cloth = new Cloth(N, dt, d, win_x, win_y);
-            cloth.InitCurtainSystem(dens, u, v);
 
             PreDisplay();
         }   
@@ -68,7 +65,7 @@ namespace FluidsProject
             if (args.Length == 0)
             {
                 N = 64;
-                dt = 0.1f;
+                dt = 0.05f;
                 diff = 0.0f;
                 visc = 0.001f;
                 force = 5.0f;
@@ -117,8 +114,8 @@ namespace FluidsProject
 
         private void create_solid_object()
         {
-            //SquareObject square = new SquareObject(N / 2, N / 2, N / 4, N / 4, N);
-            //objects.Add(square);
+            SquareObject square = new SquareObject(N / 2, N / 2, N / 4, N / 4, N);
+            objects.Add(square);
         }
 
         public void OnUpdateFrame()
@@ -134,9 +131,77 @@ namespace FluidsProject
 
             foreach (RigidBody body in rigids)
             {
-                body.update(dt, N, dens, u, v);
+                body.update(dt, N, dens, u, v, o);
             }
-            //cloth.OnUpdateFrame();
+            cloth.OnUpdateFrame();
+        }
+
+        private void loadStage()
+        {
+            switch (current_stage)
+            {
+                case 1:
+                    loadStage1();
+                    break;
+                case 2:
+                    loadStage2();
+                    break;
+                case 3:
+                    loadStage3();
+                    break;
+                case 4:
+                    loadStage4();
+                    break;
+                case 5:
+                    loadStage5();
+                    break;
+            }
+        }
+
+        private void loadStage1()
+        {
+            //Nothing
+            clear_data();
+            current_stage = 1;
+        }
+
+        private void loadStage2()
+        {
+            //Fixed objects
+            clear_data();
+            for (int i = 0 / 4; i < N / 2; i++)
+            {
+                o[IX(i + N / 4, N / 4)] = 1;
+                o[IX(i + N / 4, N - N / 4)] = 1;
+
+                o[IX(N / 4, i + N / 4)] = 1;
+                o[IX(N - N / 4, i + N / 4)] = 1;
+            }
+            current_stage = 2;
+        }
+
+        private void loadStage3()
+        {
+            //Moving solid object
+            clear_data();
+            create_solid_object();
+            current_stage = 3;
+        }
+
+        private void loadStage4()
+        {
+            //Particles
+            clear_data();
+            cloth.InitCurtainSystem(dens, u, v);
+            current_stage = 4;
+        }
+
+        private void loadStage5()
+        {
+            //Rigid body
+            clear_data();
+            create_bodies();
+            current_stage = 5;
         }
 
         private void get_from_UI(float[] d, float[] u, float[] v)
@@ -191,12 +256,15 @@ namespace FluidsProject
             }
             else
             {
+
                 draw_density();
                 draw_object();
                 drawBoundry();
                 drawBodies();
+                if (show_v)
+                    draw_velocities();
 
-               // cloth.OnRenderFrame();
+               cloth.OnRenderFrame();
             }
         }
 
@@ -353,10 +421,10 @@ namespace FluidsProject
                     GL.Color3(d01, d01, d01); GL.Vertex2(x, y + h);
                     */
                     //0, .5, 1
-                    GL.Color3(0, d00 * .3, d00); GL.Vertex2(x, y);
-                    GL.Color3(0, d10 * .3, d10); GL.Vertex2(x + h, y);
-                    GL.Color3(0, d11 * .3, d11); GL.Vertex2(x + h, y + h);
-                    GL.Color3(0, d01 * .3, d01); GL.Vertex2(x, y + h);
+                    GL.Color3(d00 * .8, d00 * .8, d00); GL.Vertex2(x, y);
+                    GL.Color3(d10 * .8, d10 * .8, d10); GL.Vertex2(x + h, y);
+                    GL.Color3(d11 * .8, d11 * .8, d11); GL.Vertex2(x + h, y + h);
+                    GL.Color3(d01 * .8, d01 * .8, d01); GL.Vertex2(x, y + h);
                 }
             }
 
@@ -372,14 +440,8 @@ namespace FluidsProject
                 u[i] = v[i] = u_prev[i] = v_prev[i] = dens[i] = dens_prev[i] = o[i] = 0.0f;
             }
             objects = new List<MovingObject>();
-            create_solid_object();
-
             cloth.ClearData();
-
-            foreach (RigidBody b in rigids)
-            {
-                b.reset();
-            }
+            rigids = new List<RigidBody>();
         }
 
         public static int IX(int i, int j)
@@ -404,9 +466,28 @@ namespace FluidsProject
             {
                     case Keys.C:
                         clear_data();
+                        loadStage();
                         break;
                     case Keys.V:
                         dvel = !dvel;
+                        break;
+                    case Keys.S:
+                        show_v = !show_v;
+                        break;
+                    case Keys.D1:
+                        loadStage1();
+                        break;
+                    case Keys.D2:
+                        loadStage2();
+                        break;
+                    case Keys.D3:
+                        loadStage3();
+                        break;
+                    case Keys.D4:
+                        loadStage4();
+                        break;
+                    case Keys.D5:
+                        loadStage5();
                         break;
             }
         }
