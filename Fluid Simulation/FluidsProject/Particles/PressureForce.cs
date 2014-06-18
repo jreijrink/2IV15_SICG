@@ -13,7 +13,7 @@ namespace FluidsProject.Particles
         private int _N;
         private float[] _d, _u, _v;
         public float _dt;
-        private float factor = 5.0f;
+        private float factor = 30.0f;
 
         public PressureForce(Particle p1, float dt, int N, float[] d, float[] u, float[] v)
 		{
