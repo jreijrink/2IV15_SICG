@@ -11,36 +11,47 @@ namespace FluidsProject.Objects
     class Box : RigidBody
     {
         private float width, height;
-        private HyperPoint<float> v1, v2, v3, v4;
 
-        public Box(HyperPoint<float> x, float mass, float height, float width)
+        public Box(HyperPoint<float> x, float mass, float height, float width, int N)
             : base(x, mass)
         {
             this.width = width;
             this.height = height;
 
-            v1 = new HyperPoint<float>(x.X - width / 2.0f, x.Y - height / 2.0f);
-            v2 = new HyperPoint<float>(x.X + width / 2.0f, x.Y - height / 2.0f);
-            v3 = new HyperPoint<float>(x.X + width / 2.0f, x.Y + height / 2.0f);
-            v4 = new HyperPoint<float>(x.X - width / 2.0f, x.Y + height / 2.0f);
+
+            HyperPoint<float> v1 = new HyperPoint<float>(x.X - width / 2.0f, x.Y - height / 2.0f);
+            HyperPoint<float> v2 = new HyperPoint<float>(x.X + width / 2.0f, x.Y - height / 2.0f);
+            HyperPoint<float> v3 = new HyperPoint<float>(x.X + width / 2.0f, x.Y + height / 2.0f);
+            HyperPoint<float> v4 = new HyperPoint<float>(x.X - width / 2.0f, x.Y + height / 2.0f);
+
+            int amountX = (int)Math.Abs(v1.X * N - (int)(v2.X * N)) + 1;
+            int amountY = (int) Math.Abs(v1.Y*N - (int) (v2.Y*N)) + 1;
+
+            float distX = width/amountX;
+            float distY = height/amountY;
+
+            for (int i = 0; i < amountX; i++)
+            {
+                
+            }
+
+
+            vertices.Add(v1);
+            vertices.Add(v2);
+            vertices.Add(v3);
+            vertices.Add(v4);
+
+            localVertices.Add(v1 - x);
+            localVertices.Add(v2 - x);
+            localVertices.Add(v3 - x);
+            localVertices.Add(v4 - x);
+
+            calculateInertia();
         }
 
         public override void calculateInertia()
         {
-            this.inertia = (1/12.0f)*width*height*(width*width + height*height);
-        }
-
-        public override void draw()
-        {
-            GL.Color3(0.25f, 0.4f, 0.89f);
-            GL.Begin(BeginMode.Quads);
-
-            GL.Vertex2(v1.X, v1.Y);
-            GL.Vertex2(v2.X, v2.Y);
-            GL.Vertex2(v3.X, v3.Y);
-            GL.Vertex2(v4.X, v4.Y);
-
-            GL.End();
+            this.inertia = mass * (width*width + height*height);
         }
     }
 }

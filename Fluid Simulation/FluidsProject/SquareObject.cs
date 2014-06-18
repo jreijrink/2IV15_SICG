@@ -31,12 +31,9 @@ namespace FluidsProject
 
         public override void Draw()
         {
-            GL.Color3(1.0f, 1.0f, 0.0f);
             GL.LineWidth(1.0f);
 
             GL.Begin(BeginMode.Quads);
-
-            GL.Color3(1.0f, 1.0f, 0.0f);
 
             float h = 1.0f / _N;
             float x1 = (_x - _width_half - 0.5f) * h;
