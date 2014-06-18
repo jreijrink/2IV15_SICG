@@ -61,12 +61,34 @@ namespace FluidsProject.Objects
 
                 addForce(particle.Force, particle.Position);
                 particle.Force = new HyperPoint<float>(0, 0);
-
             }
-            
-            this.v += ((force/mass)*dt);
-            this.x += this.v*dt;
 
+            this.v += ((force / mass) * dt);
+            float old_y = this.v.Y;
+            float old_x = this.v.X;
+            foreach (Particle particle in vertices)
+            {
+                int i = (int)(particle.Position.X * N);
+                int j = (int)(particle.Position.Y * N);
+
+                if (i >= 0 && i <= N && j >= 0 && j <= N)
+                {
+                    //v[Game.IX(i, j)] = d[Game.IX(i, j)] * this.v.X;
+                    //u[Game.IX(i, j)] = d[Game.IX(i, j)] * this.v.Y;
+                    //u[Game.IX(i, j)] = d[Game.IX(i, j)] * (10 * this.v.X);//-u[Game.IX(i + 1, j)] + ;
+                    //v[Game.IX(i, j)] = d[Game.IX(i, j)]*(10 * this.v.Y);//-v[Game.IX(i, j + 1)] + ;
+                }
+                if (i <= 1 || i >= N - 1)
+                {
+                    this.v.X = old_x * -1;
+                }
+                if (j <= 1 || j >= N - 1)
+                {
+                    this.v.Y = old_y * -1;
+                }
+            }
+            this.x += this.v * dt;
+            
             rotv += torque*dt;
             orientation = (float)((orientation + (rotv * dt)));
 
@@ -81,7 +103,7 @@ namespace FluidsProject.Objects
                 vertices[i].Velocity = this.v;
             }
         }
-
+        
         public HyperPoint<float> getPosition()
         {
             return x;
