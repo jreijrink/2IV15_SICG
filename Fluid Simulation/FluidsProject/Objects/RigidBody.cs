@@ -152,5 +152,36 @@ namespace FluidsProject.Objects
                 p.Position = localVertices[i] + this.x;
             }
         }
+
+        public bool pointInPolygon(HyperPoint<float> point)
+        {
+            int i, j = vertices.Count - 1;
+            bool oddNodes = false;
+
+            for (i = 0; i < vertices.Count; i++)
+            {
+                float xi = vertices[i].Position.X;
+                float yi = vertices[i].Position.Y;
+                float xj = vertices[j].Position.X;
+                float yj = vertices[j].Position.Y;
+
+                if ((yi < point.Y && yj >= point.Y || yj < point.Y && yi >= point.Y) && (xi <= point.X || xj <= point.X))
+                {
+                    if (xi + (point.Y - yi) / (yj - yi) * (xj - xi) < point.X)
+                    {
+                        oddNodes = !oddNodes;
+                    }
+                }
+                j = i;
+            }
+
+            return oddNodes;
+        }
+
+
+        public List<Particle> getGlobalVertices()
+        {
+            return vertices;
+        }
     }
 }

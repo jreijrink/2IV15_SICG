@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using micfort.GHL.Math2;
 
 namespace FluidsProject
 {
@@ -23,5 +24,9 @@ namespace FluidsProject
         abstract public float GetVelocityY(int x, int y, float[] v);
 
         abstract public float GetVelocityDensity(int x, int y, float[] d);
+
+        abstract public List<HyperPoint<float>> GetVertices();
+
+        abstract public bool pointInObject(HyperPoint<float> point);
     }
 }

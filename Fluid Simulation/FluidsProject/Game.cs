@@ -124,21 +124,18 @@ namespace FluidsProject
         public void OnUpdateFrame()
         {
             get_from_UI(dens_prev, u_prev, v_prev);
-            //apply_grafity();
+            
+            Solver.initialize_boundaries(N);
+            Solver.setBoundaryConditionsSolidObjects(objects, N);
+            Solver.setBoundaryConditionsRigidBodies(rigids, N);
 
-//            foreach (MovingObject movingObject in objects)
-//            {
-//                movingObject.UpdatePosition();
-//            }
+            Solver.vel_step(N, u, v, u_prev, v_prev, o, objects, visc, dt, rigids);
+            Solver.dens_step(N, dens, dens_prev, u, v, o, objects, diff, dt, rigids);
 
             foreach (RigidBody body in rigids)
             {
                 body.update(dt, N, dens, u, v);
             }
-
-            Solver.vel_step(N, u, v, u_prev, v_prev, o, objects, visc, dt);
-            Solver.dens_step(N, dens, dens_prev, u, v, o, objects, diff, dt);
-
             //cloth.OnUpdateFrame();
         }
 

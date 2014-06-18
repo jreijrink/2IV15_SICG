@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OpenTK.Graphics.OpenGL;
+using micfort.GHL.Math2;
 
 namespace FluidsProject
 {
@@ -164,6 +165,36 @@ namespace FluidsProject
             }
 
             return 0;// d[Solver.IX(x, y)];
+        }
+
+        public override bool pointInObject(HyperPoint<float> point)
+        {
+            float h = 1.0f / _N;
+            float x1 = (_x - _width_half - 0.5f) * h;
+            float x2 = (_x + _width_half + 0.5f) * h;
+            float y1 = (_y - _height_half - 0.5f) * h;
+            float y2 = (_y + _height_half + 0.5f) * h;
+
+            if(point.X >= x1 && point.X <= x2 && point.Y >= y1 && point.Y <= y2)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public override List<HyperPoint<float>> GetVertices()
+        {
+            float h = 1.0f / _N;
+            float x1 = (_x - _width_half - 0.5f) * h;
+            float x2 = (_x + _width_half + 0.5f) * h;
+            float y1 = (_y - _height_half - 0.5f) * h;
+            float y2 = (_y + _height_half + 0.5f) * h;
+
+            return new List<HyperPoint<float>>(new[] {new HyperPoint<float>(x1, y1),
+                                           new HyperPoint<float>(x2, y1),
+                                           new HyperPoint<float>(x2, y2),
+                                           new HyperPoint<float>(x1, y2)
+                                          });
         }
     }
 }
