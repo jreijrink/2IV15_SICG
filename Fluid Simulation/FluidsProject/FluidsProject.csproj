@@ -32,11 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="micfort.GHL.PCL">
+    <Reference Include="micfort.GHL.PCL, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\micfort.GHL.PCL.0.159\lib\portable-win+net45+sl50+wp80+MonoAndroid10+MonoTouch10\micfort.GHL.PCL.dll</HintPath>
-    </Reference>
-    <Reference Include="micfort.GHL.Windows">
-      <HintPath>..\packages\micfort.GHL.Windows.0.159\lib\net40\micfort.GHL.Windows.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.6.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -60,6 +58,25 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Objects\Box.cs" />
+    <Compile Include="Particles\CircularWireConstraint.cs" />
+    <Compile Include="Particles\Cloth.cs" />
+    <Compile Include="Particles\Constraint.cs" />
+    <Compile Include="Particles\DragForce.cs" />
+    <Compile Include="Particles\PressureForce.cs" />
+    <Compile Include="Particles\ExtendedMatrix.cs" />
+    <Compile Include="Particles\FixedConstraint.cs" />
+    <Compile Include="Particles\FixedObject.cs" />
+    <Compile Include="Particles\Force.cs" />
+    <Compile Include="Particles\GravityForce.cs" />
+    <Compile Include="Particles\HorizontalForce.cs" />
+    <Compile Include="Particles\HorLineObject.cs" />
+    <Compile Include="Particles\LinearSolver.cs" />
+    <Compile Include="Particles\LineConstraint.cs" />
+    <Compile Include="Particles\Particle.cs" />
+    <Compile Include="Particles\RodConstraint.cs" />
+    <Compile Include="Particles\ParticleSolver.cs" />
+    <Compile Include="Particles\SpringForce.cs" />
+    <Compile Include="Particles\VerLineObject.cs" />
     <Compile Include="SquareObject.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="Interface\CustomGLControl.cs">

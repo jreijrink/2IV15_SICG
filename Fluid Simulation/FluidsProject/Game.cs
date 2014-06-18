@@ -9,6 +9,7 @@ using FluidsProject.Objects;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using micfort.GHL.Math2;
+using FluidsProject.Particles;
 
 namespace FluidsProject
 {
@@ -20,19 +21,20 @@ namespace FluidsProject
         private bool dvel;
         private MovingObject on_movingObject;
 
+        float d;
+        private Cloth cloth;
+
         private float[] u, v, u_prev, v_prev, o;
         private List<MovingObject> objects;
         private float[] dens, dens_prev;
 
-        private int win_id;
         private int win_x, win_y;
         private bool[] mouse_down = { false, false, false };
         private int omx, omy, mx, my;
-        private Rectangle drawWindow;
         private float gravity = -0.01f;//-9.81f / 100.0f;
 
         private List<RigidBody> rigids = new List<RigidBody>();
- 
+
         public void init(int width, int height, string[] args)
         {
             win_x = width;
@@ -43,8 +45,13 @@ namespace FluidsProject
             create_solid_object();
 
             create_bodies();
+
+            d = 5.0f;
+            cloth = new Cloth(N, dt, d, win_x, win_y);
+            cloth.InitCurtainSystem(dens, u, v);
+
             PreDisplay();
-        }
+        }   
 
         private void create_bodies()
         {
@@ -66,7 +73,7 @@ namespace FluidsProject
                 N = 64;
                 dt = 0.1f;
                 diff = 0.0f;
-                visc = 0.0f;
+                visc = 0.001f;
                 force = 5.0f;
                 source = 100.0f;
                 Console.WriteLine("Using defaults : N={0} dt={1} diff={2} visc={3} force = {4} source={5}",
@@ -113,8 +120,8 @@ namespace FluidsProject
 
         private void create_solid_object()
         {
-            SquareObject square = new SquareObject(N / 2, N / 2, N / 4, N / 4, N);
-            objects.Add(square);
+            //SquareObject square = new SquareObject(N / 2, N / 2, N / 4, N / 4, N);
+            //objects.Add(square);
         }
 
         public void OnUpdateFrame()
@@ -134,6 +141,8 @@ namespace FluidsProject
 
             Solver.vel_step(N, u, v, u_prev, v_prev, o, objects, visc, dt);
             Solver.dens_step(N, dens, dens_prev, u, v, o, objects, diff, dt);
+
+            cloth.OnUpdateFrame();
         }
 
         private void get_from_UI(float[] d, float[] u, float[] v)
@@ -192,6 +201,8 @@ namespace FluidsProject
                 draw_object();
                 drawBoundry();
                 drawBodies();
+
+                cloth.OnRenderFrame();
             }
         }
 
@@ -368,6 +379,8 @@ namespace FluidsProject
             }
             objects = new List<MovingObject>();
             create_solid_object();
+
+            cloth.ClearData();
         }
 
         public static int IX(int i, int j)
@@ -403,28 +416,31 @@ namespace FluidsProject
 
         public void OnMouseDown(object sender, MouseEventArgs e)
         {
-            omx = mx = e.Location.X;
-            omy = my = e.Location.Y;
-
-            if (e.Button == MouseButtons.Left)
-                mouse_down[0] = true;
-            if (e.Button == MouseButtons.Right)
-                mouse_down[2] = true;
-            if (e.Button == MouseButtons.Middle)
-                mouse_down[1] = true;
-
-            int i, j, size = (N + 2) * (N + 2);
-
-            i = (int)((mx / (float)win_x) * N + 1);
-            j = (int)(((win_y - my) / (float)win_y) * N + 1);
-
-            foreach (MovingObject movingObject in objects)
+            if (!cloth.OnMouseDown(e))
             {
-                if (movingObject.IsObjectCell(i, j))
+                omx = mx = e.Location.X;
+                omy = my = e.Location.Y;
+
+                if (e.Button == MouseButtons.Left)
+                    mouse_down[0] = true;
+                if (e.Button == MouseButtons.Right)
+                    mouse_down[2] = true;
+                if (e.Button == MouseButtons.Middle)
+                    mouse_down[1] = true;
+
+                int i, j, size = (N + 2) * (N + 2);
+
+                i = (int)((mx / (float)win_x) * N + 1);
+                j = (int)(((win_y - my) / (float)win_y) * N + 1);
+
+                foreach (MovingObject movingObject in objects)
                 {
-                    movingObject.SetVelocity(0, 0);
-                    movingObject.SetPosition(i, j);
-                    on_movingObject = movingObject;
+                    if (movingObject.IsObjectCell(i, j))
+                    {
+                        movingObject.SetVelocity(0, 0);
+                        movingObject.SetPosition(i, j);
+                        on_movingObject = movingObject;
+                    }
                 }
             }
         }
@@ -441,12 +457,16 @@ namespace FluidsProject
             if (e.Button == MouseButtons.Middle)
                 mouse_down[1] = false;
             on_movingObject = null;
+
+            cloth.OnMouseUp(e);
         }
 
         public void OnMouseMove(object sender, MouseEventArgs e)
         {
             mx = e.X;
             my = e.Y;
+
+            cloth.OnMouseMove(e);
         }
     }
 }
