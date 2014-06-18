@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FluidsProject.Particles;
 using OpenTK.Graphics.OpenGL;
 using micfort.GHL.Math2;
 
@@ -15,7 +16,8 @@ namespace FluidsProject.Objects
         protected float inertia;
         
         // State Variables
-        protected HyperPoint<float> x = new HyperPoint<float>(0, 0);
+        protected HyperPoint<float> x;
+        private HyperPoint<float> x_orig;
         protected HyperPoint<float> v = new HyperPoint<float>(0, 0);
 
         protected float orientation;
@@ -23,18 +25,18 @@ namespace FluidsProject.Objects
         protected float torque;
         protected HyperPoint<float> force = new HyperPoint<float>(0, 0);
 
-        protected List<HyperPoint<float>> vertices = new List<HyperPoint<float>>();
+        protected List<Particle> vertices = new List<Particle>();
         protected List<HyperPoint<float>> localVertices = new List<HyperPoint<float>>();
- 
+        
         public RigidBody(HyperPoint<float> x, float mass)
         {
             this.mass = mass;
             this.x = x;
+            this.x_orig = x;
         }
 
         public void addForce(HyperPoint<float> force, HyperPoint<float> location)
         {
-            location = vertices[0];
             this.force += force;
             this.torque +=  cross(location - x, force) / inertia;
         }
@@ -47,10 +49,23 @@ namespace FluidsProject.Objects
             return i - j;
         }
 
-        public void update(float dt)
+        public void update(float dt, int N, float[] d, float[] u, float[] v)
         {
-            v += ((force/mass)*dt);
-            x += v*dt;
+            foreach (Particle particle in vertices)
+            {
+                PressureForce pf = new PressureForce(particle, dt, N, d, u, v);
+                DragForce df = new DragForce(particle);
+
+                pf.Calculate();
+                df.Calculate();
+
+                addForce(particle.Force, particle.Position);
+                particle.Force = new HyperPoint<float>(0, 0);
+
+            }
+            
+            this.v += ((force/mass)*dt);
+            this.x += this.v*dt;
 
             rotv += torque*dt;
             orientation = (float)((orientation + (rotv * dt)));
@@ -62,7 +77,8 @@ namespace FluidsProject.Objects
             for (int i = 0; i < vertices.Count; i++)
             {
                 HyperPoint<float> rotatedPos = new HyperPoint<float>((rot*localVertices[i]).m);
-                vertices[i] = rotatedPos + x;
+                vertices[i].Position = rotatedPos + x;
+                vertices[i].Velocity = this.v;
             }
         }
 
@@ -90,11 +106,29 @@ namespace FluidsProject.Objects
             GL.Begin(BeginMode.Polygon);
             for (int i = 0; i < vertices.Count; i++)
             {
-                HyperPoint<float> x0 = vertices[i];
-
+                HyperPoint<float> x0 = vertices[i].Position;
                 GL.Vertex2(x0.X, x0.Y);
             }
             GL.End();
+
+            foreach (Particle particle in vertices)
+            {
+                particle.draw();
+            }
+        }
+
+        public void reset()
+        {
+            this.x = x_orig;
+            this.v = new HyperPoint<float>(0, 0);
+            orientation = 0;
+            rotv = 0;
+
+            for (int i = 0; i < vertices.Count; i++)
+            {
+                Particle p = vertices[i];
+                p.Position = localVertices[i] + this.x;
+            }
         }
     }
 }

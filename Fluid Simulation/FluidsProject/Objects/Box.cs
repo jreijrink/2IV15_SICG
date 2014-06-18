@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FluidsProject.Particles;
 using OpenTK.Graphics.OpenGL;
 using micfort.GHL.Math2;
 
@@ -24,29 +25,26 @@ namespace FluidsProject.Objects
             HyperPoint<float> v3 = new HyperPoint<float>(x.X + width / 2.0f, x.Y + height / 2.0f);
             HyperPoint<float> v4 = new HyperPoint<float>(x.X - width / 2.0f, x.Y + height / 2.0f);
 
-            int amountX = (int)Math.Abs(v1.X * N - (int)(v2.X * N)) + 1;
-            int amountY = (int) Math.Abs(v1.Y*N - (int) (v2.Y*N)) + 1;
-
-            float distX = width/amountX;
-            float distY = height/amountY;
-
-            for (int i = 0; i < amountX; i++)
-            {
-                
-            }
-
-
-            vertices.Add(v1);
-            vertices.Add(v2);
-            vertices.Add(v3);
-            vertices.Add(v4);
-
-            localVertices.Add(v1 - x);
-            localVertices.Add(v2 - x);
-            localVertices.Add(v3 - x);
-            localVertices.Add(v4 - x);
-
+            constructEdge(v1, v2, N);
+            constructEdge(v2, v3, N);
+            constructEdge(v3, v4, N);
+            constructEdge(v4, v1, N);
+            
             calculateInertia();
+        }
+        
+        public void constructEdge(HyperPoint<float> x1, HyperPoint<float> x2, int N)
+        {
+            int amount = (int) ((x1 - x2).GetLength() * N) + 1;
+            HyperPoint<float> dir = (x2 - x1) / amount;
+
+            for (int i = 0; i < amount; i++)
+            {
+                HyperPoint<float> px = x1 + dir*i;
+                vertices.Add(new Particle(0, px, 1));
+                localVertices.Add(px - this.x);
+            }
+            
         }
 
         public override void calculateInertia()
