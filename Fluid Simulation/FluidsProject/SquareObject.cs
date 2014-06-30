@@ -92,10 +92,10 @@ namespace FluidsProject
                 return true;
             */
 
-            if (x < _x + _width_half &&
-                x > _x - _width_half &&
-                y < _y + _height_half &&
-                y > _y - _height_half)
+            if (x <= _x + _width_half &&
+                x >= _x - _width_half &&
+                y <= _y + _height_half &&
+                y >= _y - _height_half)
                 return true;
 
             return false;
@@ -103,8 +103,8 @@ namespace FluidsProject
 
         public override void SetVelocity(float u, float v)
         {
-            _u = u * 0.01f;
-            _v = v * 0.01f;
+            _u = u;
+            _v = v;
         }
         public override void SetPosition(float x, float y)
         {
@@ -116,12 +116,12 @@ namespace FluidsProject
         {
             if (x == Math.Floor(_x) + _width_half)
             {
-                return -u[Solver.IX(x + 1, y)] + (_u > 0 ? _u : 0);
+                return -u[Game.IX(x+1, y)] + (_u > 0 ? _u : 0);
             }
 
             if (x == Math.Ceiling(_x) - _width_half)
             {
-                return -u[Solver.IX(x - 1, y)] + (_u > 0 ? 0 : _u);
+                return -u[Game.IX(x - 1, y)] + (_u > 0 ? 0 : _u);
             }
 
             return 0;
@@ -129,14 +129,14 @@ namespace FluidsProject
 
         public override float GetVelocityY(int x, int y, float[] v)
         {
-            if (y == Math.Floor(_y) + _height_half)
+            if (y == Math.Floor(_y + _height_half))
             {
-                return -v[Solver.IX(x, y + 1)] + (_v > 0 ? _v : 0);
+                return -v[Game.IX(x,y+1)] + (_v > 0 ? _v : 0);
             }
 
-            if (y == Math.Ceiling(_y) - _height_half)
+            if (y == Math.Ceiling(_y - _height_half))
             {
-                return -v[Solver.IX(x, y - 1)] + (_v > 0 ? 0 : _v);
+                return -v[Game.IX(x,y-1)] + (_v > 0 ? 0 : _v);
             }
 
             return 0;

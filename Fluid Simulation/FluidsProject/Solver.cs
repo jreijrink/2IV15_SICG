@@ -28,10 +28,16 @@ namespace FluidsProject
         }
 
 
-        public static void add_rigid_velocity(List<RigidBody> bodies, int N)
+        public static void add_rigid_velocity(List<RigidBody> bodies, float[] u, float[] v, int N)
         {
             foreach (RigidBody body in bodies)
             {
+                HyperPoint<float> vel = body.getVelocity();
+                if(vel.GetLengthSquared() == 0)
+                {
+                    continue; ;
+                }
+
                 int[] minMaxIJ = getMinMaxIJ(body.getGlobalVertices().ConvertAll(p => p.Position), N);
 
                 int minI = minMaxIJ[0];
@@ -44,9 +50,49 @@ namespace FluidsProject
                 {
                     for (int j = minJ; j < maxJ; j++)
                     {
+                        float xi = (float) i/N;
+                        float yj = (float) j/N;
 
+                        bool ijIn = body.pointInPolygon(new HyperPoint<float>(xi, yj));
+                        if (ijIn)
+                        {
+                            float xLeft = (float) (i - 1)/N;
+                            float xRight = (float) (i + 1)/N;
+                            float yUp = (float) (j + 1)/N;
+                            float yDown = (float) (j - 1)/N;
+
+                            bool leftIn = body.pointInPolygon(new HyperPoint<float>(xLeft, yj));
+                            bool rightIn = body.pointInPolygon(new HyperPoint<float>(xRight, yj));
+                            bool upIn = body.pointInPolygon(new HyperPoint<float>(xi, yUp));
+                            bool downIn = body.pointInPolygon(new HyperPoint<float>(xi, yDown));
+
+                            if (leftIn && rightIn && downIn && upIn)
+                            {
+                                continue;
+                            }
+                            if (leftIn && !rightIn)
+                            {
+                                u[IX(i + 1, j)] += vel.X * 2;
+                                v[IX(i + 1, j)] += vel.Y * 2;
+                            }
+                            else if (!leftIn && rightIn)
+                            {
+                                u[IX(i - 1, j)] += vel.X * 2;
+                                v[IX(i - 1, j)] += vel.Y * 2;
+                            }
+                            else if (!upIn && downIn)
+                            {
+                                u[IX(i, j + 1)] += vel.X * 2;
+                                v[IX(i, j + 1)] += vel.Y * 2;
+                            }
+                            else if (upIn && !downIn)
+                            {
+                                u[IX(i, j - 1)] += vel.X * 2;
+                                v[IX(i, j - 1)] += vel.Y * 2;
+                            }
+                        }
                     }
-                }  
+                }
             }
         }
 
@@ -226,8 +272,6 @@ namespace FluidsProject
             x[IX(0, N + 1)] = 0.5f * (x[IX(1, N + 1)] + x[IX(0, N)]);
             x[IX(N + 1, 0)] = 0.5f * (x[IX(N, 0)] + x[IX(N + 1, 1)]);
             x[IX(N + 1, N + 1)] = 0.5f * (x[IX(N, N + 1)] + x[IX(N + 1, N)]);
-
-
         }
 
         public static void setBoundaryConditionsRigidBodies(List<RigidBody> bodies, int N)
@@ -291,7 +335,7 @@ namespace FluidsProject
                                 boundaries[IX(i, j)].d = BoundrySettings.Copy;
                                 boundaries[IX(i, j)].source = Source.up;
                             }
-                            if (!upIn && downIn)
+                            if (upIn && !downIn)
                             {
                                 boundaries[IX(i, j)].u = BoundrySettings.Copy;
                                 boundaries[IX(i, j)].v = BoundrySettings.Invert;
@@ -413,7 +457,7 @@ namespace FluidsProject
             }
         }
 
-        private static void setBoundaryConditionsSolidObjects2(int N, int b, float[] x, List<MovingObject> objects)
+        public static void setBoundaryConditionsSolidObjects2(int N, int b, float[] x, List<MovingObject> objects)
         {
             int i, j;
             foreach (MovingObject movingObject in objects)

@@ -116,15 +116,25 @@ namespace FluidsProject
         {
             SquareObject square = new SquareObject(N / 4, N / 4, N / 4, N / 4, N);
             objects.Add(square);
-            square.SetVelocity(0,2f);
+            square.SetVelocity(0,1f);
         }
 
         public void OnUpdateFrame()
         {
-            get_from_UI(dens_prev, u_prev, v_prev);
             
+            foreach (MovingObject ob in objects)
+            {
+                ob.UpdatePosition();
+            }
+            get_from_UI(dens_prev, u_prev, v_prev);
             Solver.initialize_boundaries(N);
-            Solver.setBoundaryConditionsSolidObjects(objects, N);
+            //Solver.add_rigid_velocity(rigids, u_prev, v_prev, N);
+
+            Solver.setBoundaryConditionsSolidObjects2(N, 1, u, objects);
+            Solver.setBoundaryConditionsSolidObjects2(N, 2, v, objects);
+            Solver.setBoundaryConditionsSolidObjects2(N, 0, dens, objects);
+
+            //Solver.setBoundaryConditionsSolidObjects(objects, N);
             Solver.setBoundaryConditionsRigidBodies(rigids, N);
 
             Solver.vel_step(N, u, v, u_prev, v_prev, o, visc, dt);
@@ -134,6 +144,7 @@ namespace FluidsProject
             {
                 body.update(dt, N, dens, u, v, o);
             }
+            
             cloth.OnUpdateFrame();
         }
 
@@ -230,7 +241,7 @@ namespace FluidsProject
             if (on_movingObject != null)
             {
                 on_movingObject.SetPosition(i, j);
-                on_movingObject.SetVelocity((mx - omx), (omy - my));
+                //on_movingObject.SetVelocity((mx - omx), (omy - my));
             }
 
             if (mouse_down[1] && (j >= 2 && j < N) && (i >= 2 && i < N))
@@ -257,7 +268,6 @@ namespace FluidsProject
             }
             else
             {
-
                 draw_density();
                 draw_object();
                 drawBoundry();
@@ -294,7 +304,7 @@ namespace FluidsProject
 
             h = 1.0f / N;
 
-            GL.Color3(1.0f, 1.0f, 1.0f);
+            GL.Color3(1.0f, 0.2f, 0.2f);
             GL.LineWidth(1.0f);
 
             GL.Begin(BeginMode.Lines);
@@ -307,7 +317,7 @@ namespace FluidsProject
                     y = (j - 0.5f) * h;
 
                     GL.Vertex2(x, y);
-                    GL.Vertex2(x + 0.1f * u[IX(i, j)], y + 0.1f * v[IX(i, j)]);
+                    GL.Vertex2(x + 0.5f * u[IX(i, j)], y + 0.5f * v[IX(i, j)]);
                 }
             }
 
@@ -521,8 +531,8 @@ namespace FluidsProject
                     if (movingObject.IsObjectCell(i, j))
                     {
                         //movingObject.SetVelocity(0, 0);
-                        movingObject.SetPosition(i, j);
-                        on_movingObject = movingObject;
+                        //movingObject.SetPosition(i, j);
+                        //on_movingObject = movingObject;
                     }
                 }
             }

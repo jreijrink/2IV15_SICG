@@ -36,8 +36,8 @@ namespace FluidsProject.Particles
 
             dt0 = _dt * _N;
 
-            float x = (float)(_p1.Position.X * _N);
-            float y = (float)(_p1.Position.Y * _N);
+            float x = _p1.Position.X * _N;
+            float y = _p1.Position.Y * _N;
 
             if (x < 0.5f) x = 0.5f;
             if (x > _N + 0.5f) x = _N + 0.5f;
@@ -55,8 +55,8 @@ namespace FluidsProject.Particles
             if ((float)Math.Max(i0, Math.Max(i1, Math.Max(j0, j1))) <= _N && (float)Math.Min(i0, Math.Min(i1, Math.Min(j0, j1))) >= 0)
             {
                 float density = s0 * (t0 * _d[Game.IX(i0, j0)] + t1 * _d[Game.IX(i0, j1)]) + s1 * (t0 * _d[Game.IX(i1, j0)] + t1 * _d[Game.IX(i1, j1)]);
-                float v_x = s0 * (t0 * _u[Game.IX(i0, j0)] + t1 * _u[Game.IX(i0, j1)]) + s1 * (t0 * _u[Game.IX(i1, j0)] + t1 * _u[Game.IX(i1, j1)]);
-                float v_y = s0 * (t0 * _v[Game.IX(i0, j0)] + t1 * _v[Game.IX(i0, j1)]) + s1 * (t0 * _v[Game.IX(i1, j0)] + t1 * _v[Game.IX(i1, j1)]);
+                float v_x =     s0 * (t0 * _u[Game.IX(i0, j0)] + t1 * _u[Game.IX(i0, j1)]) + s1 * (t0 * _u[Game.IX(i1, j0)] + t1 * _u[Game.IX(i1, j1)]);
+                float v_y =     s0 * (t0 * _v[Game.IX(i0, j0)] + t1 * _v[Game.IX(i0, j1)]) + s1 * (t0 * _v[Game.IX(i1, j0)] + t1 * _v[Game.IX(i1, j1)]);
                 _p1.Force += new HyperPoint<float>(v_x * factor, v_y * factor) * Math.Min(1, density);
             }
         }

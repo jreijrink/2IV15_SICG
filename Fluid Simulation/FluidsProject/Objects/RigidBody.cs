@@ -180,5 +180,10 @@ namespace FluidsProject.Objects
         {
             return vertices;
         }
+
+        public HyperPoint<float> getVelocity()
+        {
+            return v;
+        }
     }
 }
