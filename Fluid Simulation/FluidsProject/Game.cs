@@ -19,22 +19,23 @@ namespace FluidsProject
         private float dt, diff, visc;
         private float force, source;
         private bool dvel, show_v;
-        private MovingObject on_movingObject;
         private int current_stage = 1;
 
         float d;
         private Cloth cloth;
 
         private float[] u, v, u_prev, v_prev, o;
-        private List<MovingObject> objects;
         private float[] dens, dens_prev;
 
         private int win_x, win_y;
         private bool[] mouse_down = { false, false, false };
         private int omx, omy, mx, my;
-        private float gravity = -9.81f / 100.0f;
+        private float gravity = -9.81f / 50.0f;
 
         private List<RigidBody> rigids = new List<RigidBody>();
+
+        private int steps = 1;
+        private RigidBody currentSelectedBody;
 
         public void init(int width, int height, string[] args)
         {
@@ -48,13 +49,13 @@ namespace FluidsProject
             cloth = new Cloth(N, dt, d, win_x, win_y);
 
             PreDisplay();
-        }   
+        }
 
         private void create_bodies()
         {
             float h = 1.0f / N;
-            float x0 = (N/2.0f) * h;
-            float y0 = (N/2.0f) * h;
+            float x0 = (N / 2.0f) * h;
+            float y0 = (N / 3.0f) * h;
 
             Box box = new Box(new HyperPoint<float>(x0, y0), 100, 10.0f * h, 10.0f * h, N);
             rigids.Add(box);
@@ -66,7 +67,7 @@ namespace FluidsProject
             {
                 N = 64;
                 dt = 0.05f;
-                diff = 0.0f;
+                diff = 0;
                 visc = 0.001f;
                 force = 5.0f;
                 source = 100.0f;
@@ -83,7 +84,7 @@ namespace FluidsProject
                 source = float.Parse(args[5]);
                 Console.WriteLine("Using defaults : N={0} dt={1} diff={2} visc={3} force = {4} source={5}",
                     N, dt, diff, visc, force, source);
-            }   
+            }
         }
 
         private void allocate_data()
@@ -97,55 +98,42 @@ namespace FluidsProject
             dens = new float[size];
             dens_prev = new float[size];
             o = new float[size];
-            objects = new List<MovingObject>();
         }
 
         private void apply_grafity()
         {
             int i, j;
-            for (i = 0; i <= N + 1; i++)
+            for (i = 1; i <= N; i++)
             {
-                for (j = 0; j <= N + 1; j++)
+                for (j = 1; j <= N; j++)
                 {
-                    v[IX(i, j)] = gravity;
+                    if (dens[IX(i, j)] > 0)
+                        v_prev[IX(i, j)] += gravity;
                 }
             }
         }
 
-        private void create_solid_object()
-        {
-            SquareObject square = new SquareObject(N / 4, N / 4, N / 4, N / 4, N);
-            objects.Add(square);
-            square.SetVelocity(0,1f);
-        }
-
         public void OnUpdateFrame()
         {
-            
-            foreach (MovingObject ob in objects)
+            for (int i = 0; i < steps; i++)
             {
-                ob.UpdatePosition();
+
+                foreach (RigidBody body in rigids)
+                {
+                    body.update(dt, N, dens, u, v, o, mx / (float)win_x, 1 - (my / (float)win_y), Solver.boundaries);
+                }
+
+                get_from_UI(dens_prev, u_prev, v_prev);
+                //apply_grafity();
+
+                Solver.initialize_boundaries(N);
+                Solver.add_rigid_velocity(rigids, u_prev, v_prev, dens, N);
+
+                Solver.vel_step(N, u, v, u_prev, v_prev, o, visc, dt);
+                Solver.dens_step(N, dens, dens_prev, u, v, o, diff, dt);
+
+                cloth.OnUpdateFrame();
             }
-            get_from_UI(dens_prev, u_prev, v_prev);
-            Solver.initialize_boundaries(N);
-            //Solver.add_rigid_velocity(rigids, u_prev, v_prev, N);
-
-            Solver.setBoundaryConditionsSolidObjects2(N, 1, u, objects);
-            Solver.setBoundaryConditionsSolidObjects2(N, 2, v, objects);
-            Solver.setBoundaryConditionsSolidObjects2(N, 0, dens, objects);
-
-            //Solver.setBoundaryConditionsSolidObjects(objects, N);
-            Solver.setBoundaryConditionsRigidBodies(rigids, N);
-
-            Solver.vel_step(N, u, v, u_prev, v_prev, o, visc, dt);
-            Solver.dens_step(N, dens, dens_prev, u, v, o, diff, dt);
-
-            foreach (RigidBody body in rigids)
-            {
-                body.update(dt, N, dens, u, v, o);
-            }
-            
-            cloth.OnUpdateFrame();
         }
 
         private void loadStage()
@@ -157,9 +145,6 @@ namespace FluidsProject
                     break;
                 case 2:
                     loadStage2();
-                    break;
-                case 3:
-                    loadStage3();
                     break;
                 case 4:
                     loadStage4();
@@ -192,14 +177,6 @@ namespace FluidsProject
             current_stage = 2;
         }
 
-        private void loadStage3()
-        {
-            //Moving solid object
-            clear_data();
-            create_solid_object();
-            current_stage = 3;
-        }
-
         private void loadStage4()
         {
             //Particles
@@ -213,6 +190,14 @@ namespace FluidsProject
             //Rigid body
             clear_data();
             create_bodies();
+
+            for (int i = 1; i <= N; i++)
+            {
+                for (int j = N / 2; j <= N; j++)
+                {
+                    this.dens[IX(i, j)] = 1;
+                }
+            }
             current_stage = 5;
         }
 
@@ -236,12 +221,6 @@ namespace FluidsProject
             {
                 u[IX(i, j)] = force * (mx - omx);
                 v[IX(i, j)] = force * (omy - my);
-            }
-
-            if (on_movingObject != null)
-            {
-                on_movingObject.SetPosition(i, j);
-                //on_movingObject.SetVelocity((mx - omx), (omy - my));
             }
 
             if (mouse_down[1] && (j >= 2 && j < N) && (i >= 2 && i < N))
@@ -275,7 +254,7 @@ namespace FluidsProject
                 if (show_v)
                     draw_velocities();
 
-               cloth.OnRenderFrame();
+                cloth.OnRenderFrame();
             }
         }
 
@@ -302,6 +281,7 @@ namespace FluidsProject
             int i, j;
             float x, y, h;
 
+            float damping = 0.1f;
             h = 1.0f / N;
 
             GL.Color3(1.0f, 0.2f, 0.2f);
@@ -317,7 +297,7 @@ namespace FluidsProject
                     y = (j - 0.5f) * h;
 
                     GL.Vertex2(x, y);
-                    GL.Vertex2(x + 0.5f * u[IX(i, j)], y + 0.5f * v[IX(i, j)]);
+                    GL.Vertex2(x + damping * u[IX(i, j)], y + damping * v[IX(i, j)]);
                 }
             }
 
@@ -330,7 +310,7 @@ namespace FluidsProject
             GL.LineWidth(1.0f);
 
             GL.Begin(BeginMode.Lines);
-            
+
             drawLineForIJ(1, N, N, N);
             drawLineForIJ(N, N, N, 1);
             drawLineForIJ(N, 1, 1, 1);
@@ -393,11 +373,6 @@ namespace FluidsProject
                 }
             }
             GL.End();
-
-            foreach (MovingObject movingObject in objects)
-            {
-                movingObject.Draw();
-            }
         }
 
         private void draw_density()
@@ -407,7 +382,7 @@ namespace FluidsProject
 
             h = 1.0f / N;
 
-            GL.Begin(BeginMode.Quads);
+
 
             for (i = 1; i < N; i++)
             {
@@ -416,12 +391,13 @@ namespace FluidsProject
                 {
                     y = (j - 0.5f) * h;
 
+                    GL.Begin(BeginMode.Quads);
                     d00 = dens[IX(i, j)];
                     d01 = dens[IX(i, j + 1)];
                     d10 = dens[IX(i + 1, j)];
                     d11 = dens[IX(i + 1, j + 1)];
 
-                    if(d00 > 0 || d01 > 0 || d10 > 0 || d11 > 1)
+                    if (d00 > 0 || d01 > 0 || d10 > 0 || d11 > 1)
                     {
                         d00 = d00;
                     }
@@ -436,10 +412,19 @@ namespace FluidsProject
                     GL.Color3(d10 * .8, d10 * .8, d10); GL.Vertex2(x + h, y);
                     GL.Color3(d11 * .8, d11 * .8, d11); GL.Vertex2(x + h, y + h);
                     GL.Color3(d01 * .8, d01 * .8, d01); GL.Vertex2(x, y + h);
+                    GL.End();
+
+                    GL.Begin(BeginMode.LineLoop);
+                    GL.Color3(0.1f, 0.1f, 0.1f);
+                    GL.Vertex2(x, y);
+                    GL.Vertex2(x + h, y);
+                    GL.Vertex2(x + h, y + h);
+                    GL.Vertex2(x, y + h);
+                    GL.End();
                 }
             }
 
-            GL.End();
+
         }
 
         private void clear_data()
@@ -450,7 +435,7 @@ namespace FluidsProject
             {
                 u[i] = v[i] = u_prev[i] = v_prev[i] = dens[i] = dens_prev[i] = o[i] = 0.0f;
             }
-            objects = new List<MovingObject>();
+            
             cloth.ClearData();
             rigids = new List<RigidBody>();
         }
@@ -465,7 +450,7 @@ namespace FluidsProject
             GLControl control = (GLControl)sender;
             win_x = control.ClientRectangle.Width;
             win_y = control.ClientRectangle.Height;
-            
+
             cloth.OnResize(win_x, win_y);
 
             GL.Viewport(0, 0, win_x, win_y);
@@ -475,31 +460,28 @@ namespace FluidsProject
         {
             switch (e.KeyCode)
             {
-                    case Keys.C:
-                        clear_data();
-                        loadStage();
-                        break;
-                    case Keys.V:
-                        dvel = !dvel;
-                        break;
-                    case Keys.S:
-                        show_v = !show_v;
-                        break;
-                    case Keys.D1:
-                        loadStage1();
-                        break;
-                    case Keys.D2:
-                        loadStage2();
-                        break;
-                    case Keys.D3:
-                        loadStage3();
-                        break;
-                    case Keys.D4:
-                        loadStage4();
-                        break;
-                    case Keys.D5:
-                        loadStage5();
-                        break;
+                case Keys.C:
+                    clear_data();
+                    loadStage();
+                    break;
+                case Keys.V:
+                    dvel = !dvel;
+                    break;
+                case Keys.S:
+                    show_v = !show_v;
+                    break;
+                case Keys.D1:
+                    loadStage1();
+                    break;
+                case Keys.D2:
+                    loadStage2();
+                    break;
+                case Keys.D3:
+                    loadStage4();
+                    break;
+                case Keys.D4:
+                    loadStage5();
+                    break;
             }
         }
 
@@ -509,7 +491,7 @@ namespace FluidsProject
 
         public void OnMouseDown(object sender, MouseEventArgs e)
         {
-            if (!cloth.OnMouseDown(e))
+            if (!cloth.OnMouseDown(e) && !selectParticle(e))
             {
                 omx = mx = e.Location.X;
                 omy = my = e.Location.Y;
@@ -520,26 +502,13 @@ namespace FluidsProject
                     mouse_down[2] = true;
                 if (e.Button == MouseButtons.Middle)
                     mouse_down[1] = true;
-
-                int i, j, size = (N + 2) * (N + 2);
-
-                i = (int)((mx / (float)win_x) * N + 1);
-                j = (int)(((win_y - my) / (float)win_y) * N + 1);
-
-                foreach (MovingObject movingObject in objects)
-                {
-                    if (movingObject.IsObjectCell(i, j))
-                    {
-                        //movingObject.SetVelocity(0, 0);
-                        //movingObject.SetPosition(i, j);
-                        //on_movingObject = movingObject;
-                    }
-                }
             }
         }
 
         public void OnMouseUp(object sender, MouseEventArgs e)
         {
+            releaseParticle(e);
+
             omx = mx = e.Location.X;
             omx = my = e.Location.X;
 
@@ -549,9 +518,59 @@ namespace FluidsProject
                 mouse_down[2] = false;
             if (e.Button == MouseButtons.Middle)
                 mouse_down[1] = false;
-            on_movingObject = null;
 
             cloth.OnMouseUp(e);
+        }
+
+        public bool selectParticle(MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                if (this.currentSelectedBody != null)
+                    return true;
+
+                float mouseX = e.Location.X / (float)win_x;
+                float mouseY = 1 - e.Location.Y / (float)win_y;
+                float minParticleDistance = 0.0005f;
+
+                HyperPoint<float> mouseLoc = new HyperPoint<float>(mouseX, mouseY);
+
+                double minDistance = double.PositiveInfinity;
+                Particle selectedParticle = null;
+                foreach (RigidBody body in rigids)
+                {
+                    foreach (Particle particle in body.getGlobalVertices())
+                    {
+                        double distance = (particle.Position - mouseLoc).GetLengthSquared();
+                        if (distance < minDistance && distance < minParticleDistance)
+                        {
+                            minDistance = distance;
+                            selectedParticle = particle;
+                        }
+                    }
+
+                    if (selectedParticle != null)
+                    {
+                        this.currentSelectedBody = body;
+                        body.selectParticle(selectedParticle);
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        public void releaseParticle(MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                if (currentSelectedBody != null)
+                {
+                    currentSelectedBody.deselectParticle();
+                    this.currentSelectedBody = null;
+                }
+            }
         }
 
         public void OnMouseMove(object sender, MouseEventArgs e)

@@ -14,9 +14,9 @@ namespace FluidsProject.Objects
         // Constant quantities
         protected float mass;
         protected float inertia;
-        
+
         // State Variables
-        protected HyperPoint<float> x;
+        private HyperPoint<float> x;
         private HyperPoint<float> x_orig;
         protected HyperPoint<float> v = new HyperPoint<float>(0, 0);
 
@@ -27,37 +27,56 @@ namespace FluidsProject.Objects
 
         protected List<Particle> vertices = new List<Particle>();
         protected List<HyperPoint<float>> localVertices = new List<HyperPoint<float>>();
-        
-        public RigidBody(HyperPoint<float> x, float mass)
+
+        protected Particle selectedParticle;
+        protected SpringForce Spring;
+
+        private bool _canRotate;
+
+        public RigidBody(HyperPoint<float> x, float mass, bool canRotate = true)
         {
             this.mass = mass;
-            this.x = x;
+            this.X = x;
             this.x_orig = x;
+            this._canRotate = canRotate;
+        }
+
+        protected HyperPoint<float> X
+        {
+            get { return x; }
+            set { x = value; }
         }
 
         public void addForce(HyperPoint<float> force, HyperPoint<float> location)
         {
             this.force += force;
-            this.torque +=  cross(location - x, force) / inertia;
+            this.torque += cross(location - x, force) / inertia;
         }
 
         private float cross(HyperPoint<float> a, HyperPoint<float> b)
         {
-            float i =  a.X*b.Y;
-            float j = a.Y*b.X;
+            float i = a.X * b.Y;
+            float j = a.Y * b.X;
 
             return i - j;
         }
 
-        public void update(float dt, int N, float[] d, float[] u, float[] v, float[] o)
+        public void update(float dt, int N, float[] d, float[] u, float[] v, float[] o, float mx, float my, BoundryConditions[] conditions)
         {
             foreach (Particle particle in vertices)
             {
-                PressureForce pf = new PressureForce(particle, dt, N, d, u, v);
+                PressureForce pf = new PressureForce(particle, N, d, u, v, conditions);
                 DragForce df = new DragForce(particle);
 
                 pf.Calculate();
                 df.Calculate();
+
+                if (particle.isSelected)
+                {
+                    Particle mouseParticle = new Particle(0, new HyperPoint<float>(mx, my));
+                    Spring = new SpringForce(mouseParticle, particle, 1 / (float)N, 100, 100);
+                    Spring.Calculate();
+                }
 
                 addForce(particle.Force, particle.Position);
                 particle.Force = new HyperPoint<float>(0, 0);
@@ -73,19 +92,27 @@ namespace FluidsProject.Objects
 
                 if (i > 0 && i < N && j > 0 && j < N)
                 {
-                    if (i <= 1 || i >= N - 1 || o[Game.IX(i, j)] == 1)
+                    if ((i <= 1 && this.v.X < 0) || (i >= N - 1 && this.v.X > 0))
                     {
                         this.v.X = old_x * -1;
+                        break;
                     }
-                    if (j <= 1 || j >= N - 1 || o[Game.IX(i, j)] == 1)
+                    if ((j <= 1 && this.v.Y < 0) || (j >= N - 1 && this.v.Y > 0))
                     {
                         this.v.Y = old_y * -1;
+                        break;
                     }
                 }
             }
-            this.x += this.v * dt;
-            
-            rotv += torque*dt;
+            this.X += this.v * dt;
+
+            float drag = 0.5f;
+            if (_canRotate)
+            {
+                torque -= rotv * drag;
+                rotv += torque * dt;
+            }
+
             orientation = (float)((orientation + (rotv * dt)));
 
             torque = 0;
@@ -94,7 +121,7 @@ namespace FluidsProject.Objects
             Matrix<float> rot = getRotationMatrix(orientation);
             for (int i = 0; i < vertices.Count; i++)
             {
-                HyperPoint<float> rotatedPos = new HyperPoint<float>((rot*localVertices[i]).m);
+                HyperPoint<float> rotatedPos = new HyperPoint<float>((rot * localVertices[i]).m);
                 vertices[i].Position = rotatedPos + x;
                 vertices[i].Velocity = this.v;
             }
@@ -110,7 +137,7 @@ namespace FluidsProject.Objects
 
         public Matrix<float> getRotationMatrix(float angle)
         {
-            Matrix<float> rot = new Matrix<float>(2,2);
+            Matrix<float> rot = new Matrix<float>(2, 2);
             rot[0, 0] = (float)Math.Cos(angle);
             rot[0, 1] = (float)-Math.Sin(angle);
             rot[1, 0] = (float)Math.Sin(angle);
@@ -134,11 +161,16 @@ namespace FluidsProject.Objects
             {
                 particle.draw();
             }
+
+            if (Spring != null)
+            {
+                Spring.Draw();
+            }
         }
 
         public void reset()
         {
-            this.x = x_orig;
+            this.X = x_orig;
             this.v = new HyperPoint<float>(0, 0);
             orientation = 0;
             rotv = 0;
@@ -147,7 +179,10 @@ namespace FluidsProject.Objects
             {
                 Particle p = vertices[i];
                 p.Position = localVertices[i] + this.x;
+                p.isSelected = false;
             }
+
+            Spring = null;
         }
 
         public bool pointInPolygon(HyperPoint<float> point)
@@ -175,6 +210,23 @@ namespace FluidsProject.Objects
             return oddNodes;
         }
 
+        public bool IsInPolygon(HyperPoint<float> p)
+        {
+            int nvert = vertices.Count;
+
+            int i, j;
+            bool c = false;
+            for (i = 0, j = nvert - 1; i < nvert; j = i++)
+            {
+                HyperPoint<float> verti = vertices[i].Position;
+                HyperPoint<float> vertj = vertices[j].Position;
+
+                if (((verti.Y > p.Y) != (vertj.Y > p.Y)) &&
+                    (p.X < (vertj.X - verti.X) * (p.Y - verti.Y) / (vertj.Y - verti.Y) + verti.X))
+                    c = !c;
+            }
+            return c;
+        }
 
         public List<Particle> getGlobalVertices()
         {
@@ -184,6 +236,19 @@ namespace FluidsProject.Objects
         public HyperPoint<float> getVelocity()
         {
             return v;
+        }
+
+        public void selectParticle(Particle p)
+        {
+            selectedParticle = p;
+            p.isSelected = true;
+        }
+
+        public void deselectParticle()
+        {
+            selectedParticle.isSelected = false;
+            selectedParticle = null;
+            Spring = null;
         }
     }
 }

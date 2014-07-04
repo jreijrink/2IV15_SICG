@@ -107,7 +107,7 @@ namespace FluidsProject.Particles
                         Particle particle = new Particle(index, start + offset, 3.0f);
                         particles.Add(particle);
 
-                        PressureForce pressureForce = new PressureForce(particle, dt, N, d, u, v);
+                        PressureForce pressureForce = new PressureForce(particle, N, d, u, v);
                         forces.Add(pressureForce);
                         DragForce dragForce = new DragForce(particle);
 
@@ -194,7 +194,7 @@ namespace FluidsProject.Particles
                     particles.Add(particle);
                     forces.Add(new GravityForce(particle));
 
-                    PressureForce pressureForce = new PressureForce(particle, dt, N, d, u, v);
+                    PressureForce pressureForce = new PressureForce(particle, N, d, u, v);
                     forces.Add(pressureForce);
                     DragForce dragForce = new DragForce(particle);
 
@@ -334,8 +334,8 @@ namespace FluidsProject.Particles
 
         public bool OnMouseDown(MouseEventArgs e)
         {
-            float mouseX = (float)(e.Location.X / (float)windowWidth);
-            float mouseY = 1 - (float)(e.Location.Y / (float)windowHeigt);
+            float mouseX = e.Location.X / (float)windowWidth;
+            float mouseY = 1 - e.Location.Y / (float)windowHeigt;
 
             if (e.Button == MouseButtons.Left)
             {
@@ -366,21 +366,6 @@ namespace FluidsProject.Particles
                     return true;
                 }
             }
-            else if (e.Button == MouseButtons.Right)
-            {
-                /*
-                foreach (Particle particle in particles)
-                {
-                    double hor_distance = particle.Position.Y - mouseY;
-                    if (hor_distance < minHorDistance && hor_distance > -minHorDistance)
-                    {
-                        bool direction = particle.Position.X > mouseX;
-                        forces.Add(new HorizontalForce(particle, direction));
-                    }
-                }
-                hor_force_applied = true;
-                */
-            }
 
             return false;
         }
@@ -400,13 +385,6 @@ namespace FluidsProject.Particles
                     this.currentSelectedParticle = null;
                     this.mouseSpringForce = null;
                 }
-            }
-            else if (e.Button == MouseButtons.Right)
-            {
-                /*
-                forces.RemoveAll(F => F.GetType() == typeof(HorizontalForce));
-                hor_force_applied = false;
-                */
             }
         }
 

@@ -10,7 +10,7 @@ namespace FluidsProject.Particles
     class DragForce : Force
 	{
 		private readonly Particle _p1;
-        private float drag = 0.5f;
+        private float drag = 2f;
 
         public DragForce(Particle p1)
 		{

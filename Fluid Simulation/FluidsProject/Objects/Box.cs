@@ -35,14 +35,14 @@ namespace FluidsProject.Objects
         
         public void constructEdge(HyperPoint<float> x1, HyperPoint<float> x2, int N)
         {
-            int amount = (int) ((x1 - x2).GetLength() * N) + 1;
+            int amount = (int) ((x1 - x2).GetLength() *N) + 1;
             HyperPoint<float> dir = (x2 - x1) / amount;
 
             for (int i = 0; i < amount; i++)
             {
                 HyperPoint<float> px = x1 + dir*i;
                 vertices.Add(new Particle(0, px, 1));
-                localVertices.Add(px - this.x);
+                localVertices.Add(px - this.X);
             }
             
         }

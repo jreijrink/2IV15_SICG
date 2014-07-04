@@ -12,7 +12,7 @@ namespace FluidsProject
     class Solver
     {
         static float gravity = -9.81f / 100.0f;
-        private static BoundryConditions[] boundaries;
+        public static BoundryConditions[] boundaries;
 
         public static int IX(int i, int j)
         {
@@ -28,16 +28,11 @@ namespace FluidsProject
         }
 
 
-        public static void add_rigid_velocity(List<RigidBody> bodies, float[] u, float[] v, int N)
+        public static void add_rigid_velocity(List<RigidBody> bodies, float[] u, float[] v, float[] d, int N)
         {
             foreach (RigidBody body in bodies)
             {
                 HyperPoint<float> vel = body.getVelocity();
-                if(vel.GetLengthSquared() == 0)
-                {
-                    continue; ;
-                }
-
                 int[] minMaxIJ = getMinMaxIJ(body.getGlobalVertices().ConvertAll(p => p.Position), N);
 
                 int minI = minMaxIJ[0];
@@ -46,25 +41,27 @@ namespace FluidsProject
                 int minJ = minMaxIJ[2];
                 int maxJ = minMaxIJ[3];
 
-                for (int i = minI; i < maxI; i++)
+                for (int i = minI; i <= maxI; i++)
                 {
-                    for (int j = minJ; j < maxJ; j++)
+                    for (int j = minJ; j <= maxJ; j++)
                     {
-                        float xi = (float) i/N;
-                        float yj = (float) j/N;
+                        float xi = (float)i / N;
+                        float yj = (float)j / N;
 
                         bool ijIn = body.pointInPolygon(new HyperPoint<float>(xi, yj));
                         if (ijIn)
                         {
-                            float xLeft = (float) (i - 1)/N;
-                            float xRight = (float) (i + 1)/N;
-                            float yUp = (float) (j + 1)/N;
-                            float yDown = (float) (j - 1)/N;
+                            float xLeft = (i - 1) / (float)N;
+                            float xRight = (i + 1) / (float)N;
+                            float yUp = (j - 1) / (float)N;
+                            float yDown = (j + 1) / (float)N;
 
-                            bool leftIn = body.pointInPolygon(new HyperPoint<float>(xLeft, yj));
-                            bool rightIn = body.pointInPolygon(new HyperPoint<float>(xRight, yj));
-                            bool upIn = body.pointInPolygon(new HyperPoint<float>(xi, yUp));
-                            bool downIn = body.pointInPolygon(new HyperPoint<float>(xi, yDown));
+                            bool leftIn = body.IsInPolygon(new HyperPoint<float>(xLeft, yj));
+                            bool rightIn = body.IsInPolygon(new HyperPoint<float>(xRight, yj));
+                            bool upIn = body.IsInPolygon(new HyperPoint<float>(xi, yUp));
+                            bool downIn = body.IsInPolygon(new HyperPoint<float>(xi, yDown));
+
+                            float forceFactor = 5;
 
                             if (leftIn && rightIn && downIn && upIn)
                             {
@@ -72,23 +69,50 @@ namespace FluidsProject
                             }
                             if (leftIn && !rightIn)
                             {
-                                u[IX(i + 1, j)] += vel.X * 2;
-                                v[IX(i + 1, j)] += vel.Y * 2;
+                                int index = IX(Math.Min(N + 1, i + 1), j);
+                                u[index] += (vel.X * forceFactor);
+                                v[index] += (vel.Y * forceFactor);
+
+//                                index = IX(Math.Min(N + 1, i + 2), j);
+//                                u[index] += (vel.X * forceFactor);
+//                                v[index] += (vel.Y * forceFactor);
+
                             }
-                            else if (!leftIn && rightIn)
+                            if (!leftIn && rightIn)
                             {
-                                u[IX(i - 1, j)] += vel.X * 2;
-                                v[IX(i - 1, j)] += vel.Y * 2;
+
+                                int index = IX(Math.Max(0, i - 1), j);
+                                u[index] += (vel.X * forceFactor);
+                                v[index] += (vel.Y * forceFactor);
+
+//                                index = IX(Math.Max(0, i - 2), j);
+//                                u[index] += (vel.X * forceFactor);
+//                                v[index] += (vel.Y * forceFactor);
+
                             }
-                            else if (!upIn && downIn)
+                            if (!upIn && downIn)
                             {
-                                u[IX(i, j + 1)] += vel.X * 2;
-                                v[IX(i, j + 1)] += vel.Y * 2;
+
+                                int index = IX(i, Math.Max(0, j - 1));
+                                u[index] += (vel.X * forceFactor);
+                                v[index] += (vel.Y * forceFactor);
+
+//                                index = IX(i, Math.Max(0, j - 2));
+//                                u[index] += (vel.X * forceFactor);
+//                                v[index] += (vel.Y * forceFactor);
+
                             }
-                            else if (upIn && !downIn)
+                            if (upIn && !downIn)
                             {
-                                u[IX(i, j - 1)] += vel.X * 2;
-                                v[IX(i, j - 1)] += vel.Y * 2;
+
+                                int index = IX(i, Math.Min(N + 1, j + 1));
+                                u[index] += (vel.X * forceFactor);
+                                v[index] += (vel.Y * forceFactor);
+
+//                                index = IX(i, Math.Min(N + 1, j + 2));
+//                                u[index] += (vel.X * forceFactor);
+//                                v[index] += (vel.Y * forceFactor);
+
                             }
                         }
                     }
@@ -220,7 +244,7 @@ namespace FluidsProject
                 x[IX(N + 1, i)] = b == 1 ? -x[IX(N, i)] : x[IX(N, i)];
 
                 x[IX(i, 0)] = b == 2 ? -x[IX(i, 1)] : x[IX(i, 1)];
-                x[IX(i, N + 1)] = b == 2 ? -x[IX(i, N)] : x[IX(i, N)];
+                x[IX(i, N + 1)] = b == 2 ? 2 * -x[IX(i, N)] : x[IX(i, N)];
             }
 
             for (i = 1; i <= N; i++)
@@ -243,7 +267,7 @@ namespace FluidsProject
                     }
 
                     BoundrySettings bs = b == 1 ? boundaries[IX(i, j)].u
-                                                : b == 2 ? boundaries[IX(i, j)].v 
+                                                : b == 2 ? boundaries[IX(i, j)].v
                                                 : boundaries[IX(i, j)].d;
 
                     Source source = boundaries[IX(i, j)].source;
@@ -286,9 +310,9 @@ namespace FluidsProject
                 int minJ = minMaxIJ[2];
                 int maxJ = minMaxIJ[3];
 
-                for (int i = minI; i < maxI; i++)
+                for (int i = minI; i <= maxI; i++)
                 {
-                    for (int j = minJ; j < maxJ; j++)
+                    for (int j = minJ; j <= maxJ; j++)
                     {
                         float xi = (float)i / N;
                         float yj = (float)j / N;
@@ -380,103 +404,7 @@ namespace FluidsProject
                 }
             }
 
-            return new[] {minI,maxI,minJ,maxJ};
-        }
-
-        public static void setBoundaryConditionsSolidObjects(List<MovingObject> objects, int N)
-        {
-            foreach (MovingObject movingObject in objects)
-            {
-                int[] minMaxIJ = getMinMaxIJ(movingObject.GetVertices(), N);
-
-                int minI = minMaxIJ[0];
-                int maxI = minMaxIJ[1];
-
-                int minJ = minMaxIJ[2];
-                int maxJ = minMaxIJ[3];
-
-                for (int i = minI; i < maxI; i++)
-                {
-                    for (int j = minJ; j < maxJ; j++)
-                    {
-                        float xi = (float)i / N;
-                        float yj = (float)j / N;
-
-                        bool ijIn = movingObject.pointInObject(new HyperPoint<float>(xi, yj));
-                        if (ijIn)
-                        {
-                            float xLeft = (float)(i - 1) / N;
-                            float xRight = (float)(i + 1) / N;
-                            float yUp = (float)(j + 1) / N;
-                            float yDown = (float)(j - 1) / N;
-
-                            bool leftIn = movingObject.pointInObject(new HyperPoint<float>(xLeft, yj));
-                            bool rightIn = movingObject.pointInObject(new HyperPoint<float>(xRight, yj));
-                            bool upIn = movingObject.pointInObject(new HyperPoint<float>(xi, yUp));
-                            bool downIn = movingObject.pointInObject(new HyperPoint<float>(xi, yDown));
-
-                            if (leftIn && rightIn && downIn && upIn)
-                            {
-                                boundaries[IX(i, j)].u = BoundrySettings.Zero;
-                                boundaries[IX(i, j)].v = BoundrySettings.Zero;
-                                boundaries[IX(i, j)].d = BoundrySettings.Zero;
-                                boundaries[IX(i, j)].source = Source.None;
-
-                            }
-                            if (leftIn && !rightIn)
-                            {
-                                boundaries[IX(i, j)].u = BoundrySettings.Invert;
-                                boundaries[IX(i, j)].v = BoundrySettings.Copy;
-                                boundaries[IX(i, j)].d = BoundrySettings.Copy;
-                                boundaries[IX(i, j)].source = Source.right;
-                            }
-                            if (!leftIn && rightIn)
-                            {
-                                boundaries[IX(i, j)].u = BoundrySettings.Invert;
-                                boundaries[IX(i, j)].v = BoundrySettings.Copy;
-                                boundaries[IX(i, j)].d = BoundrySettings.Copy;
-                                boundaries[IX(i, j)].source = Source.left;
-                            }
-                            if (upIn && !downIn)
-                            {
-                                boundaries[IX(i, j)].u = BoundrySettings.Copy;
-                                boundaries[IX(i, j)].v = BoundrySettings.Invert;
-                                boundaries[IX(i, j)].d = BoundrySettings.Copy;
-                                boundaries[IX(i, j)].source = Source.down;
-                            }
-                            if (!upIn && downIn)
-                            {
-                                boundaries[IX(i, j)].u = BoundrySettings.Copy;
-                                boundaries[IX(i, j)].v = BoundrySettings.Invert;
-                                boundaries[IX(i, j)].d = BoundrySettings.Copy;
-                                boundaries[IX(i, j)].source = Source.up;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        public static void setBoundaryConditionsSolidObjects2(int N, int b, float[] x, List<MovingObject> objects)
-        {
-            int i, j;
-            foreach (MovingObject movingObject in objects)
-            {
-                for (i = 2; i <= N - 1; i++)
-                {
-                    for (j = 2; j <= N - 1; j++)
-                    {
-                        if (movingObject.IsObjectCell(i, j))
-                        {
-                            x[IX(i, j)] = b == 1
-                                              ? movingObject.GetVelocityX(i, j, x)
-                                              : (b == 2)
-                                                    ? movingObject.GetVelocityY(i, j, x)
-                                                    : movingObject.GetVelocityDensity(i, j, x);
-                        }
-                    }
-                }
-            }
+            return new[] { minI, maxI, minJ, maxJ };
         }
 
         private static float[] grafity(int N)
@@ -503,7 +431,7 @@ namespace FluidsProject
         public BoundrySettings v = BoundrySettings.None;
         public BoundrySettings d = BoundrySettings.None;
 
-        public Source source;
+        public Source source = Source.None;
     }
 
     internal enum BoundrySettings
