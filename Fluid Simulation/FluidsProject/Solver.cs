@@ -274,16 +274,16 @@ namespace FluidsProject
                     if (bs == BoundrySettings.Copy)
                     {
                         if (source == Source.left) x[IX(i, j)] = x[IX(i - 1, j)];
-                        else if (source == Source.up) x[IX(i, j)] = x[IX(i, j + 1)];
+                        else if (source == Source.up) x[IX(i, j)] = x[IX(i, j - 1)];
                         else if (source == Source.right) x[IX(i, j)] = x[IX(i + 1, j)];
-                        else if (source == Source.down) x[IX(i, j)] = x[IX(i, j - 1)];
+                        else if (source == Source.down) x[IX(i, j)] = x[IX(i, j + 1)];
                     }
                     else if (bs == BoundrySettings.Invert)
                     {
                         if (source == Source.left) x[IX(i, j)] = -x[IX(i - 1, j)];
-                        else if (source == Source.up) x[IX(i, j)] = -x[IX(i, j + 1)];
+                        else if (source == Source.up) x[IX(i, j)] = -x[IX(i, j - 1)];
                         else if (source == Source.right) x[IX(i, j)] = -x[IX(i + 1, j)];
-                        else if (source == Source.down) x[IX(i, j)] = -x[IX(i, j - 1)];
+                        else if (source == Source.down) x[IX(i, j)] = -x[IX(i, j + 1)];
                     }
                     else if (bs == BoundrySettings.Zero)
                     {

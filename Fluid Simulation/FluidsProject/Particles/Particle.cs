@@ -81,7 +81,7 @@ namespace FluidsProject.Particles
 
 		public void draw()
         {
-			const double h = 0.01;
+			const double h = 0.0075;
             if(isSelected)
                 GL.Color3(1f, 0f, 0f);
             else

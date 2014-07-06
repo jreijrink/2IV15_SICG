@@ -58,6 +58,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Objects\Box.cs" />
+    <Compile Include="Objects\Disk.cs" />
     <Compile Include="Particles\CircularWireConstraint.cs" />
     <Compile Include="Particles\Cloth.cs" />
     <Compile Include="Particles\Constraint.cs" />

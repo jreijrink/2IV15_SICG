@@ -59,6 +59,9 @@ namespace FluidsProject
 
             Box box = new Box(new HyperPoint<float>(x0, y0), 100, 10.0f * h, 10.0f * h, N);
             rigids.Add(box);
+
+            Disk disk = new Disk( new HyperPoint<float>(N/3.0f * h, N/3.0f * h), 5 * h, 10);
+            rigids.Add(disk);
         }
 
         private void initConfiguration(string[] args)
@@ -127,6 +130,7 @@ namespace FluidsProject
                 //apply_grafity();
 
                 Solver.initialize_boundaries(N);
+                Solver.setBoundaryConditionsRigidBodies(rigids, N);
                 Solver.add_rigid_velocity(rigids, u_prev, v_prev, dens, N);
 
                 Solver.vel_step(N, u, v, u_prev, v_prev, o, visc, dt);

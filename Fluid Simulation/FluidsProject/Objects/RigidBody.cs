@@ -106,7 +106,7 @@ namespace FluidsProject.Objects
             }
             this.X += this.v * dt;
 
-            float drag = 0.5f;
+            float drag = 0.25f;
             if (_canRotate)
             {
                 torque -= rotv * drag;
