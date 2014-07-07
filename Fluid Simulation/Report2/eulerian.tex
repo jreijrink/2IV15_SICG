@@ -3,13 +3,6 @@
 We have implemented the fluid simulation algorithm as described in the paper "Real-Time Fluid Dynamics for Games" by Jos Stam.
 This fluid is simulated using a velocity and density field.
 
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=5cm]{img/navierstokes.png}
-    \caption{The Navier-Stokes Equations for the velocity in a compact vector notation (top) and the equation for a density moving through the velocity field (bottom).}
-    \label{fig:navierstokes}
-\end{figure}
-
 \noindent The Navier-Stokes Equations are a precise description of the evolution of a velocity field over time.
 Given the current state of the velocity and a forces, the equations tell us precisely how the velocity will change over an infinitesimal time step.
 Figure~\ref{fig:navierstokes} (top) depicts these equations in a compact vector-like notation.
@@ -18,6 +11,13 @@ Very roughly the equation states that the change in velocity is due to the three
 \noindent The density usually takes values between zero and one: where there is no fluid the density is zero, and elsewhere it indicates the amount of particles present.
 The evolution of the density field through the velocity field of the fluid can also be described by a precise mathematical equation,
 which is depicted at the bottom of Figure~\ref{fig:navierstokes}.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=5cm]{img/navierstokes.png}
+    \caption{The Navier-Stokes Equations for the velocity in a compact vector notation (top) and the equation for a density moving through the velocity field (bottom).}
+    \label{fig:navierstokes}
+\end{figure}
 
 \noindent We define a grid where both the density and velocity are defined at the cell centers.
 The grid contains an extra layer of cells to account for the boundary conditions.
