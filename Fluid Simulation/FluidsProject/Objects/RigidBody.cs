@@ -18,12 +18,12 @@ namespace FluidsProject.Objects
         // State Variables
         private HyperPoint<float> x;
         private HyperPoint<float> x_orig;
-        protected HyperPoint<float> v = new HyperPoint<float>(0, 0);
+        protected HyperPoint<float> v;
 
         protected float orientation;
         protected float rotv;
         protected float torque;
-        protected HyperPoint<float> force = new HyperPoint<float>(0, 0);
+        protected HyperPoint<float> force;
 
         protected List<Particle> vertices = new List<Particle>();
         protected List<HyperPoint<float>> localVertices = new List<HyperPoint<float>>();
@@ -37,8 +37,10 @@ namespace FluidsProject.Objects
         {
             this.mass = mass;
             this.X = x;
+            this.v = new HyperPoint<float>(0, 0);
             this.x_orig = x;
             this._canRotate = canRotate;
+            this.force = new HyperPoint<float>(0, 0);
         }
 
         protected HyperPoint<float> X
