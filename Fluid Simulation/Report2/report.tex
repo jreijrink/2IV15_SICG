@@ -1,34 +1,17 @@
 \documentclass[a4paper,twoside,11pt]{article}
-\usepackage{a4wide,algo,graphicx,fancyhdr,amsmath,amssymb,amsthm,ifthen,path,todonotes}
+\usepackage{a4wide,graphicx,fancyhdr,amsmath,amssymb,amsthm}
 \usepackage{subcaption, caption}
-\usepackage[ruled, noline, algo2e, noend]{algorithm2e}
 \usepackage{hyperref}
 \usepackage{url}
-\usepackage{color}
 \urlstyle{rm}
-\usepackage{tikz}
-\usepackage{xifthen}
 \usepackage{listings}
-\usepackage{pgfplots}
-\usepackage{comment}
-\usepackage{parskip}
-\usepackage{tabularx, colortbl}
-\usepackage{mathtools}
-\usepackage{amsmath}
 \usepackage{float}
 %----------------------- Macros and Definitions --------------------------
 \graphicspath{ {./img/} }
 
-\setlength\headheight{10pt}
+
 \addtolength\topmargin{-10pt}
 \addtolength\footskip{20pt}
-
-\newenvironment{myindentpar}[1]%
-{\begin{list}{}%
-	{\setlength{\leftmargin}{#1}}%
-	\item[]%
-}
- {\end{list}}
 
 \fancypagestyle{plain}{
 \fancyhf{}
@@ -71,8 +54,6 @@
 
 \date{\today}
 
-\setlength{\parindent}{24pt}
-
 % Set \item separation length
 %\newlength{\wideitemsep}
 %\setlength{\wideitemsep}{1\itemsep}
@@ -88,8 +69,6 @@
 \maketitle
 \newpage
 
-\vspace{1cm}
-
 \input{introduction.tex}
 \input{eulerian.tex}
 \input{fixedobjects.tex}
@@ -98,4 +77,11 @@
 \input{results.tex}
 \input{conclusion.tex}
 
+\begin{thebibliography}{1}
+\bibitem{laws-revisited}
+    J. Stam,
+    \emph{Real-Time Fluid Dynamics for Games},
+    Toronto, Ontario, Canada.
+\end{thebibliography}
+    
 \end{document}
