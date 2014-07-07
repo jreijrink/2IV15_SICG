@@ -54,13 +54,13 @@ namespace FluidsProject
         private void create_bodies()
         {
             float h = 1.0f / N;
-            float x0 = (N / 2.0f) * h;
+            float x0 = (2 * N / 3.0f) * h;
             float y0 = (N / 3.0f) * h;
 
             Box box = new Box(new HyperPoint<float>(x0, y0), 100, 10.0f * h, 10.0f * h, N);
             rigids.Add(box);
 
-            Disk disk = new Disk( new HyperPoint<float>(N/3.0f * h, N/3.0f * h), 5 * h, 100);
+            Disk disk = new Disk( new HyperPoint<float>(N/4.0f * h, N/3.0f * h), 5 * h, 100);
             rigids.Add(disk);
         }
 
@@ -285,7 +285,7 @@ namespace FluidsProject
             int i, j;
             float x, y, h;
 
-            float damping = 0.5f;
+            float damping = 0.2f;
             h = 1.0f / N;
 
             GL.Color3(1.0f, 0.2f, 0.2f);
