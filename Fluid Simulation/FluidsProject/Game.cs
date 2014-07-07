@@ -285,7 +285,7 @@ namespace FluidsProject
             int i, j;
             float x, y, h;
 
-            float damping = 0.1f;
+            float damping = 0.5f;
             h = 1.0f / N;
 
             GL.Color3(1.0f, 0.2f, 0.2f);

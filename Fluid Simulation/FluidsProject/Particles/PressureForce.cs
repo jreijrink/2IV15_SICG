@@ -16,7 +16,7 @@ namespace FluidsProject.Particles
         private float factor = 30.0f;
         private BoundryConditions[] _settings;
 
-        private float damp = 0.8f;
+        private float damp = 0.4f;
 
         public PressureForce(Particle p1, int N, float[] d, float[] u, float[] v, BoundryConditions[] settings = null)
         {
@@ -58,21 +58,28 @@ namespace FluidsProject.Particles
                 source = Source.None;
             }
 
-            if (source == Source.up && j0 != 0)
+            if (source == Source.up && j0 <_N)
             {
 
+                i1 = i0 + 1;
+                j0 = j0 + 2;
+                j1 = j0 - 1;
+            }
+            else if(source == Source.down && j0 > 1)
+            {
                 i1 = i0 + 1;
                 j0 = j0 - 2;
                 j1 = j0 + 1;
             }
-            else if(source == Source.down && j0 != _N)
+            else if(source == Source.right)
             {
-                i1 = i0 + 1;
-                j0 = j0 + 1;
+                i0 = i0 + 2;
+                i1 = i0 - 1;
                 j1 = j0 + 1;
             }
             else
             {
+                i0 = i0 - 2;
                 i1 = i0 + 1;
                 j1 = j0 + 1;
             }

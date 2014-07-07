@@ -53,15 +53,15 @@ namespace FluidsProject
                         {
                             float xLeft = (i - 1) / (float)N;
                             float xRight = (i + 1) / (float)N;
-                            float yUp = (j - 1) / (float)N;
-                            float yDown = (j + 1) / (float)N;
+                            float yUp = (j + 1) / (float)N;
+                            float yDown = (j - 1) / (float)N;
 
                             bool leftIn = body.IsInPolygon(new HyperPoint<float>(xLeft, yj));
                             bool rightIn = body.IsInPolygon(new HyperPoint<float>(xRight, yj));
                             bool upIn = body.IsInPolygon(new HyperPoint<float>(xi, yUp));
                             bool downIn = body.IsInPolygon(new HyperPoint<float>(xi, yDown));
 
-                            float forceFactor = 5;
+                            float forceFactor = 8;
 
                             if (leftIn && rightIn && downIn && upIn)
                             {
@@ -93,7 +93,7 @@ namespace FluidsProject
                             if (!upIn && downIn)
                             {
 
-                                int index = IX(i, Math.Max(0, j - 1));
+                                int index = IX(i, Math.Min(N+1, j + 1));
                                 u[index] += (vel.X * forceFactor);
                                 v[index] += (vel.Y * forceFactor);
 
@@ -105,7 +105,7 @@ namespace FluidsProject
                             if (upIn && !downIn)
                             {
 
-                                int index = IX(i, Math.Min(N + 1, j + 1));
+                                int index = IX(i, Math.Max(0, j - 1));
                                 u[index] += (vel.X * forceFactor);
                                 v[index] += (vel.Y * forceFactor);
 
