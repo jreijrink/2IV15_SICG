@@ -17,3 +17,11 @@ The total force on an object is defined as $F = \sum{F_i}$, where $F_i$ is the f
 There are two ways in which forces can be applied to an object. Firstly, the fluids pressure can apply forces to the particles of an object as described in the previous section. Secondly the user is able to select one of the particles of an object to create a spring force between the mouse cursor and the particle. Also to make sure an object comes to rest naturally, a drag force is used for both linear and angular velocity.
 
 \subsection{Object to fluid coupling}
+To make the simulation more realistic, solid objects and rigid bodies also exert forces to the fluids. This is done by adding velocity to the velocity field around the object. To find the cells around the object, just like with the boundary conditions, we find the bounding box of the object and then find the cells which contain a part of the boundary of the object. Then for the cells next to the boundary, we add a fraction of objects velocity to these cells, such that the density around the object will also be advected in the direction in which the object is moving. The influence of the object on the velocity field can be seen in figure \ref{fig:objectfluid}.
+
+\begin{figure}[!htb]
+\centering
+  \includegraphics[height=0.5\textwidth]{img/objectfluid}
+  \captionof{figure}{Moving rigid body influences velocity field}
+  \label{fig:objectfluid}
+\end{figure} 
