@@ -13,8 +13,8 @@ namespace FluidsProject.Objects
     {
         private float width, height;
 
-        public Box(HyperPoint<float> x, float mass, float height, float width, int N)
-            : base(x, mass)
+        public Box(HyperPoint<float> x, float mass, float height, float width, int N, bool canRotate=true)
+            : base(x, mass, canRotate)
         {
             this.width = width;
             this.height = height;

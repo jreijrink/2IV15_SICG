@@ -60,8 +60,14 @@ namespace FluidsProject
             Box box = new Box(new HyperPoint<float>(x0, y0), 100, 10.0f * h, 10.0f * h, N);
             rigids.Add(box);
 
+            Box box2 = new Box(new HyperPoint<float>(N / 4.0f * h, 3*N / 3.5f * h), 100, 5.0f * h, 5.0f * h, N, false);
+            rigids.Add(box2);
+
             Disk disk = new Disk( new HyperPoint<float>(N/4.0f * h, N/3.0f * h), 5 * h, 100);
             rigids.Add(disk);
+
+            Disk disk2 = new Disk(new HyperPoint<float>(3*N / 4.0f * h, 3 * N / 3.5f * h), 2.5f * h, 100, false);
+            rigids.Add(disk2);
         }
 
         private void initConfiguration(string[] args)
