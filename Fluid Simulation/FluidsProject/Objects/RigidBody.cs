@@ -150,7 +150,11 @@ namespace FluidsProject.Objects
 
         public void draw()
         {
-            GL.Color3(0.2, 0.6, 0.8);
+            if(_canRotate)
+                GL.Color3(0.2, 0.6, 0.8);
+            else
+                GL.Color3(1, 0.2, 0.2);
+
             GL.Begin(BeginMode.Polygon);
             for (int i = 0; i < vertices.Count; i++)
             {
